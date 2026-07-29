@@ -1,0 +1,22 @@
+{
+  "name": "fashion-network",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "scripts": {
+    "build": "corepack pnpm --filter @fashion-network/frontend build && corepack pnpm --filter @fashion-network/dashboard build",
+    "dev:dashboard": "corepack pnpm --filter @fashion-network/dashboard dev",
+    "dev:frontend": "corepack pnpm --filter @fashion-network/frontend dev",
+    "format": "prettier --write \"{frontend,dashboard}/**/*.{css,json,md,mjs,ts,tsx}\" \"*.{json,md,yml}\"",
+    "format:check": "prettier --check \"{frontend,dashboard}/**/*.{css,json,md,mjs,ts,tsx}\" \"*.{json,md,yml}\"",
+    "lint": "corepack pnpm --filter @fashion-network/frontend lint && corepack pnpm --filter @fashion-network/dashboard lint",
+    "lint:commits": "commitlint --from HEAD~1 --to HEAD --verbose",
+    "test": "corepack pnpm --filter @fashion-network/frontend test && corepack pnpm --filter @fashion-network/dashboard test",
+    "typecheck": "corepack pnpm --filter @fashion-network/frontend typecheck && corepack pnpm --filter @fashion-network/dashboard typecheck"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.1",
+    "@commitlint/config-conventional": "21.2.0",
+    "prettier": "3.9.6"
+  }
+}

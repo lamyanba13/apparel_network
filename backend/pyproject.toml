@@ -1,0 +1,60 @@
+[project]
+name = "fashion-network-backend"
+version = "0.1.0"
+description = "Fashion Network modular-monolith backend foundation"
+authors = [{ name = "Fashion Network Engineering" }]
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dynamic = ["dependencies"]
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.13,<3.14"
+fastapi = ">=0.115,<1.0"
+sqlalchemy = ">=2.0,<3.0"
+alembic = ">=1.14,<2.0"
+pydantic-settings = ">=2.7,<3.0"
+uvicorn = { version = ">=0.34,<1.0", extras = ["standard"] }
+
+[tool.poetry.group.dev.dependencies]
+black = ">=25.1,<27.0"
+httpx2 = ">=2.9,<3.0"
+mypy = ">=1.14,<2.0"
+pytest = ">=8.3,<10.0"
+pytest-cov = ">=6.0,<8.0"
+ruff = ">=0.9,<1.0"
+
+[build-system]
+requires = ["poetry-core>=2.0,<3.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ["py313"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers -p no:cacheprovider"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["app"]

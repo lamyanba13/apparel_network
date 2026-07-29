@@ -1,0 +1,85 @@
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install Poetry
+        run: pipx install poetry==2.4.1
+
+      - name: Validate Poetry project and lockfile
+        run: poetry --directory backend check --lock
+
+      - name: Install backend dependencies
+        run: poetry --directory backend install --no-interaction
+
+      - name: Check formatting
+        run: poetry --directory backend run black --check app tests
+
+      - name: Run Ruff
+        run: poetry --directory backend run ruff check app tests
+
+      - name: Run MyPy
+        run: poetry --directory backend run mypy app tests
+
+  web:
+    name: Web quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint
+        run: pnpm lint
+
+      - name: Check Prettier
+        run: pnpm format:check
+
+      - name: Check TypeScript
+        run: pnpm typecheck
+
+      - name: Validate pull request commits
+        if: github.event_name == 'pull_request'
+        run: pnpm exec commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}" --verbose

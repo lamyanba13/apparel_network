@@ -1,0 +1,51 @@
+name: Question
+description: Ask for clarification about development, architecture, or project documentation.
+title: "question: "
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Search the documentation and existing issues first. Never disclose vulnerability details, credentials, or personal data in a public question.
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Topic
+      options:
+        - Product requirements
+        - Architecture
+        - Local development
+        - Testing and quality
+        - Git workflow
+        - Deployment and operations
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: Explain the decision or task you are trying to complete.
+    validations:
+      required: true
+  - type: textarea
+    id: research
+    attributes:
+      label: What have you already checked?
+      description: Link relevant documentation, issues, or pull requests.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I searched the documentation and existing issues.
+          required: true
+        - label: This question contains no sensitive information.
+          required: true

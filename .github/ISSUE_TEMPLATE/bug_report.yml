@@ -1,0 +1,78 @@
+name: Bug report
+description: Report reproducible behavior that differs from the documented requirements.
+title: "fix: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include credentials, personal data, or vulnerability details. Report security issues through the process in `SECURITY.md`.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: Briefly describe the observed problem.
+      placeholder: A clear one-sentence description
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Backend
+        - Public frontend
+        - Dashboard
+        - Infrastructure
+        - CI/CD
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide the smallest deterministic sequence that reproduces the issue.
+      placeholder: |
+        1. Start from...
+        2. Perform...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, browser/runtime versions, branch or commit, and relevant non-secret configuration.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or evidence
+      description: Redact secrets and personal or store data before attaching logs or screenshots.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I searched for an existing issue.
+          required: true
+        - label: I removed secrets and personal data.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

@@ -1,0 +1,61 @@
+name: Feature request
+description: Propose an outcome that fits Fashion Network's approved product boundary.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fashion Network indexes store-owned inventory; it is not an e-commerce merchant. Proposals for payments, shipping, platform-owned stock, or fulfillment require a separate business-scope decision.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: Describe the user and the outcome, not a preferred implementation.
+    validations:
+      required: true
+  - type: dropdown
+    id: user
+    attributes:
+      label: Primary user
+      options:
+        - Customer
+        - Store owner
+        - Store staff
+        - Administrator
+        - Platform operator
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: State observable acceptance criteria.
+    validations:
+      required: true
+  - type: input
+    id: requirements
+    attributes:
+      label: Related requirement or issue
+      placeholder: FR-000, BR-000, or issue URL
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and non-goals
+      description: Explain what should and should not change.
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Security, privacy, operational, or compatibility considerations
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I searched for an existing request.
+          required: true
+        - label: The proposal preserves the inventory-network product boundary.
+          required: true

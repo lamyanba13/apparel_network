@@ -1,0 +1,9 @@
+.next
+node_modules
+coverage
+dist
+build
+pnpm-lock.yaml
+poetry.lock
+docs
+

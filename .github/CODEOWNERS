@@ -1,0 +1,8 @@
+# Replace this placeholder with valid users or teams before enabling required
+# CODEOWNERS reviews in branch protection.
+* @fashion-network-maintainers
+
+# Repository governance and delivery
+/.github/ @fashion-network-maintainers
+/docs/ @fashion-network-maintainers
+/infrastructure/ @fashion-network-maintainers

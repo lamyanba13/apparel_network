@@ -1,0 +1,11 @@
+packages:
+  - "frontend"
+  - "dashboard"
+
+nodeLinker: hoisted
+
+allowBuilds:
+  sharp: false
+  unrs-resolver: false
+
+verifyDepsBeforeRun: false
