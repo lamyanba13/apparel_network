@@ -2,7 +2,7 @@
 
 ## Monorepo layout
 
-The implementation repository will use the following top-level structure. This document describes the intended structure; the current deliverable contains documentation only.
+The implementation repository uses the following top-level structure. Phase 1.2 includes the project skeleton and local container infrastructure; later feature and operations artifacts remain intentional future structure.
 
 ```text
 /
@@ -16,11 +16,12 @@ The implementation repository will use the following top-level structure. This d
 ├── .github/                  # GitHub Actions workflows and repository templates
 ├── .editorconfig
 ├── .gitignore
-├── CODEOWNERS
+├── .env.example             # Documented local configuration template
+├── .env.development         # Development-only Compose defaults
 ├── package.json              # pnpm workspace scripts only
 ├── pnpm-workspace.yaml
-├── compose.yaml              # Local dependency orchestration
-└── README.md                 # Future repository entry point linking to docs/
+├── docker-compose.yml       # Complete local development orchestration
+└── README.md                # Repository entry point linking to docs/
 ```
 
 Generated files, dependencies, build outputs, local secrets, uploaded media, and production data MUST NOT be committed.
@@ -270,10 +271,8 @@ Scripts are thin, noninteractive where possible, safe to rerun, and delegate to 
 
 ## Local Compose layout
 
-The single `compose.yaml` uses profiles instead of multiple drifting Compose files:
+The single `docker-compose.yml` starts the complete daily development runtime by default: PostgreSQL, Redis, RabbitMQ, Meilisearch, MinIO, Mailpit, backend, Celery worker, Flower, both Next.js applications, and a development-only Nginx gateway. The `tools` profile contains the one-shot environment verifier. Future optional profiles remain:
 
-- `core`: PostgreSQL, Redis, RabbitMQ, Meilisearch, MinIO, and Mailpit;
-- `workers`: backend workers and scheduler when container execution is useful;
 - `observability`: OpenTelemetry Collector, Prometheus, and Grafana for telemetry work;
 - `resilience`: Toxiproxy or equivalent dependency-failure test support.
 

@@ -1,4 +1,457 @@
 name: fashion-network
 
-# Phase 1.1 placeholder. Services are introduced in a later approved phase.
-services: {}
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-file: "3"
+    max-size: 10m
+
+x-runtime-defaults: &runtime-defaults
+  env_file:
+    - .env.development
+  restart: unless-stopped
+  logging: *default-logging
+
+services:
+  postgres:
+    <<: *runtime-defaults
+    image: postgres:18.4-alpine
+    container_name: fashion-network-postgres
+    command:
+      - postgres
+      - -c
+      - timezone=UTC
+      - -c
+      - max_connections=200
+    environment:
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks:
+      - host-access
+      - data
+
+  redis:
+    <<: *runtime-defaults
+    image: redis:8.8.0-alpine
+    container_name: fashion-network-redis
+    command:
+      - sh
+      - -c
+      - >-
+        exec redis-server
+        --appendonly yes
+        --appendfsync everysec
+        --requirepass "$${REDIS_PASSWORD}"
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", 'redis-cli --no-auth-warning -a "$${REDIS_PASSWORD}" ping | grep PONG']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+    networks:
+      - host-access
+      - data
+
+  rabbitmq:
+    <<: *runtime-defaults
+    image: rabbitmq:4.3.4-management-alpine
+    container_name: fashion-network-rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 20s
+    networks:
+      - host-access
+      - data
+
+  meilisearch:
+    <<: *runtime-defaults
+    image: getmeili/meilisearch:v1.45.1
+    container_name: fashion-network-meilisearch
+    ports:
+      - "127.0.0.1:7700:7700"
+    volumes:
+      - meilisearch_data:/meili_data
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:7700/health >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks:
+      - host-access
+      - data
+
+  minio:
+    <<: *runtime-defaults
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    container_name: fashion-network-minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:9000/minio/health/live >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks:
+      - host-access
+      - data
+
+  minio-init:
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+    container_name: fashion-network-minio-init
+    env_file:
+      - .env.development
+    restart: "no"
+    logging: *default-logging
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint:
+      - /bin/sh
+      - -ec
+      - |
+        mc alias set local http://minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}"
+        mc mb --ignore-existing "local/$${MINIO_BUCKET}"
+        mc anonymous set none "local/$${MINIO_BUCKET}"
+        touch /state/minio-initialized
+    volumes:
+      - bootstrap_state:/state
+    networks:
+      - data
+
+  mailpit:
+    <<: *runtime-defaults
+    image: axllent/mailpit:v1.30.0
+    container_name: fashion-network-mailpit
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+    volumes:
+      - mailpit_data:/data
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+    networks:
+      - host-access
+      - data
+
+  backend:
+    <<: *runtime-defaults
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fashion-network-backend
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./backend:/workspace
+      - backend_cache:/home/fashion/.cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks:
+      - host-access
+      - app
+      - data
+
+  celery-worker:
+    <<: *runtime-defaults
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fashion-network-celery-worker
+    hostname: celery-worker
+    command:
+      - celery
+      - -A
+      - app.worker:celery_app
+      - worker
+      - --loglevel=INFO
+      - --hostname=worker@%h
+      - --without-gossip
+      - --without-mingle
+    volumes:
+      - ./backend:/workspace
+      - celery_cache:/home/fashion/.cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "celery -A app.worker:celery_app inspect ping --destination worker@celery-worker --timeout 5 | grep pong",
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    networks:
+      - app
+      - data
+
+  flower:
+    <<: *runtime-defaults
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fashion-network-flower
+    command:
+      - celery
+      - -A
+      - app.worker:celery_app
+      - flower
+      - --address=0.0.0.0
+      - --port=5555
+    ports:
+      - "127.0.0.1:5555:5555"
+    volumes:
+      - ./backend:/workspace
+      - flower_data:/home/fashion/.flower
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      celery-worker:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import base64,os,urllib.request; r=urllib.request.Request('http://127.0.0.1:5555/'); r.add_header('Authorization','Basic '+base64.b64encode(os.environ['FLOWER_BASIC_AUTH'].encode()).decode()); urllib.request.urlopen(r,timeout=3)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    networks:
+      - host-access
+      - app
+      - data
+
+  frontend:
+    <<: *runtime-defaults
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: fashion-network-frontend
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./frontend:/workspace/frontend
+      - frontend_node_modules:/workspace/node_modules
+      - frontend_next:/workspace/frontend/.next
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    networks:
+      - edge
+
+  dashboard:
+    <<: *runtime-defaults
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+    container_name: fashion-network-dashboard
+    ports:
+      - "127.0.0.1:3001:3000"
+    volumes:
+      - ./dashboard:/workspace/dashboard
+      - dashboard_node_modules:/workspace/node_modules
+      - dashboard_next:/workspace/dashboard/.next
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    networks:
+      - edge
+
+  nginx:
+    <<: *runtime-defaults
+    build:
+      context: ./infrastructure/nginx
+      dockerfile: Dockerfile
+    container_name: fashion-network-nginx
+    ports:
+      - "127.0.0.1:80:80"
+    volumes:
+      - nginx_cache:/var/cache/nginx
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+      dashboard:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --spider http://127.0.0.1/healthz || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+    networks:
+      - edge
+      - app
+
+  verify:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    profiles:
+      - tools
+    env_file:
+      - .env.development
+    command:
+      - python
+      - /workspace/scripts/verify_environment.py
+      - --inside-compose
+    restart: "no"
+    logging: *default-logging
+    depends_on:
+      backend:
+        condition: service_healthy
+      celery-worker:
+        condition: service_healthy
+      dashboard:
+        condition: service_healthy
+      flower:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      nginx:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./scripts:/workspace/scripts:ro
+      - bootstrap_state:/state:ro
+    networks:
+      - edge
+      - app
+      - data
+
+networks:
+  edge:
+    name: fashion-network-edge
+  host-access:
+    name: fashion-network-host-access
+  app:
+    name: fashion-network-app
+    internal: true
+  data:
+    name: fashion-network-data
+    internal: true
+
+volumes:
+  backend_cache:
+    name: fashion-network-backend-cache
+  bootstrap_state:
+    name: fashion-network-bootstrap-state
+  celery_cache:
+    name: fashion-network-celery-cache
+  dashboard_next:
+    name: fashion-network-dashboard-next
+  dashboard_node_modules:
+    name: fashion-network-dashboard-node-modules
+  flower_data:
+    name: fashion-network-flower-data
+  frontend_next:
+    name: fashion-network-frontend-next
+  frontend_node_modules:
+    name: fashion-network-frontend-node-modules
+  mailpit_data:
+    name: fashion-network-mailpit-data
+  meilisearch_data:
+    name: fashion-network-meilisearch-data
+  minio_data:
+    name: fashion-network-minio-data
+  nginx_cache:
+    name: fashion-network-nginx-cache
+  postgres_data:
+    name: fashion-network-postgres-data
+  rabbitmq_data:
+    name: fashion-network-rabbitmq-data
+  redis_data:
+    name: fashion-network-redis-data

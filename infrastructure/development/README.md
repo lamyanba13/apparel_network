@@ -1,4 +1,5 @@
 # Development environment
 
-Development infrastructure composition will be added after Phase 1.1. Local cloud substitutes and Compose profiles must follow the approved technology-stack documentation.
+The root `docker-compose.yml`, `.env.development`, and `scripts/verify_environment.py` own the Phase 1.2 local runtime. See [`docs/local-development.md`](../../docs/local-development.md).
 
+Local dependencies use named volumes, a dedicated loopback host-access network, health checks, restart policies, bounded logs, and the internal data network.

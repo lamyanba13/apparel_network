@@ -1,37 +1,47 @@
-.PHONY: install format lint typecheck test build dev-backend dev-frontend dev-dashboard
+.PHONY: up down logs restart clean config build verify test lint typecheck format
 
-install:
-	poetry --directory backend install
-	corepack enable
-	corepack pnpm install
+up:
+	docker compose up --build --detach
 
-format:
-	poetry --directory backend run black app tests
-	poetry --directory backend run ruff check --fix app tests
-	corepack pnpm format
+down:
+	docker compose down --remove-orphans
 
-lint:
-	poetry --directory backend run black --check app tests
-	poetry --directory backend run ruff check app tests
-	corepack pnpm lint
-	corepack pnpm format:check
+logs:
+	docker compose logs --follow --tail=200
 
-typecheck:
-	poetry --directory backend run mypy app tests
-	corepack pnpm typecheck
+restart:
+	docker compose restart
 
-test:
-	poetry --directory backend run pytest
-	corepack pnpm test
+clean:
+	docker compose down --volumes --remove-orphans
+
+config:
+	docker compose config --quiet
 
 build:
-	corepack pnpm build
+	docker compose build
 
-dev-backend:
-	poetry --directory backend run uvicorn app.main:app --reload
+verify:
+	docker compose --profile tools run --rm verify
 
-dev-frontend:
-	corepack pnpm dev:frontend
+test:
+	docker compose run --rm --no-deps backend pytest
+	docker compose run --rm --no-deps frontend corepack pnpm --filter @fashion-network/frontend test
+	docker compose run --rm --no-deps dashboard corepack pnpm --filter @fashion-network/dashboard test
 
-dev-dashboard:
-	corepack pnpm dev:dashboard
+lint:
+	docker compose run --rm --no-deps backend black --check app tests
+	docker compose run --rm --no-deps backend ruff check app tests
+	docker compose run --rm --no-deps frontend corepack pnpm --filter @fashion-network/frontend lint
+	docker compose run --rm --no-deps dashboard corepack pnpm --filter @fashion-network/dashboard lint
+	docker compose run --rm --no-deps frontend corepack pnpm format:check
+
+typecheck:
+	docker compose run --rm --no-deps backend mypy app tests
+	docker compose run --rm --no-deps frontend corepack pnpm --filter @fashion-network/frontend typecheck
+	docker compose run --rm --no-deps dashboard corepack pnpm --filter @fashion-network/dashboard typecheck
+
+format:
+	docker compose run --rm --no-deps backend black app tests
+	docker compose run --rm --no-deps backend ruff check --fix app tests
+	docker compose run --rm --no-deps frontend corepack pnpm format

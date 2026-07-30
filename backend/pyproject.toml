@@ -17,6 +17,10 @@ sqlalchemy = ">=2.0,<3.0"
 alembic = ">=1.14,<2.0"
 pydantic-settings = ">=2.7,<3.0"
 uvicorn = { version = ">=0.34,<1.0", extras = ["standard"] }
+celery = ">=5.6,<6.0"
+flower = ">=2.0,<3.0"
+psycopg = { version = ">=3.2,<4.0", extras = ["binary", "pool"] }
+redis = ">=6.0,<7.0"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=25.1,<27.0"
@@ -50,6 +54,10 @@ python_version = "3.13"
 strict = true
 warn_unreachable = true
 plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["celery", "celery.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 addopts = "--strict-config --strict-markers -p no:cacheprovider"

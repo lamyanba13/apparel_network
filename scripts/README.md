@@ -1,4 +1,9 @@
-# Scripts
+# Development scripts
 
-Future scripts must be thin, documented, noninteractive where possible, safe to rerun, and explicit about side effects. Phase 1.1 adds no operational scripts.
+The bootstrap scripts validate Docker, preserve an existing `.env.development`, build and start the complete Compose environment, and run the containerized verifier.
 
+- Linux/macOS: `./scripts/bootstrap.sh`
+- Windows PowerShell: `.\scripts\bootstrap.ps1`
+- Verification only: `docker compose --profile tools run --rm verify`
+
+Scripts are safe to rerun. They do not delete named volumes. `make clean` is the explicit destructive command for removing local service data.

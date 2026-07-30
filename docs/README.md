@@ -49,7 +49,8 @@ Read these documents in order when joining the project:
 15. [Scaling Strategy](15-scaling-strategy.md)
 16. [Contributing Guide](16-contributing-guide.md)
 17. [Git Workflow](git-workflow.md)
-18. [Phase 0 Architecture Review](PHASE0_REVIEW.md)
+18. [Local Development Environment](local-development.md)
+19. [Phase 0 Architecture Review](PHASE0_REVIEW.md)
 
 ## Decision authority
 

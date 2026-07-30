@@ -16,6 +16,15 @@ class Settings(BaseSettings):
     application_name: str = "Fashion Network API"
     application_version: str = "0.1.0"
     environment: Literal["development", "test", "staging", "production"] = "development"
+    log_level: str = "INFO"
+    database_url: str = (
+        "postgresql+psycopg://fashion_network:fashion_network@localhost:5432/"
+        "fashion_network"
+    )
+    redis_url: str = "redis://localhost:6379/0"
+    rabbitmq_url: str = "amqp://fashion_network:fashion_network@localhost:5672//"
+    meilisearch_url: str = "http://localhost:7700"
+    s3_endpoint_url: str = "http://localhost:9000"
 
 
 @lru_cache

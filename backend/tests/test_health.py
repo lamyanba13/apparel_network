@@ -10,8 +10,10 @@ def test_health_endpoint_reports_ok() -> None:
     assert response.json() == {"status": "ok"}
 
 
-def test_framework_documentation_routes_are_disabled() -> None:
+def test_development_swagger_is_available_without_a_root_route() -> None:
     client = TestClient(app)
 
-    for path in ("/", "/docs", "/redoc", "/openapi.json"):
-        assert client.get(path).status_code == 404
+    assert client.get("/").status_code == 404
+    assert client.get("/redoc").status_code == 404
+    assert client.get("/docs").status_code == 200
+    assert client.get("/openapi.json").status_code == 200

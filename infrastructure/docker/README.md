@@ -1,4 +1,10 @@
 # Docker
 
-Docker images and service definitions are intentionally deferred. Production images will be introduced only in the approved containerization phase.
+Development Dockerfiles live with each deployable application:
 
+- `backend/Dockerfile`
+- `frontend/Dockerfile`
+- `dashboard/Dockerfile`
+- `infrastructure/nginx/Dockerfile`
+
+The root `.dockerignore` keeps local dependencies, build output, secrets, and repository metadata out of build contexts.
