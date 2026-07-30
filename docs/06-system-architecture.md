@@ -373,7 +373,7 @@ CI SHOULD enforce:
 
 ## Architecture decision records
 
-ADRs live under `docs/adr/` when implementation begins. Required early ADRs include:
+Accepted foundation ADRs are indexed in [`docs/adr/`](adr/README.md). More detailed product decisions are recorded before the affected module is implemented, including:
 
 - authentication/session strategy;
 - database identifiers, optimistic versions, lifecycle/deletion, and partition thresholds;

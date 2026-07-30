@@ -2,14 +2,18 @@
 
 Fashion Network is digital inventory infrastructure connecting participating clothing stores in Manipur. Customers discover store-owned inventory across the network; stores retain inventory ownership and fulfill their own reservations. It is not an e-commerce platform.
 
-Phase 1.5 makes the business-neutral backend foundation production-operable.
-It adds separate liveness, readiness, and startup probes; Prometheus metrics;
-opt-in OpenTelemetry and Sentry; slow request/query and lifecycle diagnostics;
-an optional local observability profile; security/dependency CI; load-test
-examples; and backup, recovery, resource, deployment, and incident runbooks.
-It introduces no authentication, authorization, business logic, business
-models, migrations, or business APIs. `/api/v1` remains an empty composition
-boundary for future reviewed contracts.
+Phase 1.6 freezes the reviewed, business-neutral engineering foundation.
+The foundation includes separate liveness, readiness, and startup probes;
+Prometheus metrics; opt-in OpenTelemetry and Sentry; slow request/query and
+lifecycle diagnostics; an optional local observability profile;
+security/dependency CI; load-test examples; and backup, recovery, resource,
+deployment, and incident runbooks. The accepted decisions and review evidence
+are recorded in the [ADRs](docs/adr/README.md) and
+[architecture freeze review](docs/phase-1.6-architecture-freeze.md).
+
+The foundation introduces no authentication, authorization, business logic,
+business models, migrations, or business APIs. `/api/v1` remains an empty
+composition boundary for future reviewed contracts.
 
 The Phase 1.4 transport foundations remain unchanged and include disabled-by-default
 rate-limiting and conditional-ETag middleware, validated `Idempotency-Key`

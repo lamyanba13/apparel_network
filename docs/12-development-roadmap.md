@@ -67,169 +67,214 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Secret and container scans pass policy.
 - The documented Ruff/Pyright/pytest, ESLint/Prettier/Vitest/Playwright, pre-commit, commitlint, and pnpm workspace workflow is reproducible on a clean machine.
 
-## Phase 2 — Identity, users, and store tenancy
+## Phase 1.6 — Architecture freeze
 
 ### Outcomes
 
-- Secure accounts and store-scoped access form the trust boundary for later features.
+- Establish a reviewed, measured, and tagged foundation before business implementation begins.
 
 ### Work
 
-- Implement registration/sign-in/verification/recovery/session lifecycle according to ADR.
-- Implement profile and account controls.
-- Implement stores, memberships, invitation/revocation, and permission policies.
-- Implement store onboarding/review and admin permission foundation.
-- Add complete tenant-isolation and authorization contract tests.
-- Add security audit events through the Audit module and a permission-scoped Admin audit query foundation.
-- Add store/public profile experience and dashboard store selection.
+- Audit dead code, generated artifacts, dependencies, TODO markers, documentation, and diagrams.
+- Benchmark development startup, health/API paths, PostgreSQL readiness, and memory.
+- Review environment variables, secrets, containers, CI, dependencies, headers, and observability.
+- Record accepted foundational decisions in ADRs.
+- Publish system, module, sequence, empty ER, and request-flow diagrams.
 
 ### Exit gate
 
-- Horizontal and vertical authorization tests pass.
-- Session revocation and credential-recovery security tests pass.
-- Administrator MFA and permissions work in staging.
-- A store can be submitted, approved, suspended, and safely scoped.
-- Security review approves identity and tenancy foundation.
+- The Phase 1.6 review is committed and all CI-equivalent checks pass.
+- The reviewed commit is tagged `foundation-v1`.
+- Material foundation changes after the tag require an ADR and technical review.
 
-## Phase 3 — Catalog, uploads, and inventory
+## Phase 2 — Identity & Access
 
 ### Outcomes
 
-- Approved stores can publish structured, verified, accurate inventory.
+- Secure identity, sessions, profiles, and role-based access form the trust boundary for every later module.
 
 ### Work
 
-- Implement approved taxonomy/reference data.
-- Implement products, variants, drafts/publication, validation, and moderation hooks.
-- Implement R2 upload-intent/finalization, media verification, and lifecycle.
-- Implement inventory levels, movement ledger, nonnegative constraints, exact private views, public availability mapping, and freshness.
-- Enforce `0 <= reserved <= on_hand`, aggregate versions, exact fulfillment/release semantics, and dry-run reconciliation.
-- Keep bulk import out of MVP and retain it as P1 post-pilot work.
-- Emit outbox events for eligible store/product/inventory/media changes.
-- Build store dashboard workflows with mobile usability and accessibility testing.
+- Implement registration, sign-in, verification, recovery, session lifecycle, and account controls.
+- Implement user identity profiles without placing store, catalog, or administrator domain rules in the Users module.
+- Establish permission evaluation, administrator MFA requirements, audit events, abuse controls, and enumeration-safe errors.
+- Add horizontal and vertical authorization contract tests.
 
 ### Exit gate
 
-- Store A cannot access or modify Store B data in any catalog/inventory path.
-- Publication rejects incomplete/unverified content.
-- Inventory mutations are transactional, audited, and produce correct availability.
-- Upload security test suite and object-permission review pass.
-- Representative store users complete core workflows successfully.
+- Session revocation, credential recovery, and permission tests pass.
+- Protected APIs consistently reject missing, invalid, expired, and revoked credentials.
+- Sensitive values are absent from logs, telemetry, and error reporting.
+- Security review approves the identity and access boundary.
 
-## Phase 4 — Search and public discovery
+## Phase 3 — Store Module
 
 ### Outcomes
 
-- Customers can reliably discover eligible inventory across stores.
+- Verified stores can be onboarded and operated by explicitly authorized owners and staff.
 
 ### Work
 
-- Define/version Meilisearch documents, facets, ranking, synonyms, and typo tolerance.
-- Implement incremental projection from outbox events.
-- Implement periodic authoritative reconciliation in addition to incremental projection.
-- Implement full rebuild with safe cutover and operational runbook.
-- Build search API, public discovery UI, product detail, and store detail.
-- Add public response caching only where measured and safe.
-- Instrument governed search success and zero-result events.
-- Run relevance evaluation using approved Manipur/store/product vocabulary.
+- Implement store lifecycle, public profile, verification, suspension, and moderation hooks.
+- Implement store memberships, invitations, revocation, and store-scoped permissions.
+- Add dashboard store selection and permission-scoped administration foundations.
+- Add complete tenant-isolation and authorization tests.
 
 ### Exit gate
 
-- Search includes every eligible sampled record and excludes suspended, unpublished, unavailable-policy, and unverified content.
-- Freshness SLO is met in load testing.
-- Rebuild and incremental replay complete without missing updates.
-- Public contracts expose no private inventory or customer/store operational fields.
-- Accessibility, mobile performance, and search relevance acceptance pass.
+- Store A cannot read or modify Store B data.
+- A store can be submitted, approved, suspended, and restored according to policy.
+- Membership changes and administrative actions are audited.
+- Representative store operators can complete onboarding.
 
-## Phase 5 — Reservations and notifications
+## Phase 4 — Product Catalog
 
 ### Outcomes
 
-- Customers can create safe time-limited holds and stores can process them.
+- Approved stores can publish structured and verified product information.
 
 ### Work
 
-- Implement reservation aggregate/state machine and human-readable references.
-- Implement Inventory hold acquisition/release/consume facade.
-- Implement PostgreSQL locking/conditional update and idempotency records.
-- Implement customer create/list/detail/cancel.
-- Implement store list/detail/fulfill/decline.
-- Implement expiry scheduler/worker and reconciliation.
-- Implement in-app and approved external transactional notifications.
-- Add concurrency, duplicate delivery, provider outage, and delayed expiry tests.
+- Implement approved taxonomy and reference data.
+- Implement products, variants, drafts, publication, validation, and moderation hooks.
+- Implement R2 upload intent/finalization, media verification, and object lifecycle.
+- Emit reliable events for eligible store, product, and media changes.
+- Build accessible, mobile-ready catalog management workflows.
 
 ### Exit gate
 
-- High-contention tests prove no stock oversubscription.
-- Every terminal state changes holds exactly once.
-- Duplicate API requests and Celery delivery are logically idempotent.
-- Notification failure never corrupts reservation state.
-- Customer/store usability tests communicate expiry and platform boundary clearly.
-- Security review approves reservation and notification behavior.
+- Publication rejects incomplete or unverified content.
+- Store isolation applies to every catalog and upload path.
+- Upload security and object-permission reviews pass.
+- Catalog changes are transactional, audited, and observable.
 
-## Phase 6 — Admin operations, analytics, and hardening
+## Phase 5 — Inventory
 
 ### Outcomes
 
-- Operators can safely launch, observe, support, and improve the platform.
+- Stores can maintain accurate stock while public consumers receive only approved availability information.
 
 ### Work
 
-- Complete moderation and support views with least privilege and field masking.
-- Complete operational policies and audit query controls.
-- Add store-scoped and platform aggregate metrics.
-- Finalize PostHog consent, events, retention, and dashboards.
-- Conduct performance/load, accessibility, resilience, backup/restore, and disaster exercises.
-- Exercise RabbitMQ interruption/redelivery, audit archive verification, OpenAPI drift, and the 1,000-store capacity profile.
-- Tune queries, indexes, caches, workers, and search.
-- Complete penetration testing and remediation.
-- Finalize legal/privacy text supplied by authorized owners.
-- Complete incident, rollback, search rebuild, queue, and recovery runbooks.
-- Conduct store-operator training/pilot support readiness.
+- Implement inventory levels, movement ledger, nonnegative constraints, private exact views, public availability mapping, and freshness rules.
+- Enforce `0 <= reserved <= on_hand`, versioned mutation, and reconciliation.
+- Emit idempotent inventory projection events.
+- Keep bulk import outside MVP unless post-pilot evidence promotes it.
 
 ### Exit gate
 
-- All P0 functional and non-functional acceptance evidence is linked.
-- No open critical/high launch blocker.
-- No unresolved scale-gate, data-retention, provider-jurisdiction, or audit-integrity blocker for the approved pilot scope.
-- Restore, rollback/roll-forward, search rebuild, and incident exercises pass.
-- On-call ownership, alert routing, dashboards, and support escalation are active.
-- Product owner and technical/security owners approve launch.
+- Concurrent mutations preserve inventory invariants.
+- Exact quantities remain private and public availability follows policy.
+- Reconciliation detects and safely reports drift.
+- Store operators complete core inventory workflows successfully.
 
-## Phase 7 — Controlled pilot and production launch
+## Phase 6 — Search
 
 ### Outcomes
 
-- Validate the system with a small participating-store cohort before wider availability.
+- Customers can reliably discover eligible inventory across participating stores.
 
 ### Work
 
-- Onboard a controlled set of approved stores.
-- Validate catalog quality and freshness operational process.
-- Release customer discovery gradually using feature/traffic controls.
-- Watch SLOs, zero-result searches, indexing lag, reservation conflicts, expiry, and store response behavior.
-- Run daily pilot triage with product, engineering, and store operations.
-- Fix correctness and usability issues before increasing scope.
+- Define and version Meilisearch documents, facets, ranking, synonyms, and typo tolerance.
+- Implement idempotent incremental projection and periodic authoritative reconciliation.
+- Implement full rebuild with safe cutover and a tested runbook.
+- Build the search API contract without coupling authoritative writes to Meilisearch.
+- Instrument governed relevance, success, zero-result, freshness, and latency measures.
 
 ### Exit gate
 
-- Pilot meets the product-set reliability/freshness/operability criteria.
-- No unresolved data-isolation or inventory-integrity issue.
-- Support load and store workflows are sustainable.
-- A go/no-go review approves wider launch.
+- Eligible sampled records are present and ineligible records are excluded.
+- Search freshness and latency targets pass representative tests.
+- Rebuild, replay, and reconciliation complete without missing updates.
+- Public contracts expose no private inventory or operational fields.
 
-## Phase 8 — Post-launch improvement
+## Phase 7 — Reservations
 
-Only prioritize evidence-backed improvements within product scope:
+### Outcomes
 
-- search relevance and taxonomy improvements;
-- inventory freshness workflows;
-- bulk import if deferred;
-- store onboarding efficiency;
-- performance/cost optimization;
-- accessibility and localization improvements;
-- reporting definition refinement;
-- technical debt and dependency upgrades.
+- Customers can create safe time-limited holds and stores can process them without overselling.
+
+### Work
+
+- Implement the reservation state machine and human-readable references.
+- Implement the Inventory hold acquire, release, and consume contract.
+- Use PostgreSQL transactional concurrency controls and persistent idempotency records.
+- Implement customer and store reservation workflows, expiry jobs, reconciliation, and transactional notifications.
+- Test contention, retries, duplicate delivery, delayed expiry, and provider outages.
+
+### Exit gate
+
+- High-contention tests prove that stock cannot be oversubscribed.
+- Every terminal transition changes a hold exactly once.
+- API retries and Celery redelivery are logically idempotent.
+- Notification failure cannot corrupt reservation state.
+
+## Phase 8 — Customer Website
+
+### Outcomes
+
+- Customers have an accessible, responsive discovery and reservation experience.
+
+### Work
+
+- Build public discovery, product detail, store detail, account, and reservation views.
+- Integrate search and reservation contracts through generated clients.
+- Add safe public caching and conditional responses where measurements justify them.
+- Validate responsive behavior, WCAG 2.2 AA acceptance, privacy controls, and analytics governance.
+
+### Exit gate
+
+- Critical customer journeys pass browser, accessibility, and mobile tests.
+- The UI clearly communicates availability, reservation expiry, and the platform's non-commerce boundary.
+- Performance budgets pass on representative devices and networks.
+- Analytics collection follows approved consent and data-minimization rules.
+
+## Phase 9 — Store Dashboard
+
+### Outcomes
+
+- Store owners and staff can operate their approved store capabilities efficiently and safely.
+
+### Work
+
+- Complete store, membership, catalog, upload, inventory, and reservation workflows.
+- Apply role and store scope to navigation, actions, APIs, and generated client usage.
+- Add operational feedback, safe retry behavior, accessibility, and mobile usability.
+- Add store-scoped analytics only for approved definitions.
+
+### Exit gate
+
+- Role-based end-to-end tests cover owner and staff workflows.
+- Cross-store data exposure is absent from UI and API behavior.
+- Representative store users complete critical workflows within accepted usability criteria.
+- Failures are actionable without exposing internal or sensitive data.
+
+## Phase 10 — Admin Platform
+
+### Outcomes
+
+- Authorized operators can moderate, support, observe, and launch the network safely.
+
+### Work
+
+- Complete verification, suspension, moderation, support, audit-query, and field-masking workflows.
+- Complete platform aggregate metrics and approved PostHog dashboards.
+- Conduct performance, accessibility, resilience, backup/restore, disaster-recovery, RabbitMQ redelivery, search rebuild, and penetration exercises.
+- Tune measured bottlenecks and finalize incident, rollback, queue, recovery, and operator runbooks.
+- Run a controlled pilot with explicit go/no-go gates before wider launch.
+
+### Exit gate
+
+- All P0 acceptance evidence is linked and no critical or high launch blocker remains.
+- Recovery, rollback/roll-forward, search rebuild, and incident exercises pass.
+- On-call ownership, alerts, dashboards, and support escalation are active.
+- The controlled pilot has no unresolved isolation or inventory-integrity issue.
+- Product, technical, security, and operational owners approve wider release.
+
+## Post-launch improvement
+
+Only prioritize evidence-backed improvements within product scope: search relevance, taxonomy, inventory freshness, store onboarding, performance/cost, accessibility/localization, reporting definitions, dependency upgrades, and bulk import if pilot evidence supports it.
 
 POS integration, native apps, payments, delivery, recommendations, or other out-of-scope capabilities require separate product discovery and architecture decisions.
 

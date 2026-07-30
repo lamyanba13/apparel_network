@@ -2,7 +2,7 @@
 
 Fashion Network is a searchable digital inventory network for existing clothing stores in Manipur. It helps customers discover which participating store currently carries a product while each store keeps ownership and physical control of its inventory.
 
-This repository is intentionally in the architecture and planning phase. The `docs/` directory is the complete technical foundation for implementation; it contains no application code.
+The `docs/` directory is the source of truth for product and technical decisions. The repository contains an implementation-ready application and infrastructure foundation, but no business logic, authentication, business models, or business migrations at the `foundation-v1` freeze.
 
 ## Product boundary
 
@@ -59,6 +59,9 @@ Read these documents in order when joining the project:
 25. [Development Performance Baseline](performance-baseline.md)
 26. [Production Deployment Checklist](production-deployment-checklist.md)
 27. [Dependency Report](dependency-report.md)
+28. [Architecture Decision Records](adr/README.md)
+29. [Foundation Architecture Diagrams](architecture-diagrams.md)
+30. [Phase 1.6 Architecture Freeze Review](phase-1.6-architecture-freeze.md)
 
 ## Decision authority
 

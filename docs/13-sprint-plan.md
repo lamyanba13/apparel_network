@@ -9,6 +9,8 @@
 - Security, accessibility, tests, operations, and documentation are part of every story.
 - P1 bulk inventory import begins only after the controlled pilot; manual dashboard maintenance is the MVP workflow.
 
+The sprint backlog delivers the roadmap in module-sized increments: Phase 2 Identity & Access, Phase 3 Store, Phase 4 Product Catalog, Phase 5 Inventory, Phase 6 Search, Phase 7 Reservations, Phase 8 Customer Website, Phase 9 Store Dashboard, and Phase 10 Admin Platform. Sprint numbers are planning increments rather than architecture phase numbers.
+
 ## Definition of ready
 
 A story enters a sprint only when:
@@ -70,7 +72,7 @@ Make implementation safe to start and prove the release path.
 - CI can block a known test, dependency-rule, secret, or migration failure.
 - CI can block OpenAPI drift, forbidden audit mutation, unsafe OpenTofu, and RabbitMQ/outbox contract failures.
 
-## Sprint 1 — Authentication and user lifecycle
+## Sprint 1 — Identity and access
 
 ### Goal
 
