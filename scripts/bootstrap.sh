@@ -17,6 +17,7 @@ fi
 
 docker compose config --quiet
 docker compose up --build --detach
+docker compose run --rm backend alembic upgrade head
 docker compose --profile tools run --rm verify
 
 echo "Fashion Network is ready at http://localhost"

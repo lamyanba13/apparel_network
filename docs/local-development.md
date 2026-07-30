@@ -2,7 +2,7 @@
 
 ## Scope
 
-Phase 1.2 supplies the complete containerized development runtime without implementing business features. `docker compose up` starts the two Next.js applications, FastAPI, Celery worker, Flower, Nginx, PostgreSQL, Redis, RabbitMQ, Meilisearch, MinIO, and Mailpit.
+Phase 1.3 uses the complete containerized development runtime and adds the shared asynchronous database foundation without implementing business features. `docker compose up` starts the two Next.js applications, FastAPI, Celery worker, Flower, Nginx, PostgreSQL, Redis, RabbitMQ, Meilisearch, MinIO, and Mailpit.
 
 RabbitMQ remains the only Celery broker. Redis is limited to caching, sessions, rate limiting, temporary reservation locks, and ephemeral coordination. PostgreSQL remains authoritative, Meilisearch remains rebuildable, and MinIO is a local substitute for Cloudflare R2.
 
@@ -29,11 +29,16 @@ Changing initialized PostgreSQL, RabbitMQ, Redis, or MinIO credentials requires 
 
 ```text
 docker compose up
+docker compose run --rm backend alembic upgrade head
 docker compose --profile tools run --rm verify
 docker compose down
 ```
 
 The `tools` profile contains only the one-shot verifier. Observability and resilience profiles remain future work under the approved roadmap.
+
+`alembic upgrade head` is intentionally a no-op in Phase 1.3 because no
+business models or migration revisions exist. It still validates that the
+asyncpg migration environment can connect and execute.
 
 ## Image policy
 

@@ -1,4 +1,4 @@
-.PHONY: up down logs restart clean config build verify test lint typecheck format
+.PHONY: up down logs restart clean config build verify migrate migration-check migration-current test lint typecheck format
 
 up:
 	docker compose up --build --detach
@@ -23,6 +23,15 @@ build:
 
 verify:
 	docker compose --profile tools run --rm verify
+
+migrate:
+	docker compose run --rm backend alembic upgrade head
+
+migration-check:
+	docker compose run --rm backend alembic check
+
+migration-current:
+	docker compose run --rm backend alembic current
 
 test:
 	docker compose run --rm --no-deps backend pytest

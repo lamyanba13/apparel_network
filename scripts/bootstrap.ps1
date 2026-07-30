@@ -20,6 +20,9 @@ if ($LASTEXITCODE -ne 0) { throw "Docker Compose configuration is invalid." }
 docker compose up --build --detach
 if ($LASTEXITCODE -ne 0) { throw "Docker Compose failed to start." }
 
+docker compose run --rm backend alembic upgrade head
+if ($LASTEXITCODE -ne 0) { throw "Alembic migration failed." }
+
 docker compose --profile tools run --rm verify
 if ($LASTEXITCODE -ne 0) { throw "Environment verification failed." }
 

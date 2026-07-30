@@ -49,6 +49,9 @@ jobs:
       - name: Run MyPy
         run: poetry --directory backend run mypy app tests
 
+      - name: Verify no migration revisions were added in Phase 1.3
+        run: test -z "$(find backend/migrations/versions -name '*.py' -print -quit)"
+
   web:
     name: Web quality
     runs-on: ubuntu-latest

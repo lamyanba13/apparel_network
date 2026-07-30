@@ -19,6 +19,8 @@ RUN --mount=type=cache,target=/root/.cache/pypoetry \
     poetry install --no-root
 
 COPY --chown=fashion:fashion app ./app
+COPY --chown=fashion:fashion alembic.ini ./
+COPY --chown=fashion:fashion migrations ./migrations
 COPY --chown=fashion:fashion tests ./tests
 
 USER fashion

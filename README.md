@@ -2,7 +2,7 @@
 
 Fashion Network is digital inventory infrastructure connecting participating clothing stores in Manipur. Customers discover store-owned inventory across the network; stores retain inventory ownership and fulfill their own reservations. It is not an e-commerce platform.
 
-Phase 1.2 provides a complete, containerized local development environment. It introduces no authentication, business logic, database models, product behavior, inventory behavior, or reservation behavior. The only API route is `GET /health`.
+Phase 1.3 adds the asynchronous SQLAlchemy and Alembic database foundation to the containerized development environment. It introduces no authentication, business logic, business database models, product behavior, inventory behavior, or reservation behavior. The only API route is the database-aware `GET /health`.
 
 ## Local architecture
 
@@ -37,6 +37,7 @@ Clone the repository, then run:
 ```text
 copy .env.example .env.development
 docker compose up
+docker compose run --rm backend alembic upgrade head
 ```
 
 On Linux or macOS, use `cp` instead of `copy`. The repository already contains a safe local `.env.development`; copying the example is useful when resetting configuration.
@@ -103,6 +104,8 @@ make down        # Stop containers and preserve data
 make logs        # Follow recent logs
 make restart     # Restart running services
 make verify      # Verify every service from the Compose networks
+make migrate     # Apply the ordered Alembic history
+make migration-check # Check metadata against the current schema
 make lint        # Run containerized linters
 make typecheck   # Run containerized type checks
 make test        # Run containerized tests
@@ -114,6 +117,7 @@ Without GNU Make, run the corresponding commands from the `Makefile`. The main l
 
 ```text
 docker compose up --build --detach
+docker compose run --rm backend alembic upgrade head
 docker compose --profile tools run --rm verify
 docker compose logs --follow
 docker compose down
@@ -121,7 +125,7 @@ docker compose down
 
 ## Hot reload
 
-The backend bind-mounts `backend/` and runs Uvicorn reload. Each Next.js application bind-mounts its own source tree and enables file polling for Docker Desktop compatibility. Dependency and `.next` directories use named volumes, preventing host/container platform conflicts.
+The backend bind-mounts `backend/` and runs Uvicorn reload. FastAPI lifespan creates one asyncpg SQLAlchemy pool, validates PostgreSQL and migration status at startup, and disposes the pool during graceful shutdown. Each request receives one automatically closed async session; application services will own commits, while exceptions trigger rollback. Each Next.js application bind-mounts its own source tree and enables file polling for Docker Desktop compatibility. Dependency and `.next` directories use named volumes, preventing host/container platform conflicts.
 
 ## Cloudflare R2 in production
 
@@ -134,11 +138,11 @@ MinIO is never deployed as the production object store. The production adapter w
 5. Remove MinIO and its initialization container from the production topology.
 6. Run staging contract tests against real R2 because MinIO compatibility is not proof of complete R2 compatibility.
 
-No R2 adapter or upload business workflow is implemented in Phase 1.2.
+No R2 adapter or upload business workflow is implemented in Phase 1.3.
 
 ## Verification
 
-The verifier checks PostgreSQL encoding/timezone, authenticated Redis, RabbitMQ alarms, Meilisearch, MinIO bucket initialization, FastAPI health and Swagger, both Next.js applications, Celery through Flower, Mailpit, and all Nginx routes:
+The verifier checks PostgreSQL encoding/timezone, authenticated Redis, RabbitMQ alarms, Meilisearch, MinIO bucket initialization, database-aware FastAPI health and Swagger, both Next.js applications, Celery through Flower, Mailpit, and all Nginx routes:
 
 ```text
 docker compose --profile tools run --rm verify

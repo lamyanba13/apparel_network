@@ -194,7 +194,10 @@ def build_checks(inside_compose: bool) -> list[Check]:
         Check("MinIO and media bucket", lambda: verify_minio(minio_url, minio_marker)),
         Check(
             "Backend health",
-            lambda: fetch(f"{backend_url}/health", expected_text='"status":"ok"'),
+            lambda: fetch(
+                f"{backend_url}/health",
+                expected_text='"database":"healthy"',
+            ),
         ),
         Check(
             "Backend Swagger",
@@ -231,7 +234,7 @@ def build_checks(inside_compose: bool) -> list[Check]:
             "Nginx backend route",
             lambda: fetch(
                 f"{nginx_url}/health",
-                expected_text='"status":"ok"',
+                expected_text='"database":"healthy"',
                 headers={"Host": "api.localhost"},
             ),
         ),
@@ -240,7 +243,7 @@ def build_checks(inside_compose: bool) -> list[Check]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Verify every Phase 1.2 local development service."
+        description="Verify every Phase 1.3 local development service."
     )
     parser.add_argument(
         "--env-file",
@@ -288,7 +291,7 @@ def main() -> int:
             print(f"[FAIL] {name}: {failures.get(name, 'timed out')}", flush=True)
         return 1
 
-    print("\nAll Phase 1.2 services are healthy.", flush=True)
+    print("\nAll Phase 1.3 services are healthy.", flush=True)
     return 0
 
 
