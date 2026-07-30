@@ -317,6 +317,19 @@ authoritative opaque refresh sessions:
 - public frontend and dashboard sessions are separate host-scoped sessions, so compromise of one host does not automatically expose the other's cookie;
 - the same account identity may authenticate independently to both applications.
 
+Phase 2.3 adds an Identity-owned session-management application slice. It
+lists, identifies, renames, and revokes owned active sessions; can revoke all
+other sessions while preserving the current one; and records throttled
+last-seen/device metadata. A bounded cleanup service marks expired sessions
+revoked and removes retained revoked lineage leaves after the configured
+retention period. Trusted and risk fields are persistence-only and have no
+authentication or authorization effect.
+
+Session lifecycle changes emit internal security events behind the shared
+event-publisher boundary. Cleanup policy implements a scheduler-neutral
+`CleanupJob` contract; later local, Celery, or managed scheduling adapters may
+invoke it without owning retention rules.
+
 The same-origin proxy only forwards approved API traffic and
 correlation/security headers. It contains no domain decisions. ADR 0009 records
 the token and key-management decision.

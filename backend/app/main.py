@@ -21,6 +21,7 @@ from app.common.rate_limiting import RateLimiter, RateLimitPolicy, RateLimitScop
 from app.common.rate_limiting.redis import RedisRateLimiter
 from app.core.config import Settings, get_settings
 from app.database.lifespan import create_database_lifespan
+from app.modules.identity.infrastructure.activity import SessionActivityMiddleware
 from app.modules.identity.infrastructure.events import AuthenticationEventPublisher
 from app.modules.identity.infrastructure.security import (
     JwtTokenService,
@@ -119,6 +120,10 @@ def create_application(
     register_exception_handlers(application)
 
     application.add_middleware(RequestTimingMiddleware)
+    application.add_middleware(
+        SessionActivityMiddleware,
+        throttle_seconds=resolved_settings.session_activity_throttle_seconds,
+    )
     application.add_middleware(
         MetricsMiddleware,
         enabled=resolved_settings.metrics_enabled,

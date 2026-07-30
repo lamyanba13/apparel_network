@@ -85,9 +85,27 @@ AUTHENTICATION_LOGOUT = Counter(
     "fashion_network_authentication_logout_total",
     "Completed current-session and all-session logout operations.",
 )
+SESSION_ACTIVE = Gauge(
+    "fashion_network_identity_sessions_active",
+    "Current active, unexpired identity sessions.",
+)
+SESSION_REVOKED = Gauge(
+    "fashion_network_identity_sessions_revoked",
+    "Current retained revoked identity sessions.",
+)
+SESSION_CLEANUP_EXECUTIONS = Counter(
+    "fashion_network_identity_session_cleanup_executions_total",
+    "Completed session-retention cleanup executions.",
+)
+SESSION_REVOCATIONS = Counter(
+    "fashion_network_identity_session_revocations_total",
+    "Sessions revoked through session-management operations.",
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)
+SESSION_ACTIVE.set(0)
+SESSION_REVOKED.set(0)
 
 
 def _route_template(scope: Scope) -> str:

@@ -62,6 +62,7 @@ Read these documents in order when joining the project:
 28. [Architecture Decision Records](adr/README.md)
 29. [Foundation Architecture Diagrams](architecture-diagrams.md)
 30. [Phase 1.6 Architecture Freeze Review](phase-1.6-architecture-freeze.md)
+31. [Phase 2.3 Session Management](phase-2.3-session-management.md)
 
 ## Decision authority
 

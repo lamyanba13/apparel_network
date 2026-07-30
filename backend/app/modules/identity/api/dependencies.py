@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from datetime import timedelta
 from typing import Annotated, cast
 
@@ -19,6 +20,9 @@ from app.modules.identity.application.services import (
     PasswordService,
     SessionService,
     TokenService,
+)
+from app.modules.identity.application.session_management import (
+    SessionManagementService,
 )
 from app.modules.identity.infrastructure.persistence.repositories import (
     SqlAlchemyLoginAttemptRepository,
@@ -82,6 +86,7 @@ async def optional_identity_dependency(
 
 
 async def current_identity_dependency(
+    request: Request,
     identity: Annotated[
         AuthenticatedIdentity | None,
         Depends(optional_identity_dependency),
@@ -94,7 +99,25 @@ async def current_identity_dependency(
             detail="Authentication credentials are required.",
             status_code=401,
         )
+    request.state.authenticated_session_id = identity.session.id
     return identity
+
+
+async def session_management_service_dependency(
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> AsyncIterator[SessionManagementService]:
+    events = cast(EventPublisher, request.app.state.authentication_events)
+    try:
+        yield SessionManagementService(
+            session,
+            SqlAlchemyRefreshSessionRepository(session),
+            events,
+        )
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
 
 
 async def authenticated_session_dependency(
@@ -117,4 +140,8 @@ CurrentIdentity = Annotated[
 OptionalIdentity = Annotated[
     AuthenticatedIdentity | None,
     Depends(optional_identity_dependency),
+]
+SessionManagementServiceDependency = Annotated[
+    SessionManagementService,
+    Depends(session_management_service_dependency),
 ]

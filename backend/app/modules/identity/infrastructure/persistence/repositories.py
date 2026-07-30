@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import Select, select, update
+from sqlalchemy import Select, delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.modules.identity.application.schemas import (
     EmailVerificationTokenCreate,
@@ -154,10 +156,11 @@ class SqlAlchemyRefreshSessionRepository(SqlAlchemyRepository):
     async def add(self, values: RefreshSessionCreate) -> RefreshSessionRecord:
         model = RefreshSessionModel(
             **values.model_dump(
-                exclude={"refresh_token_hash", "ip_address"},
+                exclude={"refresh_token_hash", "ip_address", "last_ip"},
             ),
             refresh_token_hash=values.refresh_token_hash.get_secret_value(),
             ip_address=str(values.ip_address),
+            last_ip=str(values.last_ip) if values.last_ip is not None else None,
         )
         await _persist_model(self._session, model)
         return RefreshSessionRecord.model_validate(model)
@@ -190,7 +193,10 @@ class SqlAlchemyRefreshSessionRepository(SqlAlchemyRepository):
                 RefreshSessionModel.id == session_id,
                 RefreshSessionModel.is_revoked.is_(False),
             )
-            .values(is_revoked=True)
+            .values(
+                is_revoked=True,
+                version=RefreshSessionModel.version + 1,
+            )
             .returning(RefreshSessionModel.id)
         )
         await self._session.flush()
@@ -203,7 +209,10 @@ class SqlAlchemyRefreshSessionRepository(SqlAlchemyRepository):
                 RefreshSessionModel.family_id == family_id,
                 RefreshSessionModel.is_revoked.is_(False),
             )
-            .values(is_revoked=True)
+            .values(
+                is_revoked=True,
+                version=RefreshSessionModel.version + 1,
+            )
             .returning(RefreshSessionModel.id)
         )
         await self._session.flush()
@@ -216,7 +225,190 @@ class SqlAlchemyRefreshSessionRepository(SqlAlchemyRepository):
                 RefreshSessionModel.user_id == user_id,
                 RefreshSessionModel.is_revoked.is_(False),
             )
-            .values(is_revoked=True)
+            .values(
+                is_revoked=True,
+                version=RefreshSessionModel.version + 1,
+            )
+            .returning(RefreshSessionModel.id)
+        )
+        await self._session.flush()
+        return len(result.scalars().all())
+
+    async def list_active_for_user(
+        self,
+        user_id: UUID,
+        *,
+        now: datetime,
+    ) -> Sequence[RefreshSessionRecord]:
+        models = (
+            await self._session.scalars(
+                select(RefreshSessionModel)
+                .where(
+                    RefreshSessionModel.user_id == user_id,
+                    RefreshSessionModel.is_revoked.is_(False),
+                    RefreshSessionModel.expires_at > now,
+                )
+                .order_by(
+                    RefreshSessionModel.last_seen_at.desc(),
+                    RefreshSessionModel.id.desc(),
+                )
+            )
+        ).all()
+        return tuple(RefreshSessionRecord.model_validate(model) for model in models)
+
+    async def get_for_user(
+        self,
+        session_id: UUID,
+        user_id: UUID,
+    ) -> RefreshSessionRecord | None:
+        model = await self._session.scalar(
+            select(RefreshSessionModel).where(
+                RefreshSessionModel.id == session_id,
+                RefreshSessionModel.user_id == user_id,
+            )
+        )
+        return RefreshSessionRecord.model_validate(model) if model is not None else None
+
+    async def rename(
+        self,
+        session_id: UUID,
+        user_id: UUID,
+        display_name: str,
+    ) -> RefreshSessionRecord | None:
+        model = await self._session.scalar(
+            update(RefreshSessionModel)
+            .where(
+                RefreshSessionModel.id == session_id,
+                RefreshSessionModel.user_id == user_id,
+                RefreshSessionModel.is_revoked.is_(False),
+            )
+            .values(
+                display_name=display_name,
+                version=RefreshSessionModel.version + 1,
+            )
+            .returning(RefreshSessionModel)
+        )
+        await self._session.flush()
+        return RefreshSessionRecord.model_validate(model) if model is not None else None
+
+    async def revoke_others(
+        self,
+        user_id: UUID,
+        current_session_id: UUID,
+        *,
+        now: datetime,
+    ) -> int:
+        result = await self._session.execute(
+            update(RefreshSessionModel)
+            .where(
+                RefreshSessionModel.user_id == user_id,
+                RefreshSessionModel.id != current_session_id,
+                RefreshSessionModel.is_revoked.is_(False),
+                RefreshSessionModel.expires_at > now,
+            )
+            .values(
+                is_revoked=True,
+                version=RefreshSessionModel.version + 1,
+            )
+            .returning(RefreshSessionModel.id)
+        )
+        await self._session.flush()
+        return len(result.scalars().all())
+
+    async def touch_activity(
+        self,
+        session_id: UUID,
+        *,
+        observed_at: datetime,
+        write_before: datetime,
+        ip_address: str,
+        user_agent: str,
+        browser: str,
+        operating_system: str,
+        device_type: str,
+        platform: str,
+    ) -> bool:
+        result = await self._session.execute(
+            update(RefreshSessionModel)
+            .where(
+                RefreshSessionModel.id == session_id,
+                RefreshSessionModel.is_revoked.is_(False),
+                RefreshSessionModel.expires_at > observed_at,
+                RefreshSessionModel.last_seen_at <= write_before,
+            )
+            .values(
+                last_seen_at=observed_at,
+                last_activity_at=observed_at,
+                last_ip=ip_address,
+                last_user_agent=user_agent,
+                last_browser=browser,
+                last_operating_system=operating_system,
+                last_device_type=device_type,
+                platform=platform,
+                version=RefreshSessionModel.version + 1,
+            )
+            .returning(RefreshSessionModel.id)
+        )
+        await self._session.flush()
+        return result.scalar_one_or_none() is not None
+
+    async def count_by_state(self, *, now: datetime) -> tuple[int, int]:
+        active = await self._session.scalar(
+            select(func.count())
+            .select_from(RefreshSessionModel)
+            .where(
+                RefreshSessionModel.is_revoked.is_(False),
+                RefreshSessionModel.expires_at > now,
+            )
+        )
+        revoked = await self._session.scalar(
+            select(func.count())
+            .select_from(RefreshSessionModel)
+            .where(RefreshSessionModel.is_revoked.is_(True))
+        )
+        return int(active or 0), int(revoked or 0)
+
+    async def revoke_expired(self, *, now: datetime) -> int:
+        result = await self._session.execute(
+            update(RefreshSessionModel)
+            .where(
+                RefreshSessionModel.is_revoked.is_(False),
+                RefreshSessionModel.expires_at <= now,
+            )
+            .values(
+                is_revoked=True,
+                version=RefreshSessionModel.version + 1,
+            )
+            .returning(RefreshSessionModel.id)
+        )
+        await self._session.flush()
+        return len(result.scalars().all())
+
+    async def delete_expired_revoked(
+        self,
+        *,
+        expired_before: datetime,
+        limit: int,
+    ) -> int:
+        child = aliased(RefreshSessionModel)
+        candidate_ids = (
+            select(RefreshSessionModel.id)
+            .where(
+                RefreshSessionModel.is_revoked.is_(True),
+                RefreshSessionModel.expires_at <= expired_before,
+                ~select(child.id)
+                .where(child.parent_session_id == RefreshSessionModel.id)
+                .exists(),
+            )
+            .order_by(
+                RefreshSessionModel.expires_at,
+                RefreshSessionModel.id,
+            )
+            .limit(limit)
+        )
+        result = await self._session.execute(
+            delete(RefreshSessionModel)
+            .where(RefreshSessionModel.id.in_(candidate_ids))
             .returning(RefreshSessionModel.id)
         )
         await self._session.flush()

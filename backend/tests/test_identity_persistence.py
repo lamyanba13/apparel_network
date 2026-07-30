@@ -305,11 +305,13 @@ async def test_sessions_and_tokens_store_only_hashes(
             refresh_token_hash=TOKEN_HASH,
             family_id=UUID(int=2),
             device_name="Personal phone",
+            display_name="Personal phone",
             browser="Firefox",
             operating_system="Android",
             ip_address="127.0.0.1",
             user_agent="Synthetic test agent",
             last_activity_at=now,
+            last_seen_at=now,
             expires_at=now + timedelta(days=30),
         )
     )

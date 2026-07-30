@@ -75,6 +75,9 @@ class Settings(BaseSettings):
     sentry_trace_sample_rate: float = Field(default=0.0, ge=0, le=1)
     auth_access_token_lifetime_seconds: int = Field(default=900, ge=60, le=3600)
     auth_refresh_token_lifetime_days: int = Field(default=30, ge=1, le=365)
+    session_activity_throttle_seconds: int = Field(default=300, ge=60, le=3600)
+    session_cleanup_retention_days: int = Field(default=30, ge=1, le=3650)
+    session_cleanup_batch_size: int = Field(default=500, ge=1, le=5000)
     auth_require_verified_email: bool = True
     auth_login_rate_limit: int = Field(default=5, ge=1, le=1000)
     auth_refresh_rate_limit: int = Field(default=20, ge=1, le=5000)

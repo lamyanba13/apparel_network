@@ -34,7 +34,9 @@ from app.modules.identity.domain import (
     LogoutCompleted,
     RefreshReuseDetected,
     RefreshRotated,
+    parse_device,
 )
+from app.modules.identity.domain.session_events import SessionCreated
 
 _INVALID_CREDENTIALS = "Invalid email or password."
 _INVALID_REFRESH_TOKEN = "Invalid refresh token."
@@ -64,6 +66,10 @@ class AuthenticationContext:
     ip_address: IPv4Address | IPv6Address
     user_agent: str
     device_name: str
+    browser: str
+    operating_system: str
+    device_type: str
+    platform: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,6 +126,7 @@ class SessionService:
     ) -> tuple[RefreshSessionRecord, SecretStr]:
         refresh_token = self._token_service.generate_refresh_token()
         now = datetime.now(UTC)
+        display_name = context.device_name
         session = await self._repository.add(
             RefreshSessionCreate(
                 user_id=user_id,
@@ -128,11 +135,19 @@ class SessionService:
                 ),
                 family_id=uuid7(),
                 device_name=context.device_name,
-                browser=None,
-                operating_system=None,
+                display_name=display_name,
+                browser=context.browser,
+                operating_system=context.operating_system,
                 ip_address=context.ip_address,
                 user_agent=context.user_agent,
                 last_activity_at=now,
+                last_seen_at=now,
+                last_ip=context.ip_address,
+                last_user_agent=context.user_agent,
+                last_browser=context.browser,
+                last_operating_system=context.operating_system,
+                last_device_type=context.device_type,
+                platform=context.platform,
                 expires_at=now + self._refresh_lifetime,
             )
         )
@@ -180,11 +195,21 @@ class SessionService:
                 last_asn=current.last_asn,
                 last_device_fingerprint=current.last_device_fingerprint,
                 device_name=current.device_name,
+                display_name=current.display_name,
                 browser=current.browser,
                 operating_system=current.operating_system,
                 ip_address=current.ip_address,
                 user_agent=current.user_agent,
                 last_activity_at=now,
+                last_seen_at=now,
+                last_ip=current.last_ip,
+                last_user_agent=current.last_user_agent,
+                last_browser=current.last_browser,
+                last_operating_system=current.last_operating_system,
+                last_device_type=current.last_device_type,
+                platform=current.platform,
+                city=current.city,
+                is_trusted=current.is_trusted,
                 expires_at=current.expires_at,
             )
         )
@@ -261,6 +286,13 @@ class AuthenticationService:
         user, session, refresh_token = authenticated
         await self._event_publisher.publish(
             AuthenticationSucceeded(
+                user_id=user.id,
+                session_id=session.id,
+                correlation_id=_correlation_id(),
+            )
+        )
+        await self._event_publisher.publish(
+            SessionCreated(
                 user_id=user.id,
                 session_id=session.id,
                 correlation_id=_correlation_id(),
@@ -381,10 +413,16 @@ def authentication_context(
         parsed_ip = ip_address(client_ip or "0.0.0.0")
     except ValueError:
         parsed_ip = ip_address("0.0.0.0")
+    normalized_user_agent = (user_agent or "Unknown user agent")[:1024]
+    device = parse_device(normalized_user_agent)
     return AuthenticationContext(
         ip_address=parsed_ip,
-        user_agent=(user_agent or "Unknown user agent")[:1024],
+        user_agent=normalized_user_agent,
         device_name=(device_name or "Unknown device")[:120],
+        browser=device.browser,
+        operating_system=device.operating_system,
+        device_type=device.device_type,
+        platform=device.platform,
     )
 
 

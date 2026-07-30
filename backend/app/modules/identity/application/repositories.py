@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from datetime import datetime
 from typing import Protocol
 from uuid import UUID
 
@@ -87,6 +88,44 @@ class RefreshSessionRepository(Protocol):
     async def revoke_family(self, family_id: UUID) -> int: ...
 
     async def revoke_all_for_user(self, user_id: UUID) -> int: ...
+
+    async def list_active_for_user(
+        self, user_id: UUID, *, now: datetime
+    ) -> Sequence[RefreshSessionRecord]: ...
+
+    async def get_for_user(
+        self, session_id: UUID, user_id: UUID
+    ) -> RefreshSessionRecord | None: ...
+
+    async def rename(
+        self, session_id: UUID, user_id: UUID, display_name: str
+    ) -> RefreshSessionRecord | None: ...
+
+    async def revoke_others(
+        self, user_id: UUID, current_session_id: UUID, *, now: datetime
+    ) -> int: ...
+
+    async def touch_activity(
+        self,
+        session_id: UUID,
+        *,
+        observed_at: datetime,
+        write_before: datetime,
+        ip_address: str,
+        user_agent: str,
+        browser: str,
+        operating_system: str,
+        device_type: str,
+        platform: str,
+    ) -> bool: ...
+
+    async def count_by_state(self, *, now: datetime) -> tuple[int, int]: ...
+
+    async def revoke_expired(self, *, now: datetime) -> int: ...
+
+    async def delete_expired_revoked(
+        self, *, expired_before: datetime, limit: int
+    ) -> int: ...
 
 
 class PasswordHistoryRepository(Protocol):

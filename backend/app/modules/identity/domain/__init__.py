@@ -1,5 +1,6 @@
 """Framework-independent identity persistence invariants."""
 
+from app.modules.identity.domain.device import DeviceMetadata, parse_device
 from app.modules.identity.domain.events import (
     AuthenticationFailed,
     AuthenticationSucceeded,
@@ -16,10 +17,12 @@ from app.modules.identity.domain.values import (
 __all__ = [
     "AuthenticationFailed",
     "AuthenticationSucceeded",
+    "DeviceMetadata",
     "LogoutCompleted",
     "RefreshReuseDetected",
     "RefreshRotated",
     "is_argon2id_hash",
     "is_sha256_hex_digest",
     "normalize_email",
+    "parse_device",
 ]

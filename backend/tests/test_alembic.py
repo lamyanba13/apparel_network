@@ -13,6 +13,7 @@ BACKEND_ROOT = Path(__file__).resolve().parents[1]
 IDENTITY_REVISION = "b6d38dd509e1"
 SESSION_LINEAGE_REVISION = "eb3079e2bb7e"
 SESSION_RISK_REVISION = "a9c2cc1d183e"
+SESSION_LIFECYCLE_REVISION = "d41f63a709b2"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -43,7 +44,7 @@ def test_alembic_upgrades_identity_schema_without_drift(
 
         assert identity_models is not None
         assert IDENTITY_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [SESSION_RISK_REVISION]
+        assert script.get_heads() == [SESSION_LIFECYCLE_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -51,6 +52,7 @@ def test_alembic_upgrades_identity_schema_without_drift(
             f"{IDENTITY_REVISION}_create_identity_persistence",
             f"{SESSION_LINEAGE_REVISION}_add_refresh_session_rotation_lineage",
             f"{SESSION_RISK_REVISION}_reserve_session_risk_metadata",
+            f"{SESSION_LIFECYCLE_REVISION}_add_session_lifecycle_metadata",
         }
 
         command.check(config)

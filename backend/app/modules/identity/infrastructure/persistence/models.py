@@ -331,6 +331,10 @@ class RefreshSessionModel(
             name="device_name_length",
         ),
         CheckConstraint(
+            "length(btrim(display_name)) BETWEEN 1 AND 120",
+            name="display_name_length",
+        ),
+        CheckConstraint(
             "length(user_agent) BETWEEN 1 AND 1024",
             name="user_agent_length",
         ),
@@ -383,6 +387,12 @@ class RefreshSessionModel(
             "expires_at",
             postgresql_where=text("NOT is_revoked"),
         ),
+        Index(
+            "ix_identity_refresh_sessions_cleanup",
+            "expires_at",
+            "id",
+            postgresql_where=text("is_revoked"),
+        ),
     )
 
     user_id: Mapped[UUID] = mapped_column(
@@ -414,6 +424,11 @@ class RefreshSessionModel(
         nullable=True,
     )
     device_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    display_name: Mapped[str] = mapped_column(
+        String(120),
+        nullable=False,
+        server_default=text("'Unknown device'"),
+    )
     browser: Mapped[str | None] = mapped_column(String(120), nullable=True)
     operating_system: Mapped[str | None] = mapped_column(
         String(120),
@@ -424,6 +439,27 @@ class RefreshSessionModel(
     last_activity_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
+    )
+    last_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    last_ip: Mapped[str | None] = mapped_column(INET, nullable=True)
+    last_user_agent: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    last_browser: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    last_operating_system: Mapped[str | None] = mapped_column(
+        String(120),
+        nullable=True,
+    )
+    last_device_type: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    platform: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    city: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    is_trusted: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default=false(),
     )
     expires_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

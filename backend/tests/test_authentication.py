@@ -36,6 +36,7 @@ from app.modules.identity.domain import (
     RefreshReuseDetected,
     RefreshRotated,
 )
+from app.modules.identity.domain.session_events import SessionCreated
 from app.modules.identity.infrastructure.events import AuthenticationEventPublisher
 from app.modules.identity.infrastructure.persistence.models import (
     LoginAttemptModel,
@@ -465,6 +466,7 @@ async def test_authentication_services_emit_typed_internal_events(
         )
 
     assert any(isinstance(event, AuthenticationSucceeded) for event in publisher.events)
+    assert any(isinstance(event, SessionCreated) for event in publisher.events)
     assert any(isinstance(event, RefreshRotated) for event in publisher.events)
     assert any(isinstance(event, RefreshReuseDetected) for event in publisher.events)
     assert any(isinstance(event, LogoutCompleted) for event in publisher.events)

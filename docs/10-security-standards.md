@@ -66,6 +66,12 @@ their SHA-256 hashes are stored. Every refresh rotates the credential into a
 new session-lineage row and revokes its parent. Reuse of a revoked credential
 revokes the complete token family.
 
+Phase 2.3 session operations are always owner-scoped in both the application
+service and repository. Cross-user identifiers are reported as not found.
+Session activity writes are atomically throttled, and no session response,
+audit event, log, or metric may contain a refresh credential or token hash.
+The `is_trusted` and nullable risk metadata fields are informational only.
+
 ### Browser session protection
 
 First-party clients MUST:

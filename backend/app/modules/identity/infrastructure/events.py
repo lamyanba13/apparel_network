@@ -10,6 +10,15 @@ from app.modules.identity.domain import (
     RefreshReuseDetected,
     RefreshRotated,
 )
+from app.modules.identity.domain.session_events import (
+    OtherSessionsRevoked,
+    SessionCleanupCompleted,
+    SessionCreated,
+    SessionExpired,
+    SessionRenamed,
+    SessionRevoked,
+    SessionRiskUpdated,
+)
 from app.observability.metrics import (
     AUTHENTICATION_FAILED,
     AUTHENTICATION_LOGOUT,
@@ -45,4 +54,17 @@ class AuthenticationEventPublisher(EventPublisher):
             logger.warning(event.event_name, extra=extra)
         elif isinstance(event, LogoutCompleted):
             AUTHENTICATION_LOGOUT.inc()
+            logger.info(event.event_name, extra=extra)
+        elif isinstance(
+            event,
+            (
+                SessionRenamed,
+                SessionRevoked,
+                OtherSessionsRevoked,
+                SessionCleanupCompleted,
+                SessionCreated,
+                SessionExpired,
+                SessionRiskUpdated,
+            ),
+        ):
             logger.info(event.event_name, extra=extra)

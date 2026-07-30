@@ -159,7 +159,7 @@ docker compose --profile observability up --detach
 
 ## Hot reload
 
-The backend bind-mounts `backend/` and runs Uvicorn reload. FastAPI lifespan creates one asyncpg SQLAlchemy pool, validates PostgreSQL and migration status at startup, and disposes the pool during graceful shutdown. Each request receives one automatically closed async session; application services will own commits, while exceptions trigger rollback. Each Next.js application bind-mounts its own source tree and enables file polling for Docker Desktop compatibility. Dependency and `.next` directories use named volumes, preventing host/container platform conflicts.
+The backend bind-mounts `backend/` and runs Uvicorn reload. FastAPI lifespan creates one asyncpg SQLAlchemy pool, validates PostgreSQL and migration status at startup, and disposes the pool during graceful shutdown. Each request receives one automatically closed async session; application service boundaries own successful commits, exceptions trigger rollback, and repositories never commit. Each Next.js application bind-mounts its own source tree and enables file polling for Docker Desktop compatibility. Dependency and `.next` directories use named volumes, preventing host/container platform conflicts.
 
 ## Cloudflare R2 in production
 

@@ -127,6 +127,13 @@ Resources vulnerable to lost updates SHOULD expose a version or ETag. Mutation c
 ## Authentication and authorization
 
 - Authentication uses 15-minute Ed25519 bearer access tokens plus rotating opaque refresh credentials backed by authoritative PostgreSQL sessions.
+- Identity session lifecycle routes live under `/api/v1/sessions`; they expose
+  active owned-session metadata only, return `404` for missing or cross-user
+  identifiers, and return `409` for invalid lifecycle transitions such as
+  revoking an already revoked session.
+- Session representations publish `current`, `is_trusted`, `can_rename`,
+  `can_revoke`, and `session_version`; clients MUST use these capabilities
+  rather than reproduce lifecycle policy.
 - Access tokens contain `ver=1` plus identity claims only. Roles, permissions, and store memberships never appear in the token.
 - Refresh credentials are returned only at authentication/rotation boundaries and first-party clients protect them in host-only, `Secure`, `HttpOnly`, appropriately `SameSite` cookies.
 - The public frontend and dashboard use their own same-origin API route/proxy and separate host-scoped sessions.

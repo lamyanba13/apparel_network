@@ -180,11 +180,21 @@ class RefreshSessionCreate(PersistenceSchema):
     last_asn: int | None = Field(default=None, ge=0, le=4_294_967_295)
     last_device_fingerprint: str | None = Field(default=None, max_length=128)
     device_name: str = Field(min_length=1, max_length=120)
+    display_name: str = Field(min_length=1, max_length=120)
     browser: str | None = Field(default=None, max_length=120)
     operating_system: str | None = Field(default=None, max_length=120)
     ip_address: IPv4Address | IPv6Address
     user_agent: str = Field(min_length=1, max_length=1024)
     last_activity_at: AwareDatetime
+    last_seen_at: AwareDatetime
+    last_ip: IPv4Address | IPv6Address | None = None
+    last_user_agent: str | None = Field(default=None, max_length=1024)
+    last_browser: str | None = Field(default=None, max_length=120)
+    last_operating_system: str | None = Field(default=None, max_length=120)
+    last_device_type: str | None = Field(default=None, max_length=40)
+    platform: str | None = Field(default=None, max_length=80)
+    city: str | None = Field(default=None, max_length=120)
+    is_trusted: bool = False
     expires_at: AwareDatetime
     is_revoked: bool = False
 
