@@ -2,16 +2,16 @@
 
 Fashion Network is digital inventory infrastructure connecting participating clothing stores in Manipur. Customers discover store-owned inventory across the network; stores retain inventory ownership and fulfill their own reservations. It is not an e-commerce platform.
 
-Phase 1.4 adds the reusable application framework on top of the asynchronous
-database foundation: request context, UUIDv7 request IDs, structured logging,
-central exception translation, bounded pagination, strict configuration,
-security middleware, shared validators and types, OpenAPI metadata, and future
-event/observability ports. It introduces no authentication, authorization,
-business logic, business database models, or business APIs. The only implemented
-route remains the database-aware `GET /health`; `/api/v1` is an empty composition
+Phase 1.5 makes the business-neutral backend foundation production-operable.
+It adds separate liveness, readiness, and startup probes; Prometheus metrics;
+opt-in OpenTelemetry and Sentry; slow request/query and lifecycle diagnostics;
+an optional local observability profile; security/dependency CI; load-test
+examples; and backup, recovery, resource, deployment, and incident runbooks.
+It introduces no authentication, authorization, business logic, business
+models, migrations, or business APIs. `/api/v1` remains an empty composition
 boundary for future reviewed contracts.
 
-Additional Phase 1.4 transport foundations include disabled-by-default
+The Phase 1.4 transport foundations remain unchanged and include disabled-by-default
 rate-limiting and conditional-ETag middleware, validated `Idempotency-Key`
 contracts, opt-in API deprecation/sunset headers, and adaptive Brotli/GZip
 response compression. No rate policy, Redis limiter, idempotency table, or
@@ -29,6 +29,9 @@ flowchart LR
     Backend --> Redis[(Redis)]
     Backend --> Meilisearch[(Meilisearch)]
     Backend --> MinIO[(MinIO / local R2)]
+    Prometheus -. private scrape .-> Backend
+    Backend -. optional OTLP .-> Collector[OpenTelemetry Collector]
+    Collector -. production export .-> ManagedTelemetry[Managed telemetry]
     Worker[Celery worker] --> RabbitMQ[(RabbitMQ)]
     Worker --> PostgreSQL
     Flower --> RabbitMQ
@@ -71,25 +74,33 @@ The first start downloads base images and installs pinned dependencies, so it ta
 
 All published ports bind to loopback only.
 
-| Service         | URL or port                    | Purpose                             |
-| --------------- | ------------------------------ | ----------------------------------- |
-| Nginx           | `http://localhost`             | Local frontend gateway              |
-| Nginx dashboard | `http://dashboard.localhost`   | Dashboard gateway                   |
-| Nginx API       | `http://api.localhost`         | Backend gateway                     |
-| Frontend        | `http://localhost:3000`        | Direct Next.js development server   |
-| Dashboard       | `http://localhost:3001`        | Direct dashboard development server |
-| Backend         | `http://localhost:8000`        | Direct FastAPI development server   |
-| Swagger UI      | `http://localhost:8000/docs`   | Development API documentation       |
-| PostgreSQL      | `localhost:5432`               | Authoritative relational database   |
-| Redis           | `localhost:6379`               | Authenticated ephemeral data        |
-| RabbitMQ AMQP   | `localhost:5672`               | Celery broker                       |
-| RabbitMQ UI     | `http://localhost:15672`       | Broker administration               |
-| Meilisearch     | `http://localhost:7700/health` | Search engine API                   |
-| MinIO S3 API    | `http://localhost:9000`        | Local object storage API            |
-| MinIO Console   | `http://localhost:9001`        | Object storage administration       |
-| Flower          | `http://localhost:5555`        | Authenticated Celery monitoring     |
-| Mailpit UI      | `http://localhost:8025`        | Captured development email          |
-| Mailpit SMTP    | `localhost:1025`               | Local SMTP endpoint                 |
+| Service         | URL or port                            | Purpose                             |
+| --------------- | -------------------------------------- | ----------------------------------- |
+| Nginx           | `http://localhost`                     | Local frontend gateway              |
+| Nginx dashboard | `http://dashboard.localhost`           | Dashboard gateway                   |
+| Nginx API       | `http://api.localhost`                 | Backend gateway                     |
+| Frontend        | `http://localhost:3000`                | Direct Next.js development server   |
+| Dashboard       | `http://localhost:3001`                | Direct dashboard development server |
+| Backend         | `http://localhost:8000`                | Direct FastAPI development server   |
+| Swagger UI      | `http://localhost:8000/docs`           | Development API documentation       |
+| Liveness        | `http://localhost:8000/health/live`    | Process-only probe                  |
+| Readiness       | `http://localhost:8000/health/ready`   | Required dependency probe           |
+| Startup         | `http://localhost:8000/health/startup` | Initialization probe                |
+| Metrics         | `http://localhost:8000/metrics`        | Private Prometheus exposition       |
+| PostgreSQL      | `localhost:5432`                       | Authoritative relational database   |
+| Redis           | `localhost:6379`                       | Authenticated ephemeral data        |
+| RabbitMQ AMQP   | `localhost:5672`                       | Celery broker                       |
+| RabbitMQ UI     | `http://localhost:15672`               | Broker administration               |
+| Meilisearch     | `http://localhost:7700/health`         | Search engine API                   |
+| MinIO S3 API    | `http://localhost:9000`                | Local object storage API            |
+| MinIO Console   | `http://localhost:9001`                | Object storage administration       |
+| Flower          | `http://localhost:5555`                | Authenticated Celery monitoring     |
+| Mailpit UI      | `http://localhost:8025`                | Captured development email          |
+| Mailpit SMTP    | `localhost:1025`                       | Local SMTP endpoint                 |
+
+The optional `observability` profile adds Prometheus on port `9090`, Grafana on
+port `3002`, OTLP on ports `4317`/`4318`, and collector health on `13133`.
+These ports are loopback-only, and `/metrics` is blocked by the Nginx gateway.
 
 Credentials are the development-only values in `.env.development`. They are intentionally invalid for non-development configuration.
 
@@ -136,6 +147,12 @@ docker compose logs --follow
 docker compose down
 ```
 
+For local dashboards and trace export:
+
+```text
+docker compose --profile observability up --detach
+```
+
 ## Hot reload
 
 The backend bind-mounts `backend/` and runs Uvicorn reload. FastAPI lifespan creates one asyncpg SQLAlchemy pool, validates PostgreSQL and migration status at startup, and disposes the pool during graceful shutdown. Each request receives one automatically closed async session; application services will own commits, while exceptions trigger rollback. Each Next.js application bind-mounts its own source tree and enables file polling for Docker Desktop compatibility. Dependency and `.next` directories use named volumes, preventing host/container platform conflicts.
@@ -151,11 +168,14 @@ MinIO is never deployed as the production object store. The production adapter w
 5. Remove MinIO and its initialization container from the production topology.
 6. Run staging contract tests against real R2 because MinIO compatibility is not proof of complete R2 compatibility.
 
-No R2 adapter or upload business workflow is implemented in Phase 1.4.
+No R2 adapter or upload business workflow is implemented in Phase 1.5.
 
 ## Verification
 
-The verifier checks PostgreSQL encoding/timezone, authenticated Redis, RabbitMQ alarms, Meilisearch, MinIO bucket initialization, database-aware FastAPI health and Swagger, both Next.js applications, Celery through Flower, Mailpit, and all Nginx routes:
+The verifier checks PostgreSQL encoding/timezone, authenticated Redis, RabbitMQ
+alarms, Meilisearch, MinIO bucket initialization, all three FastAPI probes,
+Prometheus exposition, Swagger, both Next.js applications, Celery through
+Flower, Mailpit, and all Nginx routes:
 
 ```text
 docker compose --profile tools run --rm verify
@@ -181,3 +201,6 @@ docker compose logs SERVICE_NAME
 ## Repository workflow
 
 Read [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`docs/git-workflow.md`](docs/git-workflow.md) before changing the repository. Report vulnerabilities privately through [`SECURITY.md`](SECURITY.md).
+Operations start with [`docs/observability.md`](docs/observability.md),
+[`docs/runbook.md`](docs/runbook.md), and the
+[`production deployment checklist`](docs/production-deployment-checklist.md).

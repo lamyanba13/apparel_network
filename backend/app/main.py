@@ -20,6 +20,12 @@ from app.common.middleware import (
 from app.common.rate_limiting import RateLimiter
 from app.core.config import Settings, get_settings
 from app.database.lifespan import create_database_lifespan
+from app.observability import (
+    MetricsMiddleware,
+    configure_fastapi_telemetry,
+    configure_sentry,
+    metrics_response,
+)
 
 
 def create_application(
@@ -31,6 +37,7 @@ def create_application(
     """Create the FastAPI application and compose shared infrastructure."""
     resolved_settings = application_settings or get_settings()
     configure_logging(resolved_settings)
+    configure_sentry(resolved_settings)
     expose_development_docs = resolved_settings.environment in {
         Environment.DEVELOPMENT,
         Environment.TEST,
@@ -54,9 +61,20 @@ def create_application(
     )
     application.state.settings = resolved_settings
     application.include_router(api_router)
+    if resolved_settings.metrics_enabled:
+        application.add_api_route(
+            resolved_settings.metrics_path,
+            metrics_response,
+            methods=["GET"],
+            include_in_schema=False,
+        )
     register_exception_handlers(application)
 
     application.add_middleware(RequestTimingMiddleware)
+    application.add_middleware(
+        MetricsMiddleware,
+        enabled=resolved_settings.metrics_enabled,
+    )
     application.add_middleware(
         AdaptiveCompressionMiddleware,
         minimum_size=resolved_settings.gzip_minimum_size,
@@ -100,10 +118,14 @@ def create_application(
         SecurityHeadersMiddleware,
         environment=resolved_settings.environment,
     )
-    application.add_middleware(RequestLoggingMiddleware)
+    application.add_middleware(
+        RequestLoggingMiddleware,
+        slow_request_threshold_ms=resolved_settings.slow_request_threshold_ms,
+    )
     application.add_middleware(RequestContextMiddleware)
 
     install_custom_openapi(application, resolved_settings)
+    configure_fastapi_telemetry(application, resolved_settings)
     return application
 
 

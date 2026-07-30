@@ -1,0 +1,39 @@
+groups:
+  - name: fashion-network-foundation
+    rules:
+      - alert: FashionNetworkApiHighErrorRatio
+        expr: |
+          (
+            sum(rate(fashion_network_http_requests_total{status_code=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(fashion_network_http_requests_total[5m])), 0.001)
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          owner: platform
+        annotations:
+          summary: API 5xx ratio exceeds 5%
+          runbook: docs/runbook.md#high-api-error-rate
+
+      - alert: FashionNetworkDependencyUnavailable
+        expr: fashion_network_dependency_up == 0
+        for: 5m
+        labels:
+          severity: critical
+          owner: platform
+        annotations:
+          summary: A backend readiness dependency is unavailable
+          runbook: docs/runbook.md#dependency-failures
+
+      - alert: FashionNetworkDatabasePoolSaturated
+        expr: |
+          fashion_network_database_pool_checked_out
+          >= fashion_network_database_pool_size
+        for: 10m
+        labels:
+          severity: warning
+          owner: platform
+        annotations:
+          summary: SQLAlchemy base connection pool is saturated
+          runbook: docs/runbook.md#database-connection-pool-saturation

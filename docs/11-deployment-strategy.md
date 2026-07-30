@@ -285,6 +285,13 @@ Disaster exercises validate the stated RTO, not merely the ability to start a da
 
 ## Release checklist
 
+The executable Phase 1.5 gate is maintained in
+[Production Deployment Checklist](production-deployment-checklist.md). Backup,
+resource, observability, and disaster evidence are defined in
+[Backups](backups.md), [Resource Limits](resource-limits.md),
+[Observability](observability.md), and
+[Disaster Recovery](disaster-recovery.md).
+
 Before approval:
 
 - acceptance tests and security scans pass;

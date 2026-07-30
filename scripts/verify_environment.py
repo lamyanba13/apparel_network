@@ -195,8 +195,22 @@ def build_checks(inside_compose: bool) -> list[Check]:
         Check(
             "Backend health",
             lambda: fetch(
-                f"{backend_url}/health",
-                expected_text='"database":"healthy"',
+                f"{backend_url}/health/ready",
+                expected_text='"status":"ready"',
+            ),
+        ),
+        Check(
+            "Backend liveness",
+            lambda: fetch(
+                f"{backend_url}/health/live",
+                expected_text='"status":"alive"',
+            ),
+        ),
+        Check(
+            "Backend metrics",
+            lambda: fetch(
+                f"{backend_url}/metrics",
+                expected_text="fashion_network_http_requests_total",
             ),
         ),
         Check(
@@ -233,8 +247,8 @@ def build_checks(inside_compose: bool) -> list[Check]:
         Check(
             "Nginx backend route",
             lambda: fetch(
-                f"{nginx_url}/health",
-                expected_text='"database":"healthy"',
+                f"{nginx_url}/health/ready",
+                expected_text='"status":"ready"',
                 headers={"Host": "api.localhost"},
             ),
         ),
@@ -243,7 +257,7 @@ def build_checks(inside_compose: bool) -> list[Check]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Verify every Phase 1.4 local development service."
+        description="Verify every Phase 1.5 local development service."
     )
     parser.add_argument(
         "--env-file",
@@ -291,7 +305,7 @@ def main() -> int:
             print(f"[FAIL] {name}: {failures.get(name, 'timed out')}", flush=True)
         return 1
 
-    print("\nAll Phase 1.4 services are healthy.", flush=True)
+    print("\nAll Phase 1.5 services are healthy.", flush=True)
     return 0
 
 

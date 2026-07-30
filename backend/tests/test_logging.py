@@ -76,7 +76,7 @@ def test_request_logging_middleware_includes_request_identifiers(
     monkeypatch.setattr(request_logging.logger, "info", capture_log)
 
     with TestClient(create_application(test_settings)) as client:
-        response = client.get("/health")
+        response = client.get("/health/live")
 
     assert captured["message"] == "http.request_completed"
     assert captured["request_id"] == response.headers["X-Request-ID"]
@@ -84,6 +84,6 @@ def test_request_logging_middleware_includes_request_identifiers(
     extra = cast(dict[str, object], captured["extra"])
     assert extra["event"] == "http.request_completed"
     assert extra["http_method"] == "GET"
-    assert extra["http_path"] == "/health"
+    assert extra["http_path"] == "/health/live"
     assert extra["status_code"] == 200
     assert isinstance(extra["duration_ms"], float)

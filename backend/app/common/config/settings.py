@@ -60,6 +60,18 @@ class Settings(BaseSettings):
     brotli_quality: int = Field(default=4, ge=0, le=11)
     etag_enabled: bool = False
     rate_limit_enabled: bool = False
+    metrics_enabled: bool = True
+    metrics_path: str = "/metrics"
+    health_check_timeout_seconds: float = Field(default=3.0, gt=0, le=30)
+    slow_request_threshold_ms: float = Field(default=1000.0, gt=0)
+    slow_query_threshold_ms: float = Field(default=500.0, gt=0)
+    opentelemetry_enabled: bool = False
+    opentelemetry_service_name: str = "fashion-network-api"
+    opentelemetry_exporter_otlp_endpoint: str | None = None
+    opentelemetry_trace_sample_ratio: float = Field(default=0.1, ge=0, le=1)
+    sentry_enabled: bool = False
+    sentry_dsn: SecretStr | None = None
+    sentry_trace_sample_rate: float = Field(default=0.0, ge=0, le=1)
 
     database_url: str = (
         "postgresql+asyncpg://fashion_network:fashion_network_dev_postgres@localhost:5432/"
@@ -152,8 +164,28 @@ class Settings(BaseSettings):
             raise ValueError("At least one trusted host is required")
         return normalized
 
+    @field_validator("metrics_path")
+    @classmethod
+    def validate_metrics_path(cls, value: str) -> str:
+        if not value.startswith("/") or value == "/" or " " in value:
+            raise ValueError("metrics_path must be an absolute non-root path")
+        return value
+
+    @field_validator("opentelemetry_exporter_otlp_endpoint")
+    @classmethod
+    def validate_optional_otlp_endpoint(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return cls._validate_service_url(value, {"http", "https"}, "OTLP")
+
     @model_validator(mode="after")
     def validate_environment_security(self) -> Settings:
+        sentry_dsn = (
+            self.sentry_dsn.get_secret_value() if self.sentry_dsn is not None else ""
+        )
+        if self.sentry_enabled and not sentry_dsn.strip():
+            raise ValueError("sentry_dsn is required when Sentry is enabled")
+
         if self.environment not in {Environment.STAGING, Environment.PRODUCTION}:
             return self
 

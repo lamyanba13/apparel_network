@@ -2,7 +2,11 @@
 
 ## Monorepo layout
 
-The implementation repository uses the following top-level structure. Phase 1.4 includes the project skeleton, local container infrastructure, asynchronous database foundation, and business-neutral shared application framework; later feature and operations artifacts remain intentional future structure.
+The implementation repository uses the following top-level structure. Phase
+1.5 includes the project skeleton, local container infrastructure, asynchronous
+database foundation, business-neutral shared application framework, and
+reliability/observability operations foundation; later feature artifacts remain
+intentional future structure.
 
 ```text
 /
@@ -269,11 +273,15 @@ scripts/
 
 Scripts are thin, noninteractive where possible, safe to rerun, and delegate to normal project tools. Each script documents prerequisites, inputs, side effects, exit codes, and examples. A script must not conceal destructive production operations behind a harmless name.
 
+Business-neutral manual load examples live at `tests/load/` with k6, Locust,
+and execution/reporting guidance. They are not run automatically in CI.
+
 ## Local Compose layout
 
-The single `docker-compose.yml` starts the complete daily development runtime by default: PostgreSQL, Redis, RabbitMQ, Meilisearch, MinIO, Mailpit, backend, Celery worker, Flower, both Next.js applications, and a development-only Nginx gateway. The `tools` profile contains the one-shot environment verifier. Future optional profiles remain:
+The single `docker-compose.yml` starts the complete daily development runtime by default: PostgreSQL, Redis, RabbitMQ, Meilisearch, MinIO, Mailpit, backend, Celery worker, Flower, both Next.js applications, and a development-only Nginx gateway. The `tools` profile contains the one-shot environment verifier. Optional profiles are:
 
-- `observability`: OpenTelemetry Collector, Prometheus, and Grafana for telemetry work;
+- `observability`: implemented OpenTelemetry Collector, Prometheus, and Grafana
+  for local telemetry work;
 - `resilience`: Toxiproxy or equivalent dependency-failure test support.
 
 Containers use named volumes and health checks. Default ports bind only to loopback. Local credentials are fixed development-only values and cannot be accepted by non-local configuration validation.

@@ -11,8 +11,9 @@ logger = logging.getLogger(__name__)
 class RequestLoggingMiddleware:
     """Emit one safe completion event for each HTTP request."""
 
-    def __init__(self, app: ASGIApp) -> None:
+    def __init__(self, app: ASGIApp, *, slow_request_threshold_ms: float) -> None:
         self.app = app
+        self.slow_request_threshold_ms = slow_request_threshold_ms
 
     async def __call__(
         self,
@@ -37,10 +38,20 @@ class RequestLoggingMiddleware:
             await self.app(scope, receive, capture_status)
         finally:
             duration_ms = round((perf_counter() - started) * 1000, 3)
-            logger.info(
-                "http.request_completed",
+            log = (
+                logger.warning
+                if duration_ms >= self.slow_request_threshold_ms
+                else logger.info
+            )
+            event = (
+                "http.slow_request"
+                if duration_ms >= self.slow_request_threshold_ms
+                else "http.request_completed"
+            )
+            log(
+                event,
                 extra={
-                    "event": "http.request_completed",
+                    "event": event,
                     "http_method": scope["method"],
                     "http_path": scope["path"],
                     "status_code": status_code,

@@ -2,11 +2,13 @@
 
 ## Scope
 
-Phase 1.4 uses the complete containerized development runtime and adds the
-business-neutral application framework without implementing business features.
-FastAPI now provides request context, structured logging, centralized errors,
-security middleware, strict environment validation, and a future `/api/v1`
-composition boundary. `docker compose up` starts the two Next.js applications,
+Phase 1.5 uses the complete containerized development runtime and adds the
+business-neutral reliability and observability foundation without implementing
+business features. FastAPI provides separate probes, Prometheus metrics,
+optional OpenTelemetry/Sentry, slow-operation diagnostics, request context,
+structured logging, centralized errors, security middleware, strict
+configuration, and a future `/api/v1` composition boundary. `docker compose up`
+starts the two Next.js applications,
 FastAPI, Celery worker, Flower, Nginx, PostgreSQL, Redis, RabbitMQ, Meilisearch,
 MinIO, and Mailpit.
 
@@ -40,19 +42,31 @@ docker compose --profile tools run --rm verify
 docker compose down
 ```
 
-The `tools` profile contains only the one-shot verifier. Observability and resilience profiles remain future work under the approved roadmap.
+The `tools` profile contains only the one-shot verifier. The optional
+`observability` profile starts OpenTelemetry Collector, Prometheus, and Grafana.
+The `resilience` profile remains future work.
+
+```text
+docker compose --profile observability up --detach
+```
+
+Metrics remain available directly at `http://127.0.0.1:8000/metrics` and are
+blocked through local Nginx. OpenTelemetry is disabled until explicitly enabled
+in an uncommitted override; Sentry remains disabled by default.
 
 `alembic upgrade head` is intentionally a no-op in Phase 1.4 because no
 business models or migration revisions exist. It still validates that the
 asyncpg migration environment can connect and execute.
 
-Local/test logs are readable structured lines. Production selects JSON logging
+Local/test logs are readable structured lines. Slow request, slow SQL operation,
+startup, and shutdown events include timings but never SQL text or bind values.
+Production selects JSON logging
 and additionally requires secure service URLs, non-development credentials,
 explicit trusted hosts/CORS origins, and storage/search secrets. The committed
 `.env.production` remains a deliberately unusable contract until real values
 are supplied through the selected secret manager.
 
-Rate limiting and automatic ETag handling are disabled by default. Enabling
+Rate limiting and automatic ETag handling remain disabled by default. Enabling
 rate limiting without an injected adapter fails startup rather than silently
 claiming protection. Future command endpoints opt into the idempotency-key
 dependency and a PostgreSQL implementation of its storage port. Brotli is

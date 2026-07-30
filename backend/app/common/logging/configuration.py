@@ -14,9 +14,11 @@ _STANDARD_LOG_RECORD_FIELDS = frozenset(logging.makeLogRecord({}).__dict__)
 _SAFE_EXTRA_FIELDS = frozenset(
     {
         "duration_ms",
+        "dependency",
         "event",
         "http_method",
         "http_path",
+        "operation",
         "status_code",
     }
 )

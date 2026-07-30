@@ -51,6 +51,14 @@ Read these documents in order when joining the project:
 17. [Git Workflow](git-workflow.md)
 18. [Local Development Environment](local-development.md)
 19. [Phase 0 Architecture Review](PHASE0_REVIEW.md)
+20. [Observability](observability.md)
+21. [Platform Runbook](runbook.md)
+22. [Backups](backups.md)
+23. [Disaster Recovery](disaster-recovery.md)
+24. [Resource Limits](resource-limits.md)
+25. [Development Performance Baseline](performance-baseline.md)
+26. [Production Deployment Checklist](production-deployment-checklist.md)
+27. [Dependency Report](dependency-report.md)
 
 ## Decision authority
 

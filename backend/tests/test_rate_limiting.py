@@ -33,7 +33,7 @@ def admin_scope(_: Scope) -> RateLimitScope:
 
 def test_rate_limiting_is_disabled_by_default(test_settings: Settings) -> None:
     with TestClient(create_application(test_settings)) as client:
-        response = client.get("/health")
+        response = client.get("/health/live")
 
     assert response.status_code == 200
     assert "ratelimit-limit" not in response.headers
@@ -71,7 +71,7 @@ def test_rate_limiter_can_apply_a_future_route_scope(
     )
 
     with TestClient(application) as client:
-        response = client.get("/health")
+        response = client.get("/health/live")
 
     assert response.status_code == 200
     assert response.headers["RateLimit-Limit"] == "50"
@@ -95,7 +95,7 @@ def test_rate_limiter_returns_standard_429_problem(
     with TestClient(
         create_application(enabled_settings, rate_limiter=limiter)
     ) as client:
-        response = client.get("/health")
+        response = client.get("/health/live")
 
     assert response.status_code == 429
     assert response.headers["Retry-After"] == "30"

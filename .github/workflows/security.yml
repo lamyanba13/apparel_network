@@ -1,0 +1,127 @@
+name: Security
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+      - develop
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependencies:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install Poetry
+        run: pipx install poetry==2.4.1
+
+      - name: Install and audit Python dependencies
+        run: |
+          poetry --directory backend install --no-interaction
+          poetry --directory backend run pip-audit --local
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Audit Node.js dependencies
+        run: pnpm audit --prod --audit-level high
+
+  static-analysis:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - python
+          - javascript-typescript
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:${{ matrix.language }}
+
+  containers:
+    name: Container vulnerability scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Build application images
+        run: |
+          docker build --target production --tag fashion-network-backend:ci backend
+          docker build --target production --tag fashion-network-frontend:ci --file frontend/Dockerfile .
+          docker build --target production --tag fashion-network-dashboard:ci --file dashboard/Dockerfile .
+          docker build --tag fashion-network-nginx:ci infrastructure/nginx
+
+      - name: Export images for socket-free scanning
+        run: |
+          mkdir --mode=0700 .trivy-images
+          docker save --output .trivy-images/backend.tar fashion-network-backend:ci
+          docker save --output .trivy-images/frontend.tar fashion-network-frontend:ci
+          docker save --output .trivy-images/dashboard.tar fashion-network-dashboard:ci
+          docker save --output .trivy-images/nginx.tar fashion-network-nginx:ci
+
+      - name: Scan images for exploitable high and critical findings
+        run: |
+          for archive in \
+            backend.tar \
+            frontend.tar \
+            dashboard.tar \
+            nginx.tar
+          do
+            docker run --rm \
+              --volume "${{ github.workspace }}/.trivy-images:/scan:ro" \
+              --volume trivy-cache:/root/.cache \
+              aquasec/trivy:0.70.0@sha256:be1190afcb28352bfddc4ddeb71470835d16462af68d310f9f4bca710961a41e image \
+              --input "/scan/$archive" \
+              --scanners vuln \
+              --exit-code 1 \
+              --ignore-unfixed \
+              --severity HIGH,CRITICAL \
+              --quiet
+          done

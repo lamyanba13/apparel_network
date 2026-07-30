@@ -24,4 +24,5 @@ def test_settings(database_url: str) -> Settings:
         database_url=database_url,
         database_pool_size=1,
         database_max_overflow=0,
+        opentelemetry_exporter_otlp_endpoint=None,
     )

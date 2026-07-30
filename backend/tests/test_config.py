@@ -33,6 +33,21 @@ def test_port_validation_rejects_out_of_range_value() -> None:
         Settings(_env_file=None, api_port=70000)
 
 
+def test_observability_settings_are_safe_by_default() -> None:
+    settings = Settings(_env_file=None, environment="test")
+
+    assert settings.metrics_enabled is True
+    assert settings.opentelemetry_enabled is False
+    assert settings.sentry_enabled is False
+    assert settings.slow_request_threshold_ms == 1000
+    assert settings.slow_query_threshold_ms == 500
+
+
+def test_sentry_requires_dsn_when_enabled() -> None:
+    with pytest.raises(ValidationError, match="sentry_dsn"):
+        Settings(_env_file=None, environment="test", sentry_enabled=True)
+
+
 def test_production_rejects_local_or_missing_service_secrets() -> None:
     with pytest.raises(ValidationError, match=r"development credentials|secret"):
         Settings(

@@ -1,3 +1,8 @@
 # Production environment
 
-Production infrastructure remains intentionally absent in Phase 1.2. The local Compose file and development Nginx/MinIO containers are not production specifications. OpenTofu, private networking, managed services, Cloudflare R2, secrets, backups, and monitoring require the hosting-provider ADR and protected deployment workflow.
+Production infrastructure remains provider-dependent and intentionally absent
+from Phase 1.5. The local Compose, Nginx, MinIO, Prometheus, Grafana, and debug
+collector containers are not production specifications. Production requires
+OpenTofu, private networking, managed services/telemetry, Cloudflare R2,
+secret-manager injection, backups, immutable images, and the protected
+deployment workflow in `docs/production-deployment-checklist.md`.

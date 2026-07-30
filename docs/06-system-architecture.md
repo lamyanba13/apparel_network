@@ -336,6 +336,27 @@ The frontend and dashboard use the same authoritative API. If server-side Next.j
 | PostHog unavailable | Core request succeeds; analytics is dropped or retried according to bounded policy. |
 | Sentry unavailable | Core request succeeds; local structured logging still records the error safely. |
 
+## Phase 1.5 operational foundation
+
+The API exposes three unversioned platform probes:
+
+- `/health/live` confirms only that the process can serve HTTP;
+- `/health/startup` confirms that required startup initialization completed;
+- `/health/ready` concurrently checks PostgreSQL, RabbitMQ, Redis, Meilisearch,
+  and the configured MinIO/R2 endpoint with bounded timeouts.
+
+Readiness failure removes a replica from traffic but does not make liveness fail,
+preventing dependency outages from causing restart storms. Probe responses
+contain safe status and timing data, never credentials or provider errors.
+
+Prometheus metrics and OpenTelemetry remain cross-cutting adapters around the
+modular monolith. They do not create a feature module, system of record, or new
+deployment boundary. Metric labels use route templates and dependency names;
+business identifiers are prohibited. OpenTelemetry instruments FastAPI,
+SQLAlchemy, outbound HTTP, and the Celery/RabbitMQ foundation when enabled.
+Sentry is a disabled-by-default error adapter with PII and request bodies
+disabled. See [Observability](observability.md).
+
 ## Architecture fitness checks
 
 CI SHOULD enforce:

@@ -170,6 +170,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: development
     container_name: fashion-network-backend
     ports:
       - "127.0.0.1:8000:8000"
@@ -193,7 +194,7 @@ services:
           "CMD",
           "python",
           "-c",
-          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=3)",
         ]
       interval: 5s
       timeout: 5s
@@ -209,6 +210,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: development
     container_name: fashion-network-celery-worker
     hostname: celery-worker
     command:
@@ -249,6 +251,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: development
     container_name: fashion-network-flower
     command:
       - celery
@@ -289,6 +292,7 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
+      target: development
     container_name: fashion-network-frontend
     ports:
       - "127.0.0.1:3000:3000"
@@ -316,6 +320,7 @@ services:
     build:
       context: .
       dockerfile: dashboard/Dockerfile
+      target: development
     container_name: fashion-network-dashboard
     ports:
       - "127.0.0.1:3001:3000"
@@ -365,10 +370,102 @@ services:
       - edge
       - app
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.157.0
+    container_name: fashion-network-otel-collector
+    profiles:
+      - observability
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    restart: unless-stopped
+    logging: *default-logging
+    volumes:
+      - ./infrastructure/monitoring/otel-collector.yml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "127.0.0.1:4317:4317"
+      - "127.0.0.1:4318:4318"
+      - "127.0.0.1:13133:13133"
+    healthcheck:
+      test: ["CMD", "/otelcol-contrib", "components"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - host-access
+      - app
+      - observability
+
+  prometheus:
+    image: prom/prometheus:v3.13.0
+    container_name: fashion-network-prometheus
+    profiles:
+      - observability
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+    restart: unless-stopped
+    logging: *default-logging
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infrastructure/monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --spider http://127.0.0.1:9090/-/healthy || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 10s
+    networks:
+      - host-access
+      - app
+      - observability
+
+  grafana:
+    image: grafana/grafana:13.1.0
+    container_name: fashion-network-grafana
+    profiles:
+      - observability
+    env_file:
+      - .env.development
+    environment:
+      GF_SECURITY_ADMIN_USER: fashion_network
+      GF_SECURITY_ADMIN_PASSWORD: fashion_network_dev_grafana
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+    restart: unless-stopped
+    logging: *default-logging
+    volumes:
+      - ./infrastructure/monitoring/grafana/provisioning/datasources/prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:3002:3000"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --spider http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    networks:
+      - host-access
+      - observability
+
   verify:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: development
     profiles:
       - tools
     env_file:
@@ -423,6 +520,9 @@ networks:
   data:
     name: fashion-network-data
     internal: true
+  observability:
+    name: fashion-network-observability
+    internal: true
 
 volumes:
   backend_cache:
@@ -455,3 +555,7 @@ volumes:
     name: fashion-network-rabbitmq-data
   redis_data:
     name: fashion-network-redis-data
+  prometheus_data:
+    name: fashion-network-prometheus-data
+  grafana_data:
+    name: fashion-network-grafana-data

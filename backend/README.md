@@ -2,15 +2,18 @@
 
 The backend is a Python 3.13 FastAPI modular monolith managed by Poetry.
 
-Phase 1.4 retains the asynchronous PostgreSQL foundation and adds the shared
-application framework:
+Phase 1.5 retains the Phase 1.4 shared application framework and adds the
+production operations foundation:
 
 - SQLAlchemy 2.x typed declarative metadata;
 - asyncpg engine and bounded connection pool;
 - request-scoped `AsyncSession` dependency;
 - rollback on failed request work and automatic session cleanup;
 - lifespan startup validation and graceful pool disposal;
-- database-aware `GET /health`;
+- process-only `GET /health/live`;
+- dependency-aware `GET /health/ready` for PostgreSQL, RabbitMQ, Redis,
+  Meilisearch, and MinIO/R2;
+- startup-sequence `GET /health/startup`;
 - Alembic autogeneration wiring with no migration revisions yet;
 - reusable UUIDv7, timestamp, selective soft-delete, audit, and optimistic
   version mixins.
@@ -24,8 +27,13 @@ application framework:
 - bounded cursor/offset pagination, allowlisted sorting/filtering primitives,
   response models, validators, common types, and narrowly named utilities;
 - an empty `/api/v1` router plus customized development OpenAPI;
-- interfaces only for future events, RabbitMQ publication, OpenTelemetry,
-  Prometheus, and Sentry adapters.
+- Prometheus HTTP, status, latency, dependency, query, database-pool, and
+  worker-placeholder metrics at private `GET /metrics`;
+- environment-controlled OpenTelemetry instrumentation for FastAPI,
+  SQLAlchemy, HTTPX, and Celery/RabbitMQ;
+- disabled-by-default, PII-scrubbed Sentry for unhandled API, startup, and
+  worker failures;
+- slow request/query and startup/shutdown timing diagnostics;
 - an injected, disabled-by-default rate-limiter port with public/store/admin
   policy scopes;
 - validated idempotency keys, canonical request fingerprints, and a future
