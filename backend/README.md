@@ -2,7 +2,8 @@
 
 The backend is a Python 3.13 FastAPI modular monolith managed by Poetry.
 
-Phase 1.3 provides the shared asynchronous PostgreSQL foundation:
+Phase 1.4 retains the asynchronous PostgreSQL foundation and adds the shared
+application framework:
 
 - SQLAlchemy 2.x typed declarative metadata;
 - asyncpg engine and bounded connection pool;
@@ -13,6 +14,24 @@ Phase 1.3 provides the shared asynchronous PostgreSQL foundation:
 - Alembic autogeneration wiring with no migration revisions yet;
 - reusable UUIDv7, timestamp, selective soft-delete, audit, and optimistic
   version mixins.
+- request-scoped IDs, correlation, start time, client IP, user agent, and a
+  deliberately empty authenticated-user placeholder;
+- development-pretty and production-JSON structured logging;
+- centralized RFC 9457-style validation, HTTP, database, and unexpected-error
+  translation;
+- CORS, trusted-host, GZip, timing, request logging, and environment-aware
+  security-header middleware;
+- bounded cursor/offset pagination, allowlisted sorting/filtering primitives,
+  response models, validators, common types, and narrowly named utilities;
+- an empty `/api/v1` router plus customized development OpenAPI;
+- interfaces only for future events, RabbitMQ publication, OpenTelemetry,
+  Prometheus, and Sentry adapters.
+- an injected, disabled-by-default rate-limiter port with public/store/admin
+  policy scopes;
+- validated idempotency keys, canonical request fingerprints, and a future
+  authoritative storage port;
+- opt-in ETag conditional requests and endpoint deprecation/sunset helpers;
+- Brotli response compression with standards-aware GZip fallback.
 
 No business models, business tables, authentication, users, stores, products,
 inventory, or reservations are implemented.

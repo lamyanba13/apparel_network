@@ -2,7 +2,7 @@
 
 ## Monorepo layout
 
-The implementation repository uses the following top-level structure. Phase 1.3 includes the project skeleton, local container infrastructure, and asynchronous database foundation; later feature and operations artifacts remain intentional future structure.
+The implementation repository uses the following top-level structure. Phase 1.4 includes the project skeleton, local container infrastructure, asynchronous database foundation, and business-neutral shared application framework; later feature and operations artifacts remain intentional future structure.
 
 ```text
 /

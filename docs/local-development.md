@@ -2,7 +2,13 @@
 
 ## Scope
 
-Phase 1.3 uses the complete containerized development runtime and adds the shared asynchronous database foundation without implementing business features. `docker compose up` starts the two Next.js applications, FastAPI, Celery worker, Flower, Nginx, PostgreSQL, Redis, RabbitMQ, Meilisearch, MinIO, and Mailpit.
+Phase 1.4 uses the complete containerized development runtime and adds the
+business-neutral application framework without implementing business features.
+FastAPI now provides request context, structured logging, centralized errors,
+security middleware, strict environment validation, and a future `/api/v1`
+composition boundary. `docker compose up` starts the two Next.js applications,
+FastAPI, Celery worker, Flower, Nginx, PostgreSQL, Redis, RabbitMQ, Meilisearch,
+MinIO, and Mailpit.
 
 RabbitMQ remains the only Celery broker. Redis is limited to caching, sessions, rate limiting, temporary reservation locks, and ephemeral coordination. PostgreSQL remains authoritative, Meilisearch remains rebuildable, and MinIO is a local substitute for Cloudflare R2.
 
@@ -36,9 +42,22 @@ docker compose down
 
 The `tools` profile contains only the one-shot verifier. Observability and resilience profiles remain future work under the approved roadmap.
 
-`alembic upgrade head` is intentionally a no-op in Phase 1.3 because no
+`alembic upgrade head` is intentionally a no-op in Phase 1.4 because no
 business models or migration revisions exist. It still validates that the
 asyncpg migration environment can connect and execute.
+
+Local/test logs are readable structured lines. Production selects JSON logging
+and additionally requires secure service URLs, non-development credentials,
+explicit trusted hosts/CORS origins, and storage/search secrets. The committed
+`.env.production` remains a deliberately unusable contract until real values
+are supplied through the selected secret manager.
+
+Rate limiting and automatic ETag handling are disabled by default. Enabling
+rate limiting without an injected adapter fails startup rather than silently
+claiming protection. Future command endpoints opt into the idempotency-key
+dependency and a PostgreSQL implementation of its storage port. Brotli is
+preferred for eligible non-streaming responses when accepted by the client;
+GZip remains the fallback.
 
 ## Image policy
 

@@ -2,7 +2,20 @@
 
 Fashion Network is digital inventory infrastructure connecting participating clothing stores in Manipur. Customers discover store-owned inventory across the network; stores retain inventory ownership and fulfill their own reservations. It is not an e-commerce platform.
 
-Phase 1.3 adds the asynchronous SQLAlchemy and Alembic database foundation to the containerized development environment. It introduces no authentication, business logic, business database models, product behavior, inventory behavior, or reservation behavior. The only API route is the database-aware `GET /health`.
+Phase 1.4 adds the reusable application framework on top of the asynchronous
+database foundation: request context, UUIDv7 request IDs, structured logging,
+central exception translation, bounded pagination, strict configuration,
+security middleware, shared validators and types, OpenAPI metadata, and future
+event/observability ports. It introduces no authentication, authorization,
+business logic, business database models, or business APIs. The only implemented
+route remains the database-aware `GET /health`; `/api/v1` is an empty composition
+boundary for future reviewed contracts.
+
+Additional Phase 1.4 transport foundations include disabled-by-default
+rate-limiting and conditional-ETag middleware, validated `Idempotency-Key`
+contracts, opt-in API deprecation/sunset headers, and adaptive Brotli/GZip
+response compression. No rate policy, Redis limiter, idempotency table, or
+catalog cache behavior is enabled or implemented prematurely.
 
 ## Local architecture
 
@@ -138,7 +151,7 @@ MinIO is never deployed as the production object store. The production adapter w
 5. Remove MinIO and its initialization container from the production topology.
 6. Run staging contract tests against real R2 because MinIO compatibility is not proof of complete R2 compatibility.
 
-No R2 adapter or upload business workflow is implemented in Phase 1.3.
+No R2 adapter or upload business workflow is implemented in Phase 1.4.
 
 ## Verification
 
