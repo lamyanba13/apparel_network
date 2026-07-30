@@ -2,8 +2,8 @@
 
 The backend is a Python 3.13 FastAPI modular monolith managed by Poetry.
 
-Phase 1.5 retains the Phase 1.4 shared application framework and adds the
-production operations foundation:
+The frozen `foundation-v1` baseline provides the production operations
+foundation:
 
 - SQLAlchemy 2.x typed declarative metadata;
 - asyncpg engine and bounded connection pool;
@@ -14,7 +14,7 @@ production operations foundation:
 - dependency-aware `GET /health/ready` for PostgreSQL, RabbitMQ, Redis,
   Meilisearch, and MinIO/R2;
 - startup-sequence `GET /health/startup`;
-- Alembic autogeneration wiring with no migration revisions yet;
+- Alembic autogeneration wiring and the reviewed Phase 2.1 Identity revision;
 - reusable UUIDv7, timestamp, selective soft-delete, audit, and optimistic
   version mixins.
 - request-scoped IDs, correlation, start time, client IP, user agent, and a
@@ -41,8 +41,10 @@ production operations foundation:
 - opt-in ETag conditional requests and endpoint deprecation/sunset helpers;
 - Brotli response compression with standards-aware GZip fallback.
 
-No business models, business tables, authentication, users, stores, products,
-inventory, or reservations are implemented.
+Phase 2.1 adds only the Identity persistence layer: records, persistence
+schemas, repository ports/adapters, and its migration. Authentication flows,
+authorization evaluation, API routes, stores, products, inventory, and
+reservations are not implemented.
 
 From this directory:
 

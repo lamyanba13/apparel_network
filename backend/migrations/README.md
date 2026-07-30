@@ -4,9 +4,9 @@ Alembic owns the single ordered PostgreSQL schema history. It uses the
 `FASHION_NETWORK_DATABASE_URL` asyncpg URL and `app.database.metadata.metadata`
 for autogeneration.
 
-Phase 1.3 deliberately contains no revision files because no business models or
-tables exist yet. The `versions/` directory is reserved for reviewed future
-revisions.
+Phase 2.1 introduces the first reviewed revision, which creates only the
+Identity persistence tables. Every later revision must remain a single ordered
+history unless an explicitly reviewed migration strategy requires otherwise.
 
 From `backend/`:
 
@@ -17,7 +17,7 @@ poetry run alembic check
 poetry run alembic upgrade head
 ```
 
-Create a future reviewed revision with:
+Create a reviewed revision with:
 
 ```text
 poetry run alembic revision --autogenerate -m "describe schema change"

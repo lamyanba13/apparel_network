@@ -9,6 +9,9 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.core.config import get_settings
 from app.database.metadata import metadata
+from app.modules.identity.infrastructure.persistence import models as identity_models
+
+_ = identity_models
 
 config = context.config
 

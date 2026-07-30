@@ -54,9 +54,8 @@ Metrics remain available directly at `http://127.0.0.1:8000/metrics` and are
 blocked through local Nginx. OpenTelemetry is disabled until explicitly enabled
 in an uncommitted override; Sentry remains disabled by default.
 
-`alembic upgrade head` is intentionally a no-op in Phase 1.4 because no
-business models or migration revisions exist. It still validates that the
-asyncpg migration environment can connect and execute.
+`alembic upgrade head` applies the reviewed Phase 2.1 Identity persistence
+revision. `alembic check` must report no pending model drift after the upgrade.
 
 Local/test logs are readable structured lines. Slow request, slow SQL operation,
 startup, and shutdown events include timings but never SQL text or bind values.

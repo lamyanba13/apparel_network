@@ -41,16 +41,16 @@ jobs:
         run: poetry --directory backend install --no-interaction
 
       - name: Check formatting
-        run: poetry --directory backend run black --check app tests
+        run: poetry --directory backend run black --check app migrations tests
 
       - name: Run Ruff
-        run: poetry --directory backend run ruff check app tests
+        run: poetry --directory backend run ruff check app migrations tests
 
       - name: Run MyPy
         run: poetry --directory backend run mypy app tests
 
-      - name: Verify no migration revisions were added in Phase 1.5
-        run: test -z "$(find backend/migrations/versions -name '*.py' -print -quit)"
+      - name: Verify Alembic migration heads
+        run: poetry --directory backend run alembic heads
 
   web:
     name: Web quality
