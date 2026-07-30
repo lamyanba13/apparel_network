@@ -23,3 +23,4 @@ Accepted ADRs are immutable historical records. A material change is documented 
 | [0006](0006-minio.md) | MinIO for local object-storage development | Accepted |
 | [0007](0007-opentelemetry.md) | OpenTelemetry for distributed telemetry | Accepted |
 | [0008](0008-observability.md) | Layered observability strategy | Accepted |
+| [0009](0009-identity-access-and-refresh-tokens.md) | Identity access and refresh token architecture | Accepted |

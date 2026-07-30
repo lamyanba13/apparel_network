@@ -19,6 +19,11 @@ def test_metrics_endpoint_exposes_http_and_foundation_metrics(
     assert "fashion_network_database_pool_size" in body
     assert "fashion_network_dependency_up" in body
     assert "fashion_network_worker_up" in body
+    assert "fashion_network_authentication_succeeded_total" in body
+    assert "fashion_network_authentication_failed_total" in body
+    assert "fashion_network_authentication_refresh_total" in body
+    assert "fashion_network_authentication_refresh_reuse_total" in body
+    assert "fashion_network_authentication_logout_total" in body
 
 
 def test_metrics_endpoint_can_be_disabled(test_settings: Settings) -> None:

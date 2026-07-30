@@ -3,7 +3,13 @@
 from app.common.rate_limiting.contracts import (
     RateLimitDecision,
     RateLimiter,
+    RateLimitPolicy,
     RateLimitScope,
 )
 
-__all__ = ["RateLimitDecision", "RateLimitScope", "RateLimiter"]
+__all__ = [
+    "RateLimitDecision",
+    "RateLimitPolicy",
+    "RateLimitScope",
+    "RateLimiter",
+]

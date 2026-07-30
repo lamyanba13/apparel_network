@@ -4,11 +4,14 @@ from typing import Protocol
 
 
 class RateLimitScope(StrEnum):
-    """Coarse transport scopes; feature policy remains future work."""
+    """Transport scopes mapped to independently configurable policies."""
 
     PUBLIC = "public"
     STORE = "store"
     ADMIN = "admin"
+    AUTH_LOGIN = "auth_login"
+    AUTH_REFRESH = "auth_refresh"
+    PASSWORD_RESET = "password_reset"
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,8 +32,18 @@ class RateLimitDecision:
             raise ValueError("retry_after_seconds cannot be negative")
 
 
+@dataclass(frozen=True, slots=True)
+class RateLimitPolicy:
+    limit: int
+    window_seconds: int
+
+    def __post_init__(self) -> None:
+        if self.limit < 1 or self.window_seconds < 1:
+            raise ValueError("rate-limit policy values must be positive")
+
+
 class RateLimiter(Protocol):
-    """Port implemented by the future ephemeral Redis rate limiter."""
+    """Provider-neutral ephemeral rate-limiter port."""
 
     async def check(
         self,

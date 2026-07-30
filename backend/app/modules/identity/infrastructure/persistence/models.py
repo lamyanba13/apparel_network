@@ -4,6 +4,7 @@ from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
     CheckConstraint,
     DateTime,
@@ -337,6 +338,27 @@ class RefreshSessionModel(
             "expires_at > last_activity_at",
             name="expiry_after_activity",
         ),
+        CheckConstraint(
+            "rotation_count >= 0",
+            name="rotation_count_non_negative",
+        ),
+        CheckConstraint(
+            "risk_score IS NULL OR risk_score BETWEEN 0 AND 100",
+            name="risk_score_range",
+        ),
+        CheckConstraint(
+            "last_country IS NULL OR last_country ~ '^[A-Z]{2}$'",
+            name="last_country_iso_alpha2",
+        ),
+        CheckConstraint(
+            "last_asn IS NULL OR last_asn BETWEEN 0 AND 4294967295",
+            name="last_asn_range",
+        ),
+        CheckConstraint(
+            "last_device_fingerprint IS NULL OR "
+            "length(last_device_fingerprint) BETWEEN 1 AND 128",
+            name="last_device_fingerprint_length",
+        ),
         CheckConstraint("version >= 1", name="version_positive"),
         Index(
             "ix_identity_refresh_sessions_refresh_token_hash",
@@ -346,6 +368,14 @@ class RefreshSessionModel(
         Index(
             "ix_identity_refresh_sessions_user_id",
             "user_id",
+        ),
+        Index(
+            "ix_identity_refresh_sessions_family_id",
+            "family_id",
+        ),
+        Index(
+            "ix_identity_refresh_sessions_parent_session_id",
+            "parent_session_id",
         ),
         Index(
             "ix_identity_refresh_sessions_user_active",
@@ -360,6 +390,29 @@ class RefreshSessionModel(
         nullable=False,
     )
     refresh_token_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    family_id: Mapped[UUID] = mapped_column(
+        nullable=False,
+        server_default=text("gen_random_uuid()"),
+    )
+    parent_session_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey(
+            "identity_refresh_sessions.id",
+            ondelete="RESTRICT",
+        ),
+        nullable=True,
+    )
+    rotation_count: Mapped[int] = mapped_column(
+        nullable=False,
+        default=0,
+        server_default=text("0"),
+    )
+    risk_score: Mapped[int | None] = mapped_column(nullable=True)
+    last_country: Mapped[str | None] = mapped_column(String(2), nullable=True)
+    last_asn: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    last_device_fingerprint: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+    )
     device_name: Mapped[str] = mapped_column(String(120), nullable=False)
     browser: Mapped[str | None] = mapped_column(String(120), nullable=True)
     operating_system: Mapped[str | None] = mapped_column(
@@ -384,6 +437,10 @@ class RefreshSessionModel(
     )
 
     user: Mapped[UserModel] = relationship(back_populates="refresh_sessions")
+    parent_session: Mapped[RefreshSessionModel | None] = relationship(
+        remote_side="RefreshSessionModel.id",
+        foreign_keys=[parent_session_id],
+    )
 
 
 class PasswordHistoryModel(UuidPrimaryKeyMixin, Base):

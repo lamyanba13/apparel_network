@@ -54,21 +54,28 @@ Review threats including broken object-level authorization, credential stuffing,
 
 ### JWT and refresh-token decision
 
-The first release intentionally does not use browser JWT access tokens or OAuth-style refresh tokens. Server-managed opaque sessions provide immediate revocation, smaller browser exposure, and simpler role/membership changes for two first-party web applications. The cookie value is a rotating opaque session credential; only its hash is stored.
+Phase 2.2 uses 15-minute access JWTs signed with Ed25519 (`EdDSA`), with
+`ES256` as the only approved fallback. `HS256` is prohibited. Access tokens
+contain only `ver=1`, `sub`, `sid`, `jti`, `iss`, `aud`, `iat`, `nbf`, `exp`,
+and `type=access`; roles, permissions, store membership, and other business
+claims are resolved from current authoritative state. Validation permits 30
+seconds of clock skew.
 
-JWTs may be introduced only for a separately approved machine/integration boundary with issuer, audience, short expiry, key rotation, scope, revocation implications, and no reuse of the browser session credential. A third-party identity provider may replace Auth internals later through an ADR without changing Users or store membership ownership.
+Refresh credentials are opaque values with at least 256 bits of entropy. Only
+their SHA-256 hashes are stored. Every refresh rotates the credential into a
+new session-lineage row and revokes its parent. Reuse of a revoked credential
+revokes the complete token family.
 
 ### Browser session protection
 
-The first release uses server-managed opaque cookie sessions. It MUST:
+First-party clients MUST:
 
 - set `Secure`, `HttpOnly`, and appropriate `SameSite`;
-- use host-only cookies and scope path narrowly;
-- protect state-changing requests against CSRF using SameSite, verified `Origin`, and a session-bound anti-CSRF token;
-- rotate identifiers on authentication and privilege changes;
-- never place sensitive session material in JavaScript-readable storage.
-
-Browser bearer tokens are not supported in the first release. A future change requires an ADR covering storage, refresh, revocation, CSRF/XSS trade-offs, audience, issuer, signing-key rotation, replay protection, and migration.
+- keep refresh credentials in narrowly scoped, host-only cookies;
+- keep access tokens out of persistent JavaScript-readable storage;
+- rotate refresh credentials on every use;
+- validate access-token issuer, audience, type, lifetime, algorithm, `kid`, and
+  authoritative session state.
 
 ## Authorization and tenant isolation
 

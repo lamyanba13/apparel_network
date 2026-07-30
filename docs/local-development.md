@@ -31,6 +31,14 @@ The one-shot `minio-init` container is the deliberate exception to restart and c
 - `.env.development` contains local-only defaults.
 - `.env.production` contains empty secret fields and is not a production secret source.
 
+Phase 2.2 authentication requires an unencrypted PKCS#8 Ed25519 private key in
+`FASHION_NETWORK_JWT_PRIVATE_KEY_PEM`. Keep the key in an uncommitted local
+override or development secret and encode embedded newlines as `\n` when the
+environment provider cannot preserve multiline values. Authentication routes
+return `503` when no signing key is configured; health, migrations, and public
+foundation routes remain available. Production and staging configuration
+validation rejects a missing signing key.
+
 Changing initialized PostgreSQL, RabbitMQ, Redis, or MinIO credentials requires deleting the corresponding local volume. Do not run `make clean` unless all local state may be discarded.
 
 ## Lifecycle

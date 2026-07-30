@@ -73,7 +73,20 @@ class RefreshSessionRepository(Protocol):
     async def get_by_token_hash(
         self,
         token_hash: str,
+        *,
+        for_update: bool = False,
     ) -> RefreshSessionRecord | None: ...
+
+    async def get_by_id(
+        self,
+        session_id: UUID,
+    ) -> RefreshSessionRecord | None: ...
+
+    async def revoke(self, session_id: UUID) -> bool: ...
+
+    async def revoke_family(self, family_id: UUID) -> int: ...
+
+    async def revoke_all_for_user(self, user_id: UUID) -> int: ...
 
 
 class PasswordHistoryRepository(Protocol):

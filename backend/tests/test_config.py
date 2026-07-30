@@ -49,7 +49,10 @@ def test_sentry_requires_dsn_when_enabled() -> None:
 
 
 def test_production_rejects_local_or_missing_service_secrets() -> None:
-    with pytest.raises(ValidationError, match=r"development credentials|secret"):
+    with pytest.raises(
+        ValidationError,
+        match=r"jwt_private_key_pem|development credentials|secret",
+    ):
         Settings(
             _env_file=None,
             environment="production",
@@ -58,7 +61,9 @@ def test_production_rejects_local_or_missing_service_secrets() -> None:
         )
 
 
-def test_production_accepts_explicit_secure_service_configuration() -> None:
+def test_production_accepts_explicit_secure_service_configuration(
+    test_private_key_pem: str,
+) -> None:
     settings = Settings(
         _env_file=None,
         environment="production",
@@ -77,6 +82,7 @@ def test_production_accepts_explicit_secure_service_configuration() -> None:
         api_server_urls=["https://api.example.com"],
         application_contact_url="https://app.example.com/contact",
         application_license_url="https://app.example.com/license",
+        jwt_private_key_pem=test_private_key_pem,
     )
 
     assert settings.environment == "production"

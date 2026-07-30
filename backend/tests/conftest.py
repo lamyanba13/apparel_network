@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 
 import pytest
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from app.core.config import Settings
 
@@ -17,7 +19,17 @@ def database_url() -> str:
 
 
 @pytest.fixture
-def test_settings(database_url: str) -> Settings:
+def test_private_key_pem() -> str:
+    private_key = Ed25519PrivateKey.generate()
+    return private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption(),
+    ).decode()
+
+
+@pytest.fixture
+def test_settings(database_url: str, test_private_key_pem: str) -> Settings:
     return Settings(
         _env_file=None,
         environment="test",
@@ -25,4 +37,5 @@ def test_settings(database_url: str) -> Settings:
         database_pool_size=1,
         database_max_overflow=0,
         opentelemetry_exporter_otlp_endpoint=None,
+        jwt_private_key_pem=test_private_key_pem,
     )

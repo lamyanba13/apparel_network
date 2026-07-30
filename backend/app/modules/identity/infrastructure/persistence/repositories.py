@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from uuid import UUID
 
-from sqlalchemy import Select, select
+from sqlalchemy import Select, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.identity.application.schemas import (
@@ -165,13 +165,62 @@ class SqlAlchemyRefreshSessionRepository(SqlAlchemyRepository):
     async def get_by_token_hash(
         self,
         token_hash: str,
+        *,
+        for_update: bool = False,
     ) -> RefreshSessionRecord | None:
-        model = await self._session.scalar(
-            select(RefreshSessionModel).where(
-                RefreshSessionModel.refresh_token_hash == token_hash
-            )
+        statement = select(RefreshSessionModel).where(
+            RefreshSessionModel.refresh_token_hash == token_hash
         )
+        if for_update:
+            statement = statement.with_for_update()
+        model = await self._session.scalar(statement)
         return RefreshSessionRecord.model_validate(model) if model is not None else None
+
+    async def get_by_id(
+        self,
+        session_id: UUID,
+    ) -> RefreshSessionRecord | None:
+        model = await self._session.get(RefreshSessionModel, session_id)
+        return RefreshSessionRecord.model_validate(model) if model is not None else None
+
+    async def revoke(self, session_id: UUID) -> bool:
+        result = await self._session.execute(
+            update(RefreshSessionModel)
+            .where(
+                RefreshSessionModel.id == session_id,
+                RefreshSessionModel.is_revoked.is_(False),
+            )
+            .values(is_revoked=True)
+            .returning(RefreshSessionModel.id)
+        )
+        await self._session.flush()
+        return result.scalar_one_or_none() is not None
+
+    async def revoke_family(self, family_id: UUID) -> int:
+        result = await self._session.execute(
+            update(RefreshSessionModel)
+            .where(
+                RefreshSessionModel.family_id == family_id,
+                RefreshSessionModel.is_revoked.is_(False),
+            )
+            .values(is_revoked=True)
+            .returning(RefreshSessionModel.id)
+        )
+        await self._session.flush()
+        return len(result.scalars().all())
+
+    async def revoke_all_for_user(self, user_id: UUID) -> int:
+        result = await self._session.execute(
+            update(RefreshSessionModel)
+            .where(
+                RefreshSessionModel.user_id == user_id,
+                RefreshSessionModel.is_revoked.is_(False),
+            )
+            .values(is_revoked=True)
+            .returning(RefreshSessionModel.id)
+        )
+        await self._session.flush()
+        return len(result.scalars().all())
 
 
 class SqlAlchemyPasswordHistoryRepository(SqlAlchemyRepository):

@@ -304,18 +304,22 @@ Routers establish actor context; application services enforce the action-specifi
 
 ## Session architecture
 
-The baseline browser design uses server-managed opaque sessions rather than long-lived browser JWTs:
+The Phase 2.2 authentication design combines short-lived access JWTs with
+authoritative opaque refresh sessions:
 
 - each Next.js application exposes the backend API through its same-origin routing/proxy layer;
-- authentication sets a random opaque, host-only, `Secure`, `HttpOnly`, `SameSite=Lax` session cookie;
+- authentication issues a 15-minute Ed25519 access JWT containing identity-only claims;
+- the opaque refresh credential has at least 256 bits of entropy and is protected by a host-only, `Secure`, `HttpOnly`, `SameSite` cookie in first-party clients;
 - PostgreSQL stores the hashed session token/family, user, issued/idle/absolute expiry, rotation lineage, and revocation state; Redis may cache a bounded lookup but is not authoritative;
-- state-changing requests also require a CSRF token bound to the session plus validated `Origin`;
-- session identifiers rotate at sign-in and sensitive privilege changes;
+- refresh rotates into a child session row; reuse revokes the entire family;
+- access validation checks both JWT cryptography and authoritative session state;
 - dashboard administrator policy requires MFA;
 - public frontend and dashboard sessions are separate host-scoped sessions, so compromise of one host does not automatically expose the other's cookie;
 - the same account identity may authenticate independently to both applications.
 
-The same-origin proxy only forwards approved API traffic and correlation/security headers. It contains no domain decisions. An ADR records precise cookie names, lifetimes, token hashing, rotation/reuse handling, CSRF format, trusted proxy rules, and deployment hostnames without changing this model.
+The same-origin proxy only forwards approved API traffic and
+correlation/security headers. It contains no domain decisions. ADR 0009 records
+the token and key-management decision.
 
 ## API boundary
 

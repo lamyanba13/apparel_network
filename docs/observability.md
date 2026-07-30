@@ -43,6 +43,11 @@ Logs must be retained according to the approved data-retention schedule and acce
 | `fashion_network_database_query_duration_seconds` | Histogram | SQL operation | Query duration without statement text or bind values. |
 | `fashion_network_worker_up` | Gauge | none | Phase 1.5 placeholder for a worker exporter. |
 | `fashion_network_worker_active_tasks` | Gauge | none | Phase 1.5 active-task placeholder. |
+| `fashion_network_authentication_succeeded_total` | Counter | none | Successful login operations. |
+| `fashion_network_authentication_failed_total` | Counter | none | Failed login operations using the generic outcome. |
+| `fashion_network_authentication_refresh_total` | Counter | none | Successful refresh-token rotations. |
+| `fashion_network_authentication_refresh_reuse_total` | Counter | none | Detected reuse of revoked refresh credentials. |
+| `fashion_network_authentication_logout_total` | Counter | none | Completed logout and logout-all operations. |
 
 Route labels use FastAPI route templates or `unmatched`, never raw URLs. User, store, product, reservation, query text, request ID, and object identifiers are prohibited metric labels.
 

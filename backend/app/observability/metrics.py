@@ -65,6 +65,26 @@ WORKER_ACTIVE_TASKS = Gauge(
     "fashion_network_worker_active_tasks",
     "Active worker task placeholder; worker exporters set this in Phase 2.",
 )
+AUTHENTICATION_SUCCEEDED = Counter(
+    "fashion_network_authentication_succeeded_total",
+    "Successful identity authentications.",
+)
+AUTHENTICATION_FAILED = Counter(
+    "fashion_network_authentication_failed_total",
+    "Failed identity authentication attempts.",
+)
+AUTHENTICATION_REFRESHED = Counter(
+    "fashion_network_authentication_refresh_total",
+    "Successfully rotated refresh credentials.",
+)
+AUTHENTICATION_REFRESH_REUSE = Counter(
+    "fashion_network_authentication_refresh_reuse_total",
+    "Detected reuse of revoked refresh credentials.",
+)
+AUTHENTICATION_LOGOUT = Counter(
+    "fashion_network_authentication_logout_total",
+    "Completed current-session and all-session logout operations.",
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)

@@ -126,10 +126,11 @@ Resources vulnerable to lost updates SHOULD expose a version or ETag. Mutation c
 
 ## Authentication and authorization
 
-- Browser authentication uses the server-managed opaque session model in System Architecture.
-- Session cookies are host-only, `Secure`, `HttpOnly`, and `SameSite=Lax`; state-changing requests require the session-bound CSRF control and allowed `Origin`.
+- Authentication uses 15-minute Ed25519 bearer access tokens plus rotating opaque refresh credentials backed by authoritative PostgreSQL sessions.
+- Access tokens contain `ver=1` plus identity claims only. Roles, permissions, and store memberships never appear in the token.
+- Refresh credentials are returned only at authentication/rotation boundaries and first-party clients protect them in host-only, `Secure`, `HttpOnly`, appropriately `SameSite` cookies.
 - The public frontend and dashboard use their own same-origin API route/proxy and separate host-scoped sessions.
-- Browser bearer tokens and long-lived JWT storage are not part of the first-release design.
+- Persistent browser storage of access or refresh credentials is prohibited.
 - Every protected operation declares authentication plus required action/resource scope.
 - Resource existence may be hidden with `404` when `403` would leak sensitive tenancy information; the policy must be consistent.
 - Admin endpoints use an explicit `/admin` namespace and separate permissions.

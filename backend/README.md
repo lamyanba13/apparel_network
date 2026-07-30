@@ -41,10 +41,13 @@ foundation:
 - opt-in ETag conditional requests and endpoint deprecation/sunset helpers;
 - Brotli response compression with standards-aware GZip fallback.
 
-Phase 2.1 adds only the Identity persistence layer: records, persistence
-schemas, repository ports/adapters, and its migration. Authentication flows,
-authorization evaluation, API routes, stores, products, inventory, and
-reservations are not implemented.
+Phase 2.1 added the Identity persistence records, schemas, repository
+ports/adapters, and initial migration.
+
+Phase 2.2 adds authentication only: Argon2id password verification, 15-minute
+Ed25519 access JWTs, opaque hashed refresh credentials, rotation/reuse
+detection, session revocation, and `/api/v1/auth` login, refresh, logout, and
+logout-all routes. It does not add authorization or business-module behavior.
 
 From this directory:
 

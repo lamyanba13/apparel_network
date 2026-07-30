@@ -303,6 +303,7 @@ async def test_sessions_and_tokens_store_only_hashes(
         RefreshSessionCreate(
             user_id=user.id,
             refresh_token_hash=TOKEN_HASH,
+            family_id=UUID(int=2),
             device_name="Personal phone",
             browser="Firefox",
             operating_system="Android",
@@ -417,6 +418,26 @@ def test_required_identity_indexes_are_explicit() -> None:
         table = UserModel.metadata.tables[table_name]
         actual_names = {index.name for index in table.indexes}
         assert required_names <= actual_names
+
+
+def test_session_risk_metadata_is_nullable_and_database_constrained() -> None:
+    table = RefreshSessionModel.metadata.tables["identity_refresh_sessions"]
+    risk_columns = {
+        "risk_score",
+        "last_country",
+        "last_asn",
+        "last_device_fingerprint",
+    }
+    constraint_names = {constraint.name for constraint in table.constraints}
+
+    assert risk_columns <= set(table.columns.keys())
+    assert all(table.c[name].nullable for name in risk_columns)
+    assert {
+        "ck_identity_refresh_sessions_risk_score_range",
+        "ck_identity_refresh_sessions_last_country_iso_alpha2",
+        "ck_identity_refresh_sessions_last_asn_range",
+        "ck_identity_refresh_sessions_last_device_fingerprint_length",
+    } <= constraint_names
 
 
 def test_all_sensitive_model_fields_are_non_plaintext_columns() -> None:

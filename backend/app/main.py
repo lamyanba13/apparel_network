@@ -15,11 +15,17 @@ from app.common.middleware import (
     RequestLoggingMiddleware,
     RequestTimingMiddleware,
     SecurityHeadersMiddleware,
-    public_rate_limit_scope,
+    authentication_rate_limit_scope,
 )
-from app.common.rate_limiting import RateLimiter
+from app.common.rate_limiting import RateLimiter, RateLimitPolicy, RateLimitScope
+from app.common.rate_limiting.redis import RedisRateLimiter
 from app.core.config import Settings, get_settings
 from app.database.lifespan import create_database_lifespan
+from app.modules.identity.infrastructure.events import AuthenticationEventPublisher
+from app.modules.identity.infrastructure.security import (
+    JwtTokenService,
+    PwdlibPasswordService,
+)
 from app.observability import (
     MetricsMiddleware,
     configure_fastapi_telemetry,
@@ -32,10 +38,44 @@ def create_application(
     application_settings: Settings | None = None,
     *,
     rate_limiter: RateLimiter | None = None,
-    rate_limit_scope_resolver: RateLimitScopeResolver = public_rate_limit_scope,
+    rate_limit_scope_resolver: RateLimitScopeResolver = (
+        authentication_rate_limit_scope
+    ),
 ) -> FastAPI:
     """Create the FastAPI application and compose shared infrastructure."""
     resolved_settings = application_settings or get_settings()
+    resolved_rate_limiter = rate_limiter
+    if resolved_settings.rate_limit_enabled and resolved_rate_limiter is None:
+        window = resolved_settings.auth_rate_limit_window_seconds
+        resolved_rate_limiter = RedisRateLimiter(
+            resolved_settings.redis_url,
+            {
+                RateLimitScope.PUBLIC: RateLimitPolicy(
+                    resolved_settings.public_rate_limit,
+                    window,
+                ),
+                RateLimitScope.STORE: RateLimitPolicy(
+                    resolved_settings.store_rate_limit,
+                    window,
+                ),
+                RateLimitScope.ADMIN: RateLimitPolicy(
+                    resolved_settings.admin_rate_limit,
+                    window,
+                ),
+                RateLimitScope.AUTH_LOGIN: RateLimitPolicy(
+                    resolved_settings.auth_login_rate_limit,
+                    window,
+                ),
+                RateLimitScope.AUTH_REFRESH: RateLimitPolicy(
+                    resolved_settings.auth_refresh_rate_limit,
+                    window,
+                ),
+                RateLimitScope.PASSWORD_RESET: RateLimitPolicy(
+                    resolved_settings.auth_login_rate_limit,
+                    window,
+                ),
+            },
+        )
     configure_logging(resolved_settings)
     configure_sentry(resolved_settings)
     expose_development_docs = resolved_settings.environment in {
@@ -60,6 +100,14 @@ def create_application(
         lifespan=create_database_lifespan(resolved_settings),
     )
     application.state.settings = resolved_settings
+    application.state.password_service = PwdlibPasswordService()
+    application.state.authentication_events = AuthenticationEventPublisher()
+    application.state.token_service = (
+        JwtTokenService(resolved_settings)
+        if resolved_settings.jwt_private_key_pem is not None
+        else None
+    )
+    application.state.rate_limiter = resolved_rate_limiter
     application.include_router(api_router)
     if resolved_settings.metrics_enabled:
         application.add_api_route(
@@ -88,7 +136,7 @@ def create_application(
     application.add_middleware(
         RateLimitMiddleware,
         enabled=resolved_settings.rate_limit_enabled,
-        limiter=rate_limiter,
+        limiter=resolved_rate_limiter,
         scope_resolver=rate_limit_scope_resolver,
     )
     application.add_middleware(
@@ -102,6 +150,7 @@ def create_application(
         allow_methods=["DELETE", "GET", "PATCH", "POST", "PUT"],
         allow_headers=[
             "Accept",
+            "Authorization",
             "Content-Type",
             "Idempotency-Key",
             "If-Match",

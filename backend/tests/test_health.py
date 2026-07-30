@@ -113,4 +113,9 @@ def test_development_swagger_is_available_without_a_root_route(
     live_parameters = schema["paths"]["/health/live"]["get"]["parameters"]
     assert any(parameter["name"] == "X-Request-ID" for parameter in live_parameters)
     assert "/metrics" not in schema["paths"]
-    assert not any(path.startswith("/api/v1/") for path in schema["paths"])
+    assert {
+        "/api/v1/auth/login",
+        "/api/v1/auth/refresh",
+        "/api/v1/auth/logout",
+        "/api/v1/auth/logout-all",
+    } <= set(schema["paths"])

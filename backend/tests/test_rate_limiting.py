@@ -39,18 +39,16 @@ def test_rate_limiting_is_disabled_by_default(test_settings: Settings) -> None:
     assert "ratelimit-limit" not in response.headers
 
 
-def test_enabled_rate_limiting_requires_an_adapter(test_settings: Settings) -> None:
+def test_enabled_rate_limiting_uses_the_configured_redis_adapter(
+    test_settings: Settings,
+) -> None:
     enabled_settings = test_settings.model_copy(update={"rate_limit_enabled": True})
-    application = create_application(enabled_settings)
 
-    with (
-        pytest.raises(
-            RuntimeError,
-            match="without a RateLimiter",
-        ),
-        TestClient(application),
-    ):
-        pass
+    with TestClient(create_application(enabled_settings)) as client:
+        response = client.get("/health/live")
+
+    assert response.status_code == 200
+    assert response.headers["RateLimit-Limit"] == "120"
 
 
 def test_rate_limiter_can_apply_a_future_route_scope(
@@ -101,3 +99,34 @@ def test_rate_limiter_returns_standard_429_problem(
     assert response.headers["Retry-After"] == "30"
     assert response.json()["code"] == "rate_limit_exceeded"
     assert response.json()["request_id"] == response.headers["X-Request-ID"]
+
+
+@pytest.mark.parametrize(
+    ("path", "expected_scope"),
+    [
+        ("/api/v1/auth/login", RateLimitScope.AUTH_LOGIN),
+        ("/api/v1/auth/refresh", RateLimitScope.AUTH_REFRESH),
+    ],
+)
+def test_authentication_routes_use_dedicated_rate_limit_policies(
+    test_settings: Settings,
+    path: str,
+    expected_scope: RateLimitScope,
+) -> None:
+    limiter = FakeRateLimiter(
+        RateLimitDecision(
+            is_allowed=False,
+            limit=5,
+            remaining=0,
+            retry_after_seconds=60,
+        )
+    )
+    enabled_settings = test_settings.model_copy(update={"rate_limit_enabled": True})
+
+    with TestClient(
+        create_application(enabled_settings, rate_limiter=limiter)
+    ) as client:
+        response = client.post(path, json={})
+
+    assert response.status_code == 429
+    assert limiter.calls == [(expected_scope, "testclient")]

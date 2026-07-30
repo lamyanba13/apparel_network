@@ -19,6 +19,18 @@ def public_rate_limit_scope(_: Scope) -> RateLimitScope:
     return RateLimitScope.PUBLIC
 
 
+def authentication_rate_limit_scope(scope: Scope) -> RateLimitScope:
+    """Apply dedicated authentication policies to sensitive public routes."""
+    path = scope.get("path", "")
+    if path == "/api/v1/auth/login":
+        return RateLimitScope.AUTH_LOGIN
+    if path == "/api/v1/auth/refresh":
+        return RateLimitScope.AUTH_REFRESH
+    if path == "/api/v1/auth/password-reset":
+        return RateLimitScope.PASSWORD_RESET
+    return RateLimitScope.PUBLIC
+
+
 class RateLimitMiddleware:
     """Optional transport limiter backed by an injected ephemeral adapter."""
 

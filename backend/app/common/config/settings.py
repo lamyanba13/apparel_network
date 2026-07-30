@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from typing import Literal
 from urllib.parse import urlsplit
 
 from pydantic import Field, SecretStr, field_validator, model_validator
@@ -72,6 +73,22 @@ class Settings(BaseSettings):
     sentry_enabled: bool = False
     sentry_dsn: SecretStr | None = None
     sentry_trace_sample_rate: float = Field(default=0.0, ge=0, le=1)
+    auth_access_token_lifetime_seconds: int = Field(default=900, ge=60, le=3600)
+    auth_refresh_token_lifetime_days: int = Field(default=30, ge=1, le=365)
+    auth_require_verified_email: bool = True
+    auth_login_rate_limit: int = Field(default=5, ge=1, le=1000)
+    auth_refresh_rate_limit: int = Field(default=20, ge=1, le=5000)
+    auth_rate_limit_window_seconds: int = Field(default=60, ge=1, le=3600)
+    public_rate_limit: int = Field(default=120, ge=1, le=10000)
+    store_rate_limit: int = Field(default=120, ge=1, le=10000)
+    admin_rate_limit: int = Field(default=60, ge=1, le=10000)
+    jwt_algorithm: Literal["EdDSA", "ES256"] = "EdDSA"
+    jwt_issuer: str = "fashion-network"
+    jwt_audience: str = "fashion-network-api"
+    jwt_current_key_id: str = "primary"
+    jwt_private_key_pem: SecretStr | None = None
+    jwt_previous_public_keys: dict[str, str] = Field(default_factory=dict)
+    jwt_clock_skew_seconds: int = Field(default=30, ge=0, le=60)
 
     database_url: str = (
         "postgresql+asyncpg://fashion_network:fashion_network_dev_postgres@localhost:5432/"
@@ -164,6 +181,38 @@ class Settings(BaseSettings):
             raise ValueError("At least one trusted host is required")
         return normalized
 
+    @field_validator("jwt_issuer", "jwt_audience", "jwt_current_key_id")
+    @classmethod
+    def validate_jwt_identifier(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized or len(normalized) > 200:
+            raise ValueError("JWT identifiers must contain 1 to 200 characters")
+        return normalized
+
+    @field_validator("jwt_private_key_pem", mode="before")
+    @classmethod
+    def normalize_private_key(
+        cls,
+        value: str | SecretStr | None,
+    ) -> str | SecretStr | None:
+        if isinstance(value, str):
+            if not value.strip():
+                return None
+            return value.replace("\\n", "\n")
+        return value
+
+    @field_validator("jwt_previous_public_keys")
+    @classmethod
+    def normalize_previous_public_keys(
+        cls,
+        values: dict[str, str],
+    ) -> dict[str, str]:
+        return {
+            key.strip(): value.replace("\\n", "\n")
+            for key, value in values.items()
+            if key.strip() and value.strip()
+        }
+
     @field_validator("metrics_path")
     @classmethod
     def validate_metrics_path(cls, value: str) -> str:
@@ -188,6 +237,16 @@ class Settings(BaseSettings):
 
         if self.environment not in {Environment.STAGING, Environment.PRODUCTION}:
             return self
+
+        private_key = (
+            self.jwt_private_key_pem.get_secret_value()
+            if self.jwt_private_key_pem is not None
+            else ""
+        )
+        if "PRIVATE KEY" not in private_key:
+            raise ValueError(
+                "jwt_private_key_pem is required outside local environments"
+            )
 
         protected_urls = {
             "database_url": self.database_url,

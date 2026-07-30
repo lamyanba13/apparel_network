@@ -34,6 +34,8 @@ opentelemetry-instrumentation-fastapi = ">=0.59b0,<1.0"
 opentelemetry-instrumentation-sqlalchemy = ">=0.59b0,<1.0"
 opentelemetry-instrumentation-httpx = ">=0.59b0,<1.0"
 opentelemetry-instrumentation-celery = ">=0.59b0,<1.0"
+pwdlib = {version = ">=0.3,<1.0", extras = ["argon2"]}
+pyjwt = {version = ">=2.10,<3.0", extras = ["crypto"]}
 
 [tool.poetry.group.dev.dependencies]
 black = ">=25.1,<27.0"

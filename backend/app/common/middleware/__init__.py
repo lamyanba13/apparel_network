@@ -6,6 +6,7 @@ from app.common.middleware.logging import RequestLoggingMiddleware
 from app.common.middleware.rate_limit import (
     RateLimitMiddleware,
     RateLimitScopeResolver,
+    authentication_rate_limit_scope,
     public_rate_limit_scope,
 )
 from app.common.middleware.request_context import RequestContextMiddleware
@@ -21,5 +22,6 @@ __all__ = [
     "RequestLoggingMiddleware",
     "RequestTimingMiddleware",
     "SecurityHeadersMiddleware",
+    "authentication_rate_limit_scope",
     "public_rate_limit_scope",
 ]

@@ -172,6 +172,13 @@ class RolePermissionRecord(RolePermissionCreate):
 class RefreshSessionCreate(PersistenceSchema):
     user_id: UUID
     refresh_token_hash: SecretStr
+    family_id: UUID
+    parent_session_id: UUID | None = None
+    rotation_count: int = Field(default=0, ge=0)
+    risk_score: int | None = Field(default=None, ge=0, le=100)
+    last_country: str | None = Field(default=None, min_length=2, max_length=2)
+    last_asn: int | None = Field(default=None, ge=0, le=4_294_967_295)
+    last_device_fingerprint: str | None = Field(default=None, max_length=128)
     device_name: str = Field(min_length=1, max_length=120)
     browser: str | None = Field(default=None, max_length=120)
     operating_system: str | None = Field(default=None, max_length=120)
