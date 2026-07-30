@@ -219,9 +219,9 @@ async def test_role_permission_and_user_role_relationships(
     )
     permission = await SqlAlchemyPermissionRepository(identity_session).add(
         PermissionCreate(
-            name="catalog.product.write",
+            name="catalog_product:write",
             description="Write catalog products",
-            resource="catalog.product",
+            resource="catalog_product",
             action="write",
         )
     )
@@ -254,10 +254,10 @@ async def test_role_names_are_unique(
     identity_session: AsyncSession,
 ) -> None:
     roles = SqlAlchemyRoleRepository(identity_session)
-    await roles.add(RoleCreate(name="customer"))
+    await roles.add(RoleCreate(name="test_customer"))
 
     with pytest.raises(IntegrityError):
-        await roles.add(RoleCreate(name="customer"))
+        await roles.add(RoleCreate(name="test_customer"))
 
 
 async def test_permission_names_are_unique(
@@ -265,8 +265,8 @@ async def test_permission_names_are_unique(
 ) -> None:
     permissions = SqlAlchemyPermissionRepository(identity_session)
     values = PermissionCreate(
-        name="catalog.product.read",
-        resource="catalog.product",
+        name="catalog_product:read",
+        resource="catalog_product",
         action="read",
     )
     await permissions.add(values)
@@ -275,7 +275,7 @@ async def test_permission_names_are_unique(
         await permissions.add(
             PermissionCreate(
                 name=values.name,
-                resource="catalog.variant",
+                resource=values.resource,
                 action="read",
             )
         )

@@ -53,6 +53,12 @@ Route labels use FastAPI route templates or `unmatched`, never raw URLs. User, s
 
 RabbitMQ queue depth/age, consumer count, unacknowledged messages, redeliveries, dead letters, confirms, and node alarms should come from the managed RabbitMQ exporter. Redis, PostgreSQL, Meilisearch, and object-storage saturation metrics should come from their managed integrations.
 
+Identity authorization exports unlabeled counters for total decisions, denied
+decisions, permission-cache hits, and permission-cache misses. Authorization
+events may include an opaque identity UUID and canonical requirement in
+structured logs, but metrics never label identity, role, permission, email,
+session, IP address, or resource identifiers.
+
 ## Tracing
 
 OpenTelemetry is disabled by default. Enable it with:

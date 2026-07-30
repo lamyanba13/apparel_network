@@ -139,6 +139,11 @@ Resources vulnerable to lost updates SHOULD expose a version or ETag. Mutation c
 - The public frontend and dashboard use their own same-origin API route/proxy and separate host-scoped sessions.
 - Persistent browser storage of access or refresh credentials is prohibited.
 - Every protected operation declares authentication plus required action/resource scope.
+- Phase 2.4 protected operations declare reusable `require_permission`,
+  `require_any_permission`, `require_all_permissions`, or `require_role`
+  dependencies. Generated OpenAPI retains bearer security and records the
+  declaration in `x-authorization`; this metadata documents but does not
+  replace service enforcement.
 - Resource existence may be hidden with `404` when `403` would leak sensitive tenancy information; the policy must be consistent.
 - Admin endpoints use an explicit `/admin` namespace and separate permissions.
 - CORS uses an exact allowlist. Credentials and wildcard origins are never combined.

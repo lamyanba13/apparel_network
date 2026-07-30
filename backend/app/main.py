@@ -1,3 +1,6 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -20,8 +23,12 @@ from app.common.middleware import (
 from app.common.rate_limiting import RateLimiter, RateLimitPolicy, RateLimitScope
 from app.common.rate_limiting.redis import RedisRateLimiter
 from app.core.config import Settings, get_settings
-from app.database.lifespan import create_database_lifespan
+from app.database.lifespan import Lifespan, create_database_lifespan
+from app.modules.identity.application.authorization import PermissionCache
 from app.modules.identity.infrastructure.activity import SessionActivityMiddleware
+from app.modules.identity.infrastructure.authorization_cache import (
+    RedisPermissionCache,
+)
 from app.modules.identity.infrastructure.events import AuthenticationEventPublisher
 from app.modules.identity.infrastructure.security import (
     JwtTokenService,
@@ -39,12 +46,17 @@ def create_application(
     application_settings: Settings | None = None,
     *,
     rate_limiter: RateLimiter | None = None,
+    permission_cache: PermissionCache | None = None,
     rate_limit_scope_resolver: RateLimitScopeResolver = (
         authentication_rate_limit_scope
     ),
 ) -> FastAPI:
     """Create the FastAPI application and compose shared infrastructure."""
     resolved_settings = application_settings or get_settings()
+    resolved_permission_cache = permission_cache or RedisPermissionCache(
+        resolved_settings.redis_url,
+        ttl_seconds=resolved_settings.authorization_cache_ttl_seconds,
+    )
     resolved_rate_limiter = rate_limiter
     if resolved_settings.rate_limit_enabled and resolved_rate_limiter is None:
         window = resolved_settings.auth_rate_limit_window_seconds
@@ -98,7 +110,10 @@ def create_application(
         docs_url="/docs" if expose_development_docs else None,
         redoc_url=None,
         openapi_url="/openapi.json" if expose_development_docs else None,
-        lifespan=create_database_lifespan(resolved_settings),
+        lifespan=_application_lifespan(
+            resolved_settings,
+            resolved_permission_cache,
+        ),
     )
     application.state.settings = resolved_settings
     application.state.password_service = PwdlibPasswordService()
@@ -109,6 +124,7 @@ def create_application(
         else None
     )
     application.state.rate_limiter = resolved_rate_limiter
+    application.state.permission_cache = resolved_permission_cache
     application.include_router(api_router)
     if resolved_settings.metrics_enabled:
         application.add_api_route(
@@ -181,6 +197,23 @@ def create_application(
     install_custom_openapi(application, resolved_settings)
     configure_fastapi_telemetry(application, resolved_settings)
     return application
+
+
+def _application_lifespan(
+    application_settings: Settings,
+    permission_cache: PermissionCache,
+) -> Lifespan:
+    database_lifespan = create_database_lifespan(application_settings)
+
+    @asynccontextmanager
+    async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+        try:
+            async with database_lifespan(application):
+                yield
+        finally:
+            await permission_cache.close()
+
+    return lifespan
 
 
 app = create_application()

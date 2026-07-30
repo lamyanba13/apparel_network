@@ -10,6 +10,16 @@ from app.modules.identity.domain import (
     RefreshReuseDetected,
     RefreshRotated,
 )
+from app.modules.identity.domain.authorization_events import (
+    AuthorizationDenied,
+    AuthorizationGranted,
+    PermissionCacheHit,
+    PermissionCacheMiss,
+    PermissionGranted,
+    PermissionRevoked,
+    RoleAssigned,
+    RoleRevoked,
+)
 from app.modules.identity.domain.session_events import (
     OtherSessionsRevoked,
     SessionCleanupCompleted,
@@ -65,6 +75,21 @@ class AuthenticationEventPublisher(EventPublisher):
                 SessionCreated,
                 SessionExpired,
                 SessionRiskUpdated,
+            ),
+        ):
+            logger.info(event.event_name, extra=extra)
+        elif isinstance(event, AuthorizationDenied):
+            logger.warning(event.event_name, extra=extra)
+        elif isinstance(
+            event,
+            (
+                AuthorizationGranted,
+                PermissionCacheHit,
+                PermissionCacheMiss,
+                RoleAssigned,
+                RoleRevoked,
+                PermissionGranted,
+                PermissionRevoked,
             ),
         ):
             logger.info(event.event_name, extra=extra)

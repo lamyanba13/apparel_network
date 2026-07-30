@@ -4,6 +4,7 @@ from typing import Any
 
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
+from fastapi.routing import APIRoute
 
 from app.common.config import Settings
 from app.common.constants import REQUEST_ID_HEADER
@@ -51,7 +52,38 @@ def install_custom_openapi(application: FastAPI, settings: Settings) -> None:
                         request_id_parameter.copy()
                     )
 
+        for route in application.routes:
+            if not isinstance(route, APIRoute):
+                continue
+            requirements = _authorization_requirements(route.dependant)
+            if not requirements:
+                continue
+            path_item = schema.get("paths", {}).get(route.path, {})
+            for method in route.methods or set():
+                operation = path_item.get(method.lower())
+                if operation is not None:
+                    operation["x-authorization"] = requirements
+
         application.openapi_schema = schema
         return schema
 
     application.openapi = custom_openapi  # type: ignore[method-assign]
+
+
+def _authorization_requirements(dependant: Any) -> list[dict[str, Any]]:
+    requirements: list[dict[str, Any]] = []
+    for dependency in dependant.dependencies:
+        requirement = getattr(
+            dependency.call,
+            "__authorization_requirement__",
+            None,
+        )
+        if requirement is not None:
+            requirements.append(
+                {
+                    "kind": requirement.kind,
+                    "values": list(requirement.values),
+                }
+            )
+        requirements.extend(_authorization_requirements(dependency))
+    return requirements

@@ -330,6 +330,25 @@ event-publisher boundary. Cleanup policy implements a scheduler-neutral
 `CleanupJob` contract; later local, Celery, or managed scheduling adapters may
 invoke it without owning retention rules.
 
+Phase 2.4 adds database-driven RBAC resolution inside Identity. User-role and
+role-permission joins produce a distinct candidate-permission snapshot, which
+may be cached briefly in a versioned Redis namespace. PostgreSQL remains
+authoritative, cache mutations are invalidated by the Identity permission
+service, and Redis failure falls back to database resolution. Roles and
+permissions never enter access-token claims.
+
+Business authorization remains a second, resource-owned policy layer. The
+Identity module exposes policy ports and deny-by-default placeholders but does
+not implement store membership, ownership, or resource-state decisions.
+Routers declare reusable authorization dependencies; application services
+remain the enforcement boundary.
+
+Policy ports receive one immutable `AuthorizationContext` containing the
+principal, resource, canonical action, and bounded metadata. They return an
+internal `PolicyDecision` with outcome, reason, policy name, and optional
+missing permission. Diagnostic details support audit and debugging but never
+replace generic client-facing authorization errors.
+
 The same-origin proxy only forwards approved API traffic and
 correlation/security headers. It contains no domain decisions. ADR 0009 records
 the token and key-management decision.

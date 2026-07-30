@@ -287,6 +287,34 @@ def test_previous_public_key_validates_tokens_during_rotation(
     assert claims.session_id == UUID(int=11)
 
 
+def test_access_token_contains_identity_claims_only(
+    test_settings: Settings,
+) -> None:
+    token = JwtTokenService(test_settings).create_access_token(
+        user_id=UUID(int=20),
+        session_id=UUID(int=21),
+    )
+    unverified = jwt.decode(
+        token,
+        options={"verify_signature": False},
+    )
+
+    assert set(unverified) == {
+        "ver",
+        "sub",
+        "sid",
+        "jti",
+        "iss",
+        "aud",
+        "iat",
+        "nbf",
+        "exp",
+        "type",
+    }
+    assert "roles" not in unverified
+    assert "permissions" not in unverified
+
+
 async def test_login_creates_hashed_session_and_valid_access_token(
     auth_session: AsyncSession,
     test_settings: Settings,

@@ -31,6 +31,7 @@ from app.modules.identity.application.schemas import (
     UserRoleRecord,
 )
 from app.modules.identity.domain import normalize_email
+from app.modules.identity.domain.authorization import AuthorizationSnapshot
 from app.modules.identity.infrastructure.persistence.models import (
     EmailVerificationTokenModel,
     LoginAttemptModel,
@@ -150,6 +151,63 @@ class SqlAlchemyIdentityGrantRepository(SqlAlchemyRepository):
         model = RolePermissionModel(**values.model_dump())
         await _persist_model(self._session, model)
         return RolePermissionRecord.model_validate(model)
+
+    async def remove_user_role(self, user_id: UUID, role_id: UUID) -> bool:
+        result = await self._session.execute(
+            delete(UserRoleModel)
+            .where(
+                UserRoleModel.user_id == user_id,
+                UserRoleModel.role_id == role_id,
+            )
+            .returning(UserRoleModel.user_id)
+        )
+        await self._session.flush()
+        return result.scalar_one_or_none() is not None
+
+    async def remove_role_permission(self, role_id: UUID, permission_id: UUID) -> bool:
+        result = await self._session.execute(
+            delete(RolePermissionModel)
+            .where(
+                RolePermissionModel.role_id == role_id,
+                RolePermissionModel.permission_id == permission_id,
+            )
+            .returning(RolePermissionModel.role_id)
+        )
+        await self._session.flush()
+        return result.scalar_one_or_none() is not None
+
+    async def resolve_authorization(self, user_id: UUID) -> AuthorizationSnapshot:
+        role_names = frozenset(
+            (
+                await self._session.scalars(
+                    select(RoleModel.name)
+                    .join(UserRoleModel, UserRoleModel.role_id == RoleModel.id)
+                    .where(UserRoleModel.user_id == user_id)
+                    .distinct()
+                )
+            ).all()
+        )
+        permission_names = frozenset(
+            (
+                await self._session.scalars(
+                    select(PermissionModel.name)
+                    .join(
+                        RolePermissionModel,
+                        RolePermissionModel.permission_id == PermissionModel.id,
+                    )
+                    .join(
+                        UserRoleModel,
+                        UserRoleModel.role_id == RolePermissionModel.role_id,
+                    )
+                    .where(UserRoleModel.user_id == user_id)
+                    .distinct()
+                )
+            ).all()
+        )
+        return AuthorizationSnapshot(
+            roles=role_names,
+            permissions=permission_names,
+        )
 
 
 class SqlAlchemyRefreshSessionRepository(SqlAlchemyRepository):

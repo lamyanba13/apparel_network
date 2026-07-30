@@ -18,6 +18,7 @@ from app.modules.identity.domain import (
     is_sha256_hex_digest,
     normalize_email,
 )
+from app.modules.identity.domain.authorization import PermissionRegistry
 
 
 class PersistenceSchema(BaseModel):
@@ -123,6 +124,7 @@ class RoleCreate(PersistenceSchema):
 
     @model_validator(mode="after")
     def validate_immutable_role(self) -> RoleCreate:
+        PermissionRegistry().validate_role(self.name)
         if self.is_immutable and not self.is_system:
             raise ValueError("only a system role may be immutable")
         return self
@@ -140,6 +142,13 @@ class PermissionCreate(PersistenceSchema):
     description: str | None = Field(default=None, max_length=500)
     resource: str = Field(min_length=1, max_length=100)
     action: str = Field(min_length=1, max_length=100)
+
+    @model_validator(mode="after")
+    def validate_canonical_permission(self) -> PermissionCreate:
+        parsed = PermissionRegistry().parse(self.name)
+        if parsed.resource != self.resource or parsed.action != self.action:
+            raise ValueError("permission name must match resource and action")
+        return self
 
 
 class PermissionRecord(PermissionCreate):

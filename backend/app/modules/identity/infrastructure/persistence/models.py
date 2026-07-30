@@ -164,6 +164,10 @@ class RoleModel(
             name="name_length",
         ),
         CheckConstraint(
+            "name ~ '^[a-z][a-z0-9_]{0,99}$'",
+            name="name_canonical",
+        ),
+        CheckConstraint(
             "description IS NULL OR length(description) <= 500",
             name="description_length",
         ),
@@ -228,6 +232,18 @@ class PermissionModel(
         CheckConstraint(
             "length(btrim(action)) BETWEEN 1 AND 100",
             name="action_length",
+        ),
+        CheckConstraint(
+            "resource ~ '^[a-z][a-z0-9_]{0,99}$'",
+            name="resource_canonical",
+        ),
+        CheckConstraint(
+            "action ~ '^[a-z][a-z0-9_]{0,99}$'",
+            name="action_canonical",
+        ),
+        CheckConstraint(
+            "name = resource || ':' || action",
+            name="name_matches_resource_action",
         ),
         CheckConstraint("version >= 1", name="version_positive"),
     )

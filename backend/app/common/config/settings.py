@@ -78,6 +78,7 @@ class Settings(BaseSettings):
     session_activity_throttle_seconds: int = Field(default=300, ge=60, le=3600)
     session_cleanup_retention_days: int = Field(default=30, ge=1, le=3650)
     session_cleanup_batch_size: int = Field(default=500, ge=1, le=5000)
+    authorization_cache_ttl_seconds: int = Field(default=60, ge=5, le=3600)
     auth_require_verified_email: bool = True
     auth_login_rate_limit: int = Field(default=5, ge=1, le=1000)
     auth_refresh_rate_limit: int = Field(default=20, ge=1, le=5000)

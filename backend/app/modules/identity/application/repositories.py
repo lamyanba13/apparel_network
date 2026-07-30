@@ -27,6 +27,7 @@ from app.modules.identity.application.schemas import (
     UserRoleCreate,
     UserRoleRecord,
 )
+from app.modules.identity.domain.authorization import AuthorizationSnapshot
 
 
 class UserRepository(Protocol):
@@ -66,6 +67,14 @@ class IdentityGrantRepository(Protocol):
         self,
         values: RolePermissionCreate,
     ) -> RolePermissionRecord: ...
+
+    async def remove_user_role(self, user_id: UUID, role_id: UUID) -> bool: ...
+
+    async def remove_role_permission(
+        self, role_id: UUID, permission_id: UUID
+    ) -> bool: ...
+
+    async def resolve_authorization(self, user_id: UUID) -> AuthorizationSnapshot: ...
 
 
 class RefreshSessionRepository(Protocol):

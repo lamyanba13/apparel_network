@@ -101,6 +101,22 @@ SESSION_REVOCATIONS = Counter(
     "fashion_network_identity_session_revocations_total",
     "Sessions revoked through session-management operations.",
 )
+AUTHORIZATION_CHECKS = Counter(
+    "fashion_network_identity_authorization_checks_total",
+    "Completed identity authorization decisions.",
+)
+AUTHORIZATION_DENIED = Counter(
+    "fashion_network_identity_authorization_denied_total",
+    "Denied identity authorization decisions.",
+)
+PERMISSION_CACHE_HITS = Counter(
+    "fashion_network_identity_permission_cache_hits_total",
+    "Permission resolution cache hits.",
+)
+PERMISSION_CACHE_MISSES = Counter(
+    "fashion_network_identity_permission_cache_misses_total",
+    "Permission resolution cache misses.",
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)

@@ -85,6 +85,26 @@ First-party clients MUST:
 
 ## Authorization and tenant isolation
 
+- Phase 2.4 role and permission identifiers are canonical lowercase
+  snake-case values; permissions use `resource:action`. Validation and
+  PostgreSQL constraints enforce the same representation.
+- Effective permissions are resolved from current PostgreSQL user-role and
+  role-permission relationships. A short-lived, versioned Redis cache is
+  optional and must be invalidated by every grant mutation.
+- Cache failure falls back to authoritative resolution and must never create a
+  grant. Access-token contents are never used as a permission source.
+- FastAPI routes declare reusable authorization dependencies, while
+  application services enforce decisions. Direct endpoint role comparisons
+  and direct business-module queries of Identity permission tables are
+  prohibited.
+- Modules SHOULD use typed foundational permission names rather than duplicate
+  literals, but PostgreSQL remains the permission and grant authority.
+- Resource policies accept immutable authorization contexts and return
+  structured internal decisions. Reasons, missing permissions, resource data,
+  and policy metadata must not be exposed in client denial responses.
+- Role and permission grant changes emit security events containing only
+  canonical identifiers and opaque actor/subject IDs; tokens and credentials
+  are prohibited.
 - Authorization uses a hybrid RBAC/resource-policy model: constrained roles grant candidate permissions, while application policies verify actor status, store membership, target ownership, resource state, and action context. A role string alone never authorizes a resource.
 - Backend authorization is mandatory on every nonpublic endpoint and job-triggered use case.
 - Policies check action, resource, store, membership status, permissions, and user status.
