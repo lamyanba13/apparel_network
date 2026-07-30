@@ -530,6 +530,6 @@ def test_authentication_routes_receive_dedicated_rate_limit_scopes() -> None:
         == RateLimitScope.AUTH_REFRESH
     )
     assert (
-        authentication_rate_limit_scope(scope("/api/v1/auth/password-reset"))
+        authentication_rate_limit_scope(scope("/api/v1/account/password/reset"))
         == RateLimitScope.PASSWORD_RESET
     )

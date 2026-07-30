@@ -118,6 +118,7 @@ def create_application(
     application.state.settings = resolved_settings
     application.state.password_service = PwdlibPasswordService()
     application.state.authentication_events = AuthenticationEventPublisher()
+    application.state.account_notifications = None
     application.state.token_service = (
         JwtTokenService(resolved_settings)
         if resolved_settings.jwt_private_key_pem is not None

@@ -69,6 +69,9 @@ class UserCreate(PersistenceSchema):
     email_verified_at: AwareDatetime | None = None
     is_active: bool = True
     is_locked: bool = False
+    locked_until: AwareDatetime | None = None
+    lock_reason: str | None = Field(default=None, max_length=100)
+    unlock_count: int = Field(default=0, ge=0)
     deleted_at: AwareDatetime | None = None
     created_by_id: UUID | None = None
     updated_by_id: UUID | None = None
@@ -108,6 +111,9 @@ class UserRecord(PersistenceSchema):
     email_verified_at: AwareDatetime | None
     is_active: bool
     is_locked: bool
+    locked_until: AwareDatetime | None
+    lock_reason: str | None
+    unlock_count: int = Field(ge=0)
     deleted_at: AwareDatetime | None
     created_at: AwareDatetime
     updated_at: AwareDatetime

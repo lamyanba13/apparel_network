@@ -80,6 +80,31 @@ class Settings(BaseSettings):
     session_cleanup_batch_size: int = Field(default=500, ge=1, le=5000)
     authorization_cache_ttl_seconds: int = Field(default=60, ge=5, le=3600)
     auth_require_verified_email: bool = True
+    password_min_length: int = Field(default=12, ge=8, le=128)
+    password_max_length: int = Field(default=128, ge=16, le=1024)
+    password_require_uppercase: bool = True
+    password_require_lowercase: bool = True
+    password_require_number: bool = True
+    password_require_symbol: bool = True
+    password_forbidden_values: list[str] = Field(
+        default_factory=lambda: [
+            "password",
+            "password123",
+            "qwerty123",
+            "letmein",
+            "fashionnetwork",
+        ]
+    )
+    password_history_depth: int = Field(default=5, ge=1, le=24)
+    password_reset_token_lifetime_minutes: int = Field(default=30, ge=5, le=1440)
+    email_verification_token_lifetime_hours: int = Field(default=24, ge=1, le=168)
+    account_lockout_delay_threshold: int = Field(default=5, ge=2, le=100)
+    account_lockout_short_threshold: int = Field(default=10, ge=3, le=200)
+    account_lockout_delay_seconds: int = Field(default=30, ge=1, le=3600)
+    account_lockout_short_seconds: int = Field(default=900, ge=30, le=86400)
+    account_lockout_window_seconds: int = Field(default=900, ge=60, le=86400)
+    account_lockout_max_seconds: int = Field(default=14400, ge=60, le=604800)
+    account_security_cleanup_batch_size: int = Field(default=500, ge=1, le=5000)
     auth_login_rate_limit: int = Field(default=5, ge=1, le=1000)
     auth_refresh_rate_limit: int = Field(default=20, ge=1, le=5000)
     auth_rate_limit_window_seconds: int = Field(default=60, ge=1, le=3600)
@@ -122,6 +147,21 @@ class Settings(BaseSettings):
         if len(segments) != 3 or not all(segment.isdigit() for segment in segments):
             raise ValueError("application_version must use MAJOR.MINOR.PATCH")
         return value
+
+    @model_validator(mode="after")
+    def validate_account_security_policy(self) -> Settings:
+        if self.password_min_length > self.password_max_length:
+            raise ValueError("password_min_length cannot exceed password_max_length")
+        if self.account_lockout_delay_threshold >= self.account_lockout_short_threshold:
+            raise ValueError(
+                "account lockout delay threshold must precede short threshold"
+            )
+        if (
+            self.account_lockout_delay_seconds > self.account_lockout_short_seconds
+            or self.account_lockout_short_seconds > self.account_lockout_max_seconds
+        ):
+            raise ValueError("account lockout durations must be monotonic")
+        return self
 
     @field_validator("log_level")
     @classmethod

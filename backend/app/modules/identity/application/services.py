@@ -102,6 +102,30 @@ class TokenService(Protocol):
     def hash_refresh_token(self, token: SecretStr | str) -> str: ...
 
 
+class LoginSecurityService(Protocol):
+    async def before_attempt(
+        self,
+        user: UserRecord | None,
+        *,
+        now: datetime,
+    ) -> None: ...
+
+    async def after_failure(
+        self,
+        user: UserRecord | None,
+        *,
+        email: str,
+        now: datetime,
+    ) -> None: ...
+
+    async def after_success(
+        self,
+        user: UserRecord,
+        *,
+        now: datetime,
+    ) -> None: ...
+
+
 class SessionService:
     """Application service for opaque refresh-session lifecycle."""
 
@@ -237,6 +261,7 @@ class AuthenticationService:
         event_publisher: EventPublisher,
         *,
         require_verified_email: bool,
+        login_security: LoginSecurityService | None = None,
     ) -> None:
         self._db_session = session
         self._users = users
@@ -247,6 +272,7 @@ class AuthenticationService:
         self._token_service = token_service
         self._event_publisher = event_publisher
         self._require_verified_email = require_verified_email
+        self._login_security = login_security
 
     async def login(
         self,
@@ -258,18 +284,33 @@ class AuthenticationService:
         authenticated: tuple[UserRecord, RefreshSessionRecord, SecretStr] | None = None
         async with _transaction(self._db_session):
             user = await self._users.get_by_email(email, include_deleted=True)
+            now = datetime.now(UTC)
+            if self._login_security is not None:
+                await self._login_security.before_attempt(user, now=now)
             password_valid = self._verify_candidate(password, user)
-            account_eligible = user is not None and self._account_is_eligible(user)
+            account_eligible = user is not None and self._account_is_eligible(
+                user,
+                now=now,
+            )
             success = password_valid and account_eligible
             await self._login_attempts.add(
                 LoginAttemptCreate(
-                    occurred_at=datetime.now(UTC),
+                    occurred_at=now,
                     ip_address=context.ip_address,
                     email=email,
                     success=success,
                     reason=None if success else "invalid_credentials",
                 )
             )
+            if self._login_security is not None:
+                if success and user is not None:
+                    await self._login_security.after_success(user, now=now)
+                else:
+                    await self._login_security.after_failure(
+                        user,
+                        email=email,
+                        now=now,
+                    )
             if success and user is not None:
                 session, refresh_token = await self._sessions.create(
                     user_id=user.id,
@@ -310,7 +351,10 @@ class AuthenticationService:
                     session.user_id,
                     include_deleted=True,
                 )
-                if user is None or not self._account_is_eligible(user):
+                if user is None or not self._account_is_eligible(
+                    user,
+                    now=datetime.now(UTC),
+                ):
                     await self._sessions.revoke_all(session.user_id)
                     rotated = None
 
@@ -339,7 +383,7 @@ class AuthenticationService:
             or session.user_id != claims.subject
             or session.is_revoked
             or session.expires_at <= now
-            or not self._account_is_eligible(user)
+            or not self._account_is_eligible(user, now=now)
         ):
             raise _authentication_error("Authentication credentials are invalid.")
         return AuthenticatedIdentity(user=user, session=session, claims=claims)
@@ -379,10 +423,18 @@ class AuthenticationService:
             user.password_hash.get_secret_value(),
         )
 
-    def _account_is_eligible(self, user: UserRecord) -> bool:
+    def _account_is_eligible(
+        self,
+        user: UserRecord,
+        *,
+        now: datetime,
+    ) -> bool:
+        lock_active = user.is_locked and (
+            user.locked_until is None or user.locked_until > now
+        )
         return (
             user.is_active
-            and not user.is_locked
+            and not lock_active
             and user.deleted_at is None
             and (user.is_email_verified or not self._require_verified_email)
         )

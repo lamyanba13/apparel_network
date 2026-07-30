@@ -72,6 +72,14 @@ Session activity writes are atomically throttled, and no session response,
 audit event, log, or metric may contain a refresh credential or token hash.
 The `is_trusted` and nullable risk metadata fields are informational only.
 
+Phase 2.5 recovery and verification credentials are independent opaque values
+with 256 bits of entropy and SHA-256 hashes as the only persisted form. They
+are single-use and expire. Recovery and resend responses are deliberately
+generic. Password changes enforce the configured policy and five-hash history;
+reset revokes every session, while an authenticated change preserves only the
+current session. Progressive lockouts always expire, use configurable bounded
+durations, and never create an automatic permanent ban.
+
 ### Browser session protection
 
 First-party clients MUST:

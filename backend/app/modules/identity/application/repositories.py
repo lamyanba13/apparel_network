@@ -38,6 +38,7 @@ class UserRepository(Protocol):
         user_id: UUID,
         *,
         include_deleted: bool = False,
+        for_update: bool = False,
     ) -> UserRecord | None: ...
 
     async def get_by_email(
@@ -45,7 +46,24 @@ class UserRepository(Protocol):
         email: str,
         *,
         include_deleted: bool = False,
+        for_update: bool = False,
     ) -> UserRecord | None: ...
+
+    async def update_password(self, user_id: UUID, password_hash: str) -> bool: ...
+
+    async def mark_email_verified(self, user_id: UUID, *, at: datetime) -> bool: ...
+
+    async def set_lock(
+        self,
+        user_id: UUID,
+        *,
+        locked_until: datetime,
+        reason: str,
+    ) -> bool: ...
+
+    async def unlock(self, user_id: UUID) -> bool: ...
+
+    async def unlock_expired(self, *, now: datetime, limit: int) -> Sequence[UUID]: ...
 
 
 class RoleRepository(Protocol):
@@ -154,6 +172,8 @@ class PasswordHistoryRepository(Protocol):
 class LoginAttemptRepository(Protocol):
     async def add(self, values: LoginAttemptCreate) -> LoginAttemptRecord: ...
 
+    async def count_recent_failures(self, email: str, *, since: datetime) -> int: ...
+
 
 class EmailVerificationTokenRepository(Protocol):
     async def add(
@@ -166,6 +186,12 @@ class EmailVerificationTokenRepository(Protocol):
         token_hash: str,
     ) -> EmailVerificationTokenRecord | None: ...
 
+    async def consume(self, token_hash: str, *, now: datetime) -> bool: ...
+
+    async def invalidate_for_user(self, user_id: UUID) -> int: ...
+
+    async def delete_expired(self, *, now: datetime, limit: int) -> int: ...
+
 
 class PasswordResetTokenRepository(Protocol):
     async def add(
@@ -177,3 +203,9 @@ class PasswordResetTokenRepository(Protocol):
         self,
         token_hash: str,
     ) -> PasswordResetTokenRecord | None: ...
+
+    async def consume(self, token_hash: str, *, now: datetime) -> bool: ...
+
+    async def invalidate_for_user(self, user_id: UUID) -> int: ...
+
+    async def delete_expired(self, *, now: datetime, limit: int) -> int: ...

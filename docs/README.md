@@ -64,6 +64,7 @@ Read these documents in order when joining the project:
 30. [Phase 1.6 Architecture Freeze Review](phase-1.6-architecture-freeze.md)
 31. [Phase 2.3 Session Management](phase-2.3-session-management.md)
 32. [Phase 2.4 Authorization](phase-2.4-authorization.md)
+33. [Phase 2.5 Account Security](phase-2.5-account-security.md)
 
 ## Decision authority
 

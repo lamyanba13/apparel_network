@@ -73,6 +73,9 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository):
             email_verified_at=values.email_verified_at,
             is_active=values.is_active,
             is_locked=values.is_locked,
+            locked_until=values.locked_until,
+            lock_reason=values.lock_reason,
+            unlock_count=values.unlock_count,
             deleted_at=values.deleted_at,
             created_by_id=values.created_by_id,
             updated_by_id=values.updated_by_id,
@@ -85,10 +88,13 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository):
         user_id: UUID,
         *,
         include_deleted: bool = False,
+        for_update: bool = False,
     ) -> UserRecord | None:
         statement = select(UserModel).where(UserModel.id == user_id)
         if not include_deleted:
             statement = statement.where(UserModel.deleted_at.is_(None))
+        if for_update:
+            statement = statement.with_for_update()
         return await self._record_or_none(statement)
 
     async def get_by_email(
@@ -96,13 +102,116 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository):
         email: str,
         *,
         include_deleted: bool = False,
+        for_update: bool = False,
     ) -> UserRecord | None:
         statement = select(UserModel).where(
             UserModel.normalized_email == normalize_email(email)
         )
         if not include_deleted:
             statement = statement.where(UserModel.deleted_at.is_(None))
+        if for_update:
+            statement = statement.with_for_update()
         return await self._record_or_none(statement)
+
+    async def update_password(self, user_id: UUID, password_hash: str) -> bool:
+        result = await self._session.execute(
+            update(UserModel)
+            .where(UserModel.id == user_id, UserModel.deleted_at.is_(None))
+            .values(
+                password_hash=password_hash,
+                updated_at=func.now(),
+                version=UserModel.version + 1,
+            )
+            .returning(UserModel.id)
+        )
+        await self._session.flush()
+        return result.scalar_one_or_none() is not None
+
+    async def mark_email_verified(self, user_id: UUID, *, at: datetime) -> bool:
+        result = await self._session.execute(
+            update(UserModel)
+            .where(
+                UserModel.id == user_id,
+                UserModel.deleted_at.is_(None),
+                UserModel.is_email_verified.is_(False),
+            )
+            .values(
+                is_email_verified=True,
+                email_verified_at=at,
+                updated_at=func.now(),
+                version=UserModel.version + 1,
+            )
+            .returning(UserModel.id)
+        )
+        await self._session.flush()
+        return result.scalar_one_or_none() is not None
+
+    async def set_lock(
+        self,
+        user_id: UUID,
+        *,
+        locked_until: datetime,
+        reason: str,
+    ) -> bool:
+        result = await self._session.execute(
+            update(UserModel)
+            .where(UserModel.id == user_id, UserModel.deleted_at.is_(None))
+            .values(
+                is_locked=True,
+                locked_until=locked_until,
+                lock_reason=reason,
+                updated_at=func.now(),
+                version=UserModel.version + 1,
+            )
+            .returning(UserModel.id)
+        )
+        await self._session.flush()
+        return result.scalar_one_or_none() is not None
+
+    async def unlock(self, user_id: UUID) -> bool:
+        result = await self._session.execute(
+            update(UserModel)
+            .where(UserModel.id == user_id, UserModel.is_locked.is_(True))
+            .values(
+                is_locked=False,
+                locked_until=None,
+                lock_reason=None,
+                unlock_count=UserModel.unlock_count + 1,
+                updated_at=func.now(),
+                version=UserModel.version + 1,
+            )
+            .returning(UserModel.id)
+        )
+        await self._session.flush()
+        return result.scalar_one_or_none() is not None
+
+    async def unlock_expired(self, *, now: datetime, limit: int) -> Sequence[UUID]:
+        candidate_ids = (
+            select(UserModel.id)
+            .where(
+                UserModel.is_locked.is_(True),
+                UserModel.locked_until.is_not(None),
+                UserModel.locked_until <= now,
+            )
+            .order_by(UserModel.locked_until, UserModel.id)
+            .limit(limit)
+            .with_for_update(skip_locked=True)
+        )
+        result = await self._session.execute(
+            update(UserModel)
+            .where(UserModel.id.in_(candidate_ids))
+            .values(
+                is_locked=False,
+                locked_until=None,
+                lock_reason=None,
+                unlock_count=UserModel.unlock_count + 1,
+                updated_at=func.now(),
+                version=UserModel.version + 1,
+            )
+            .returning(UserModel.id)
+        )
+        await self._session.flush()
+        return tuple(result.scalars().all())
 
     async def _record_or_none(
         self,
@@ -516,6 +625,27 @@ class SqlAlchemyLoginAttemptRepository(SqlAlchemyRepository):
         await _persist_model(self._session, model)
         return LoginAttemptRecord.model_validate(model)
 
+    async def count_recent_failures(self, email: str, *, since: datetime) -> int:
+        normalized_email = normalize_email(email)
+        last_success = await self._session.scalar(
+            select(func.max(LoginAttemptModel.occurred_at)).where(
+                LoginAttemptModel.email == normalized_email,
+                LoginAttemptModel.success.is_(True),
+                LoginAttemptModel.occurred_at >= since,
+            )
+        )
+        failure_boundary = max(since, last_success) if last_success else since
+        count = await self._session.scalar(
+            select(func.count())
+            .select_from(LoginAttemptModel)
+            .where(
+                LoginAttemptModel.email == normalized_email,
+                LoginAttemptModel.success.is_(False),
+                LoginAttemptModel.occurred_at > failure_boundary,
+            )
+        )
+        return int(count or 0)
+
 
 class SqlAlchemyEmailVerificationTokenRepository(SqlAlchemyRepository):
     async def add(
@@ -542,6 +672,29 @@ class SqlAlchemyEmailVerificationTokenRepository(SqlAlchemyRepository):
             EmailVerificationTokenRecord.model_validate(model)
             if model is not None
             else None
+        )
+
+    async def consume(self, token_hash: str, *, now: datetime) -> bool:
+        return await _consume_token(
+            self._session,
+            EmailVerificationTokenModel,
+            token_hash,
+            now,
+        )
+
+    async def invalidate_for_user(self, user_id: UUID) -> int:
+        return await _invalidate_tokens(
+            self._session,
+            EmailVerificationTokenModel,
+            user_id,
+        )
+
+    async def delete_expired(self, *, now: datetime, limit: int) -> int:
+        return await _delete_expired_tokens(
+            self._session,
+            EmailVerificationTokenModel,
+            now,
+            limit,
         )
 
 
@@ -571,3 +724,80 @@ class SqlAlchemyPasswordResetTokenRepository(SqlAlchemyRepository):
             if model is not None
             else None
         )
+
+    async def consume(self, token_hash: str, *, now: datetime) -> bool:
+        return await _consume_token(
+            self._session,
+            PasswordResetTokenModel,
+            token_hash,
+            now,
+        )
+
+    async def invalidate_for_user(self, user_id: UUID) -> int:
+        return await _invalidate_tokens(
+            self._session,
+            PasswordResetTokenModel,
+            user_id,
+        )
+
+    async def delete_expired(self, *, now: datetime, limit: int) -> int:
+        return await _delete_expired_tokens(
+            self._session,
+            PasswordResetTokenModel,
+            now,
+            limit,
+        )
+
+
+async def _consume_token(
+    session: AsyncSession,
+    model: type[EmailVerificationTokenModel] | type[PasswordResetTokenModel],
+    token_hash: str,
+    now: datetime,
+) -> bool:
+    result = await session.execute(
+        update(model)
+        .where(
+            model.token_hash == token_hash,
+            model.is_used.is_(False),
+            model.expires_at > now,
+        )
+        .values(is_used=True)
+        .returning(model.id)
+    )
+    await session.flush()
+    return result.scalar_one_or_none() is not None
+
+
+async def _invalidate_tokens(
+    session: AsyncSession,
+    model: type[EmailVerificationTokenModel] | type[PasswordResetTokenModel],
+    user_id: UUID,
+) -> int:
+    result = await session.execute(
+        update(model)
+        .where(model.user_id == user_id, model.is_used.is_(False))
+        .values(is_used=True)
+        .returning(model.id)
+    )
+    await session.flush()
+    return len(result.scalars().all())
+
+
+async def _delete_expired_tokens(
+    session: AsyncSession,
+    model: type[EmailVerificationTokenModel] | type[PasswordResetTokenModel],
+    now: datetime,
+    limit: int,
+) -> int:
+    candidate_ids = (
+        select(model.id)
+        .where(model.expires_at <= now)
+        .order_by(model.expires_at, model.id)
+        .limit(limit)
+    )
+    result = await session.execute(
+        delete(model).where(model.id.in_(candidate_ids)).returning(model.id)
+    )
+    await session.flush()
+    return len(result.scalars().all())

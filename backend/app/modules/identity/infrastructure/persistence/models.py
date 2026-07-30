@@ -69,6 +69,7 @@ class UserModel(
             name="deleted_user_inactive",
         ),
         CheckConstraint("version >= 1", name="version_positive"),
+        CheckConstraint("unlock_count >= 0", name="unlock_count_nonnegative"),
         Index(
             "ix_identity_users_normalized_email",
             "normalized_email",
@@ -76,6 +77,11 @@ class UserModel(
         ),
         Index("ix_identity_users_created_by_id", "created_by_id"),
         Index("ix_identity_users_updated_by_id", "updated_by_id"),
+        Index(
+            "ix_identity_users_locked_until",
+            "locked_until",
+            postgresql_where=text("is_locked"),
+        ),
     )
 
     email: Mapped[str] = mapped_column(String(320), nullable=False)
@@ -103,6 +109,17 @@ class UserModel(
         nullable=False,
         default=False,
         server_default=false(),
+    )
+    locked_until: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    lock_reason: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    unlock_count: Mapped[int] = mapped_column(
+        BigInteger,
+        nullable=False,
+        default=0,
+        server_default=text("0"),
     )
     deleted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
@@ -578,6 +595,11 @@ class EmailVerificationTokenModel(UuidPrimaryKeyMixin, Base):
             "user_id",
             "expires_at",
         ),
+        Index(
+            "ix_identity_email_verification_tokens_expiry_cleanup",
+            "expires_at",
+            "id",
+        ),
     )
 
     user_id: Mapped[UUID] = mapped_column(
@@ -617,6 +639,11 @@ class PasswordResetTokenModel(UuidPrimaryKeyMixin, Base):
             "ix_identity_password_reset_tokens_user_expiry",
             "user_id",
             "expires_at",
+        ),
+        Index(
+            "ix_identity_password_reset_tokens_expiry_cleanup",
+            "expires_at",
+            "id",
         ),
     )
 

@@ -117,6 +117,34 @@ PERMISSION_CACHE_MISSES = Counter(
     "fashion_network_identity_permission_cache_misses_total",
     "Permission resolution cache misses.",
 )
+PASSWORD_CHANGES = Counter(
+    "fashion_network_identity_password_change_total",
+    "Completed account password changes.",
+)
+PASSWORD_RESETS = Counter(
+    "fashion_network_identity_password_reset_total",
+    "Completed account password resets.",
+)
+EMAIL_VERIFICATIONS = Counter(
+    "fashion_network_identity_email_verification_total",
+    "Completed account email verifications.",
+)
+ACCOUNT_LOCKOUTS = Counter(
+    "fashion_network_identity_account_lockouts_total",
+    "Applied progressive account lockouts.",
+)
+SECURITY_EVENTS = Counter(
+    "fashion_network_identity_security_events_total",
+    "Published account-security events.",
+)
+ACCOUNT_SECURITY_CLEANUP_EXECUTIONS = Counter(
+    "fashion_network_identity_account_security_cleanup_executions_total",
+    "Completed account-security cleanup runs.",
+)
+ACCOUNT_SECURITY_CLEANUP_RECORDS = Counter(
+    "fashion_network_identity_account_security_cleanup_records_total",
+    "Expired tokens deleted and expired account locks cleared.",
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)

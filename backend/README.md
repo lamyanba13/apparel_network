@@ -49,6 +49,13 @@ Ed25519 access JWTs, opaque hashed refresh credentials, rotation/reuse
 detection, session revocation, and `/api/v1/auth` login, refresh, logout, and
 logout-all routes. It does not add authorization or business-module behavior.
 
+Phase 2.3 adds owner-scoped session lifecycle management. Phase 2.4 adds
+database-driven RBAC resolution and reusable authorization policies. Phase 2.5
+adds account password maintenance, opaque-token recovery and email
+verification, progressive expiring lockouts, and bounded cleanup. It does not
+add MFA, external identity providers, notification providers, or business
+modules.
+
 From this directory:
 
 ```text

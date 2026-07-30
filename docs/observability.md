@@ -48,6 +48,13 @@ Logs must be retained according to the approved data-retention schedule and acce
 | `fashion_network_authentication_refresh_total` | Counter | none | Successful refresh-token rotations. |
 | `fashion_network_authentication_refresh_reuse_total` | Counter | none | Detected reuse of revoked refresh credentials. |
 | `fashion_network_authentication_logout_total` | Counter | none | Completed logout and logout-all operations. |
+| `fashion_network_identity_password_change_total` | Counter | none | Completed password changes. |
+| `fashion_network_identity_password_reset_total` | Counter | none | Completed password resets. |
+| `fashion_network_identity_email_verification_total` | Counter | none | Completed email verifications. |
+| `fashion_network_identity_account_lockouts_total` | Counter | none | Applied progressive account lockouts. |
+| `fashion_network_identity_security_events_total` | Counter | none | Published account-security events. |
+| `fashion_network_identity_account_security_cleanup_executions_total` | Counter | none | Completed account-security cleanup runs. |
+| `fashion_network_identity_account_security_cleanup_records_total` | Counter | none | Expired tokens removed and expired locks cleared. |
 
 Route labels use FastAPI route templates or `unmatched`, never raw URLs. User, store, product, reservation, query text, request ID, and object identifiers are prohibited metric labels.
 
@@ -58,6 +65,11 @@ decisions, permission-cache hits, and permission-cache misses. Authorization
 events may include an opaque identity UUID and canonical requirement in
 structured logs, but metrics never label identity, role, permission, email,
 session, IP address, or resource identifiers.
+
+Identity account-security events and metrics likewise prohibit passwords,
+hashes, tokens, email addresses, IP addresses, user agents, and other
+high-cardinality labels. Lockout and cleanup telemetry reports aggregate
+outcomes only.
 
 ## Tracing
 

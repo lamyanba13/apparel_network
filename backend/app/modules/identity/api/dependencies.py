@@ -13,6 +13,12 @@ from app.common.errors import ErrorCode
 from app.common.events import EventPublisher
 from app.common.exceptions import AppError
 from app.database.session import get_db
+from app.modules.identity.application.account_security import (
+    AccountLockoutService,
+    AccountSecurityService,
+    LockoutPolicy,
+    NotificationPublisher,
+)
 from app.modules.identity.application.schemas import RefreshSessionRecord
 from app.modules.identity.application.services import (
     AuthenticatedIdentity,
@@ -24,11 +30,19 @@ from app.modules.identity.application.services import (
 from app.modules.identity.application.session_management import (
     SessionManagementService,
 )
+from app.modules.identity.domain.account_security import (
+    PasswordPolicy,
+    PasswordPolicyValidator,
+)
 from app.modules.identity.infrastructure.persistence.repositories import (
+    SqlAlchemyEmailVerificationTokenRepository,
     SqlAlchemyLoginAttemptRepository,
+    SqlAlchemyPasswordHistoryRepository,
+    SqlAlchemyPasswordResetTokenRepository,
     SqlAlchemyRefreshSessionRepository,
     SqlAlchemyUserRepository,
 )
+from app.modules.identity.infrastructure.security import OpaqueAccountTokenService
 
 _bearer = HTTPBearer(
     auto_error=False,
@@ -53,10 +67,18 @@ def authentication_service_dependency(
             status_code=503,
         )
     session_repository = SqlAlchemyRefreshSessionRepository(session)
+    user_repository = SqlAlchemyUserRepository(session)
+    login_attempt_repository = SqlAlchemyLoginAttemptRepository(session)
+    lockout_service = AccountLockoutService(
+        user_repository,
+        login_attempt_repository,
+        event_publisher,
+        _lockout_policy(settings),
+    )
     return AuthenticationService(
         session,
-        SqlAlchemyUserRepository(session),
-        SqlAlchemyLoginAttemptRepository(session),
+        user_repository,
+        login_attempt_repository,
         SessionService(
             session_repository,
             token_service,
@@ -68,7 +90,46 @@ def authentication_service_dependency(
         token_service,
         event_publisher,
         require_verified_email=settings.auth_require_verified_email,
+        login_security=lockout_service,
     )
+
+
+async def account_security_service_dependency(
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> AsyncIterator[AccountSecurityService]:
+    settings = cast(Settings, request.app.state.settings)
+    password_service = cast(PasswordService, request.app.state.password_service)
+    events = cast(EventPublisher, request.app.state.authentication_events)
+    notifications = cast(
+        NotificationPublisher | None,
+        getattr(request.app.state, "account_notifications", None),
+    )
+    try:
+        yield AccountSecurityService(
+            session,
+            SqlAlchemyUserRepository(session),
+            SqlAlchemyPasswordHistoryRepository(session),
+            SqlAlchemyPasswordResetTokenRepository(session),
+            SqlAlchemyEmailVerificationTokenRepository(session),
+            SqlAlchemyRefreshSessionRepository(session),
+            password_service,
+            OpaqueAccountTokenService(),
+            _password_policy(settings),
+            events,
+            notifications,
+            history_depth=settings.password_history_depth,
+            reset_lifetime=timedelta(
+                minutes=settings.password_reset_token_lifetime_minutes
+            ),
+            verification_lifetime=timedelta(
+                hours=settings.email_verification_token_lifetime_hours
+            ),
+        )
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
 
 
 async def optional_identity_dependency(
@@ -129,6 +190,33 @@ async def authenticated_session_dependency(
     return identity.session
 
 
+def _password_policy(settings: Settings) -> PasswordPolicyValidator:
+    return PasswordPolicyValidator(
+        PasswordPolicy(
+            minimum_length=settings.password_min_length,
+            maximum_length=settings.password_max_length,
+            require_uppercase=settings.password_require_uppercase,
+            require_lowercase=settings.password_require_lowercase,
+            require_number=settings.password_require_number,
+            require_symbol=settings.password_require_symbol,
+            forbidden_passwords=frozenset(
+                value.casefold() for value in settings.password_forbidden_values
+            ),
+        )
+    )
+
+
+def _lockout_policy(settings: Settings) -> LockoutPolicy:
+    return LockoutPolicy(
+        delay_threshold=settings.account_lockout_delay_threshold,
+        short_threshold=settings.account_lockout_short_threshold,
+        delay=timedelta(seconds=settings.account_lockout_delay_seconds),
+        short_lock=timedelta(seconds=settings.account_lockout_short_seconds),
+        observation_window=timedelta(seconds=settings.account_lockout_window_seconds),
+        maximum_lock=timedelta(seconds=settings.account_lockout_max_seconds),
+    )
+
+
 AuthenticationServiceDependency = Annotated[
     AuthenticationService,
     Depends(authentication_service_dependency),
@@ -144,4 +232,8 @@ OptionalIdentity = Annotated[
 SessionManagementServiceDependency = Annotated[
     SessionManagementService,
     Depends(session_management_service_dependency),
+]
+AccountSecurityServiceDependency = Annotated[
+    AccountSecurityService,
+    Depends(account_security_service_dependency),
 ]

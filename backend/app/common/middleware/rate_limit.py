@@ -26,7 +26,12 @@ def authentication_rate_limit_scope(scope: Scope) -> RateLimitScope:
         return RateLimitScope.AUTH_LOGIN
     if path == "/api/v1/auth/refresh":
         return RateLimitScope.AUTH_REFRESH
-    if path == "/api/v1/auth/password-reset":
+    if path in {
+        "/api/v1/account/password/forgot",
+        "/api/v1/account/password/reset",
+        "/api/v1/account/email/resend",
+        "/api/v1/account/email/verify",
+    }:
         return RateLimitScope.PASSWORD_RESET
     return RateLimitScope.PUBLIC
 
