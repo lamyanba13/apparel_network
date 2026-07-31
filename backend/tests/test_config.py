@@ -43,6 +43,22 @@ def test_observability_settings_are_safe_by_default() -> None:
     assert settings.slow_query_threshold_ms == 500
 
 
+def test_store_media_storage_settings_have_bounded_defaults() -> None:
+    settings = Settings(_env_file=None, environment="test")
+
+    assert settings.s3_bucket == "fashion-network-media"
+    assert settings.media_presigned_url_expiration_seconds == 900
+
+
+def test_store_media_presigned_expiration_is_bounded() -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            _env_file=None,
+            environment="test",
+            media_presigned_url_expiration_seconds=30,
+        )
+
+
 def test_sentry_requires_dsn_when_enabled() -> None:
     with pytest.raises(ValidationError, match="sentry_dsn"):
         Settings(_env_file=None, environment="test", sentry_enabled=True)

@@ -8,6 +8,19 @@ from app.modules.stores.domain.events import (
     StoreUpdated,
     StoreVerified,
 )
+from app.modules.stores.domain.media import (
+    StoreMedia,
+    StoreMediaStatus,
+    StoreMediaType,
+)
+from app.modules.stores.domain.media_events import (
+    StoreBannerUploaded,
+    StoreGalleryUploaded,
+    StoreLogoUploaded,
+    StoreMediaDeleted,
+    StoreMediaEvent,
+    StoreMediaReordered,
+)
 from app.modules.stores.domain.membership import (
     StoreMembership,
     StoreMembershipRole,
@@ -45,9 +58,18 @@ from app.modules.stores.domain.verification_events import (
 __all__ = [
     "Store",
     "StoreAddress",
+    "StoreBannerUploaded",
     "StoreClosed",
     "StoreContact",
     "StoreCreated",
+    "StoreGalleryUploaded",
+    "StoreLogoUploaded",
+    "StoreMedia",
+    "StoreMediaDeleted",
+    "StoreMediaEvent",
+    "StoreMediaReordered",
+    "StoreMediaStatus",
+    "StoreMediaType",
     "StoreMemberAccepted",
     "StoreMemberDeclined",
     "StoreMemberInvited",

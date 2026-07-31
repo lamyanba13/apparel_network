@@ -139,6 +139,13 @@ class Settings(BaseSettings):
     s3_endpoint_url: str = "http://localhost:9000"
     s3_access_key_id: str | None = None
     s3_secret_access_key: SecretStr | None = None
+    s3_bucket: str = "fashion-network-media"
+    s3_region: str | None = None
+    media_presigned_url_expiration_seconds: int = Field(
+        default=900,
+        ge=60,
+        le=3600,
+    )
 
     @field_validator("application_version")
     @classmethod

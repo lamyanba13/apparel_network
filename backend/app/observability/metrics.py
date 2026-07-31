@@ -177,6 +177,22 @@ STORE_MEMBERS = Gauge(
     "fashion_network_store_members_total",
     "Current active or suspended Store memberships.",
 )
+STORE_MEDIA_UPLOADS = Counter(
+    "fashion_network_store_media_upload_total",
+    "Completed Store media uploads.",
+)
+STORE_MEDIA_DELETES = Counter(
+    "fashion_network_store_media_delete_total",
+    "Completed Store media soft deletions.",
+)
+STORE_MEDIA_BYTES = Counter(
+    "fashion_network_store_media_bytes_total",
+    "Validated Store media bytes uploaded.",
+)
+STORE_MEDIA_FAILURES = Counter(
+    "fashion_network_store_media_failures_total",
+    "Rejected or failed Store media operations.",
+)
 STORE_MEMBER_INVITATIONS = Counter(
     "fashion_network_store_member_invitations_total",
     "Store membership invitations created.",

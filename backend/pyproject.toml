@@ -36,6 +36,9 @@ opentelemetry-instrumentation-httpx = ">=0.59b0,<1.0"
 opentelemetry-instrumentation-celery = ">=0.59b0,<1.0"
 pwdlib = {version = ">=0.3,<1.0", extras = ["argon2"]}
 pyjwt = {version = ">=2.10,<3.0", extras = ["crypto"]}
+python-multipart = ">=0.0.20,<1.0"
+pillow = ">=11.3,<13.0"
+minio = ">=7.2,<8.0"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=25.1,<27.0"

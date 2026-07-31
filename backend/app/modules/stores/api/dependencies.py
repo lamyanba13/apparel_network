@@ -4,10 +4,21 @@ from typing import Annotated, cast
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.common.errors import ErrorCode
 from app.common.events import EventPublisher
+from app.common.exceptions import AppError
+from app.core.config import Settings
 from app.database.session import get_db
 from app.modules.identity.infrastructure.persistence.repositories import (
     SqlAlchemyUserRepository,
+)
+from app.modules.stores.application.media_services import (
+    StoreMediaAuditService,
+    StoreMediaService,
+)
+from app.modules.stores.application.media_storage import StorageProvider
+from app.modules.stores.application.media_validation import (
+    StoreMediaValidationService,
 )
 from app.modules.stores.application.membership_services import (
     MembershipAuditService,
@@ -25,6 +36,13 @@ from app.modules.stores.application.verification_services import (
     VerificationAuditService,
     VerificationLifecycleService,
     VerificationPolicyService,
+)
+from app.modules.stores.infrastructure.media_storage import MinIOStorageProvider
+from app.modules.stores.infrastructure.media_transactions import (
+    StoreMediaStorageTransaction,
+)
+from app.modules.stores.infrastructure.persistence.media_repositories import (
+    SqlAlchemyStoreMediaRepository,
 )
 from app.modules.stores.infrastructure.persistence.membership_repositories import (
     SqlAlchemyStoreMembershipRepository,
@@ -120,4 +138,59 @@ async def store_membership_service_dependency(
 StoreMembershipServiceDependency = Annotated[
     StoreMembershipService,
     Depends(store_membership_service_dependency),
+]
+
+
+async def store_media_service_dependency(
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> AsyncIterator[StoreMediaService]:
+    settings = cast(Settings, request.app.state.settings)
+    secret = (
+        settings.s3_secret_access_key.get_secret_value()
+        if settings.s3_secret_access_key is not None
+        else ""
+    )
+    if not settings.s3_access_key_id or not secret:
+        raise AppError(
+            code=ErrorCode.INTERNAL_SERVER_ERROR,
+            title="Store media unavailable",
+            detail="Store media storage is not configured.",
+            status_code=503,
+        )
+    storage: StorageProvider = MinIOStorageProvider(
+        settings.s3_endpoint_url,
+        settings.s3_access_key_id,
+        secret,
+        region=settings.s3_region,
+    )
+    storage_transaction = StoreMediaStorageTransaction(storage)
+    events = cast(EventPublisher, request.app.state.store_events)
+    committed = False
+    try:
+        yield StoreMediaService(
+            SqlAlchemyStoreRepository(session),
+            SqlAlchemyStoreMediaRepository(session),
+            storage,
+            storage_transaction,
+            StoreMediaValidationService(),
+            StoreMediaAuditService(events),
+            bucket=settings.s3_bucket,
+            presigned_expiration_seconds=(
+                settings.media_presigned_url_expiration_seconds
+            ),
+        )
+        await session.commit()
+        committed = True
+        await storage_transaction.commit()
+    except Exception:
+        if not committed:
+            await session.rollback()
+            await storage_transaction.rollback()
+        raise
+
+
+StoreMediaServiceDependency = Annotated[
+    StoreMediaService,
+    Depends(store_media_service_dependency),
 ]

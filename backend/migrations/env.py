@@ -12,6 +12,9 @@ from app.database.metadata import metadata
 from app.modules.identity.infrastructure.persistence import models as identity_models
 from app.modules.stores.infrastructure.persistence import models as store_models
 from app.modules.stores.infrastructure.persistence import (
+    media_models as store_media_models,
+)
+from app.modules.stores.infrastructure.persistence import (
     membership_models as store_membership_models,
 )
 from app.modules.stores.infrastructure.persistence import (
@@ -20,6 +23,7 @@ from app.modules.stores.infrastructure.persistence import (
 
 _ = (
     identity_models,
+    store_media_models,
     store_membership_models,
     store_models,
     store_verification_models,

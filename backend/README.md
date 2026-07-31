@@ -82,6 +82,11 @@ without adding role comparisons or changing authentication and authorization.
 See
 [`docs/phase-3.3-store-staff-management.md`](../docs/phase-3.3-store-staff-management.md).
 
+Phase 3.4 adds Store-only logo, banner, and gallery images with decoded-content
+validation, owner-scoped APIs, private MinIO/R2 storage, compensated object
+mutations, PostgreSQL metadata, typed events, and low-cardinality metrics. See
+[`docs/phase-3.4-store-media.md`](../docs/phase-3.4-store-media.md).
+
 From this directory:
 
 ```text

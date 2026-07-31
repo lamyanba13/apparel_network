@@ -12,8 +12,9 @@ are recorded in the [ADRs](docs/adr/README.md) and
 [architecture freeze review](docs/phase-1.6-architecture-freeze.md).
 
 The frozen foundation remains unchanged. Identity is complete and frozen;
-Phases 3.1 through 3.3 introduce the first isolated business bounded context
-for owner-scoped Store profiles, verification, and Store staff lifecycle.
+Phases 3.1 through 3.4 introduce the first isolated business bounded context
+for owner-scoped Store profiles, verification, staff lifecycle, and Store-only
+media.
 
 The Phase 1.4 transport foundations remain unchanged and include disabled-by-default
 rate-limiting and conditional-ETag middleware, validated `Idempotency-Key`
@@ -65,6 +66,12 @@ adds Store-local membership persistence, invitations, acceptance/decline,
 suspension/reactivation, removal, database invariants, events, and metrics.
 Identity remains frozen, ownership transfer is excluded, and no catalog,
 inventory, media, or commerce behavior is introduced.
+
+The [Phase 3.4 Store Media](docs/phase-3.4-store-media.md) adds validated
+Store-only logo, banner, and gallery images through the approved private
+MinIO/R2 abstraction. PostgreSQL remains authoritative for lifecycle metadata;
+object mutations use rollback compensation; and no product media, workers,
+CDN, frontend, or generic upload API is added.
 
 ## Prerequisite
 
