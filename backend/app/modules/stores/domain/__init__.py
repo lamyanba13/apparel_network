@@ -8,6 +8,21 @@ from app.modules.stores.domain.events import (
     StoreUpdated,
     StoreVerified,
 )
+from app.modules.stores.domain.membership import (
+    StoreMembership,
+    StoreMembershipRole,
+    StoreMembershipStatus,
+)
+from app.modules.stores.domain.membership_events import (
+    StoreMemberAccepted,
+    StoreMemberDeclined,
+    StoreMemberInvited,
+    StoreMemberReactivated,
+    StoreMemberRemoved,
+    StoreMemberRoleChanged,
+    StoreMembershipEvent,
+    StoreMemberSuspended,
+)
 from app.modules.stores.domain.models import (
     Store,
     StoreAddress,
@@ -33,6 +48,17 @@ __all__ = [
     "StoreClosed",
     "StoreContact",
     "StoreCreated",
+    "StoreMemberAccepted",
+    "StoreMemberDeclined",
+    "StoreMemberInvited",
+    "StoreMemberReactivated",
+    "StoreMemberRemoved",
+    "StoreMemberRoleChanged",
+    "StoreMemberSuspended",
+    "StoreMembership",
+    "StoreMembershipEvent",
+    "StoreMembershipRole",
+    "StoreMembershipStatus",
     "StoreStatus",
     "StoreSubmitted",
     "StoreSuspended",

@@ -19,6 +19,7 @@ AUTHORIZATION_REVISION = "f25a7c19e4d0"
 ACCOUNT_SECURITY_REVISION = "c3d91e7a4b62"
 STORE_DOMAIN_REVISION = "d48004d70e46"
 STORE_VERIFICATION_REVISION = "0f7538229016"
+STORE_MEMBERSHIP_REVISION = "47f0ff7d40b8"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -31,7 +32,7 @@ IDENTITY_TABLES = {
     "identity_user_roles",
     "identity_users",
 }
-STORE_TABLES = {"stores", "store_verifications"}
+STORE_TABLES = {"stores", "store_memberships", "store_verifications"}
 
 
 def test_alembic_upgrades_application_schema_without_drift(
@@ -52,7 +53,7 @@ def test_alembic_upgrades_application_schema_without_drift(
         assert store_models is not None
         assert IDENTITY_TABLES.issubset(metadata.tables)
         assert STORE_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [STORE_VERIFICATION_REVISION]
+        assert script.get_heads() == [STORE_MEMBERSHIP_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -65,6 +66,7 @@ def test_alembic_upgrades_application_schema_without_drift(
             f"{ACCOUNT_SECURITY_REVISION}_add_account_security_state",
             f"{STORE_DOMAIN_REVISION}_create_store_domain",
             f"{STORE_VERIFICATION_REVISION}_create_store_verification_workflow",
+            f"{STORE_MEMBERSHIP_REVISION}_create_store_membership_management",
         }
 
         command.check(config)

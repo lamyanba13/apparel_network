@@ -75,6 +75,13 @@ synchronization, audit events, and metrics. It changes no Identity behavior or
 Phase 3.1 CRUD contract. See
 [`docs/phase-3.2-store-verification.md`](../docs/phase-3.2-store-verification.md).
 
+Phase 3.3 adds Store-local memberships, bounded invitations, invitee
+acceptance/decline, suspension/reactivation, removal, database-enforced
+uniqueness, typed events, and metrics. It consumes frozen Identity interfaces
+without adding role comparisons or changing authentication and authorization.
+See
+[`docs/phase-3.3-store-staff-management.md`](../docs/phase-3.3-store-staff-management.md).
+
 From this directory:
 
 ```text

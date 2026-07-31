@@ -4,7 +4,8 @@ Fashion Network is a searchable digital inventory network for existing clothing 
 
 The `docs/` directory is the source of truth for product and technical
 decisions. The `foundation-v1` baseline remains frozen; Identity was completed
-and frozen in Phase 2.6, and Phase 3.1 adds the isolated Store domain.
+and frozen in Phase 2.6. Phases 3.1 through 3.3 add the isolated Store profile,
+verification, and staff-management subdomains.
 
 ## Product boundary
 
@@ -71,6 +72,7 @@ Read these documents in order when joining the project:
 35. [Identity Enterprise Review](identity-enterprise-review.md)
 36. [Phase 3.1 Store Domain](phase-3.1-store-domain.md)
 37. [Phase 3.2 Store Verification](phase-3.2-store-verification.md)
+38. [Phase 3.3 Store Staff Management](phase-3.3-store-staff-management.md)
 
 ## Decision authority
 

@@ -12,8 +12,8 @@ are recorded in the [ADRs](docs/adr/README.md) and
 [architecture freeze review](docs/phase-1.6-architecture-freeze.md).
 
 The frozen foundation remains unchanged. Identity is complete and frozen;
-Phase 3.1 introduces the first isolated business bounded context for
-owner-scoped Store profiles and lifecycle foundations.
+Phases 3.1 through 3.3 introduce the first isolated business bounded context
+for owner-scoped Store profiles, verification, and Store staff lifecycle.
 
 The Phase 1.4 transport foundations remain unchanged and include disabled-by-default
 rate-limiting and conditional-ETag middleware, validated `Idempotency-Key`
@@ -59,6 +59,12 @@ The [Phase 3.2 Store Verification](docs/phase-3.2-store-verification.md)
 implements owner submission, administrative review, approval/rejection,
 reopening, and atomic Store lifecycle synchronization without adding uploads,
 staff, catalog, inventory, or commerce behavior.
+
+The [Phase 3.3 Store Staff Management](docs/phase-3.3-store-staff-management.md)
+adds Store-local membership persistence, invitations, acceptance/decline,
+suspension/reactivation, removal, database invariants, events, and metrics.
+Identity remains frozen, ownership transfer is excluded, and no catalog,
+inventory, media, or commerce behavior is introduced.
 
 ## Prerequisite
 

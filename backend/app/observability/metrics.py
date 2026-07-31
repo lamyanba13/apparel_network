@@ -173,6 +173,22 @@ STORE_VERIFICATION_PENDING = Gauge(
     "fashion_network_store_verification_pending_total",
     "Current submitted or in-review Store verifications.",
 )
+STORE_MEMBERS = Gauge(
+    "fashion_network_store_members_total",
+    "Current active or suspended Store memberships.",
+)
+STORE_MEMBER_INVITATIONS = Counter(
+    "fashion_network_store_member_invitations_total",
+    "Store membership invitations created.",
+)
+STORE_MEMBER_ACCEPTANCES = Counter(
+    "fashion_network_store_member_acceptances_total",
+    "Store membership invitations accepted.",
+)
+STORE_MEMBER_REMOVALS = Counter(
+    "fashion_network_store_member_removals_total",
+    "Store memberships removed.",
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)
@@ -181,6 +197,7 @@ SESSION_REVOKED.set(0)
 STORES_ACTIVE.set(0)
 STORES_VERIFIED.set(0)
 STORE_VERIFICATION_PENDING.set(0)
+STORE_MEMBERS.set(0)
 
 
 def _route_template(scope: Scope) -> str:
