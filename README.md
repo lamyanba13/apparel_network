@@ -55,6 +55,11 @@ The [Phase 3.1 Store Domain](docs/phase-3.1-store-domain.md) documents Store
 profile persistence, owner-scoped CRUD, lifecycle states, permissions, events,
 metrics, migration, and the strict boundary before Store Verification.
 
+The [Phase 3.2 Store Verification](docs/phase-3.2-store-verification.md)
+implements owner submission, administrative review, approval/rejection,
+reopening, and atomic Store lifecycle synchronization without adding uploads,
+staff, catalog, inventory, or commerce behavior.
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

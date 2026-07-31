@@ -54,6 +54,10 @@ def install_custom_openapi(application: FastAPI, settings: Settings) -> None:
                 "name": "Stores",
                 "description": "Owned Store profile and lifecycle foundation.",
             },
+            {
+                "name": "Store Verification",
+                "description": "Store onboarding evidence and administrative review.",
+            },
         ]
         _install_problem_details_schema(schema)
 

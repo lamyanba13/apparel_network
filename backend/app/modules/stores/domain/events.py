@@ -48,7 +48,8 @@ class StoreVerificationEvent(StoreEvent):
     @property
     def payload(self) -> dict[str, JsonValue]:
         return {
-            **super().payload,
+            "store_id": str(self.store_id),
+            "owner_id": str(self.owner_id),
             "store_status": self.status.value,
             "verification_status": self.verification_status.value,
         }
@@ -61,7 +62,24 @@ class StoreSubmitted(StoreVerificationEvent):
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class StoreVerified(StoreVerificationEvent):
+    verification_id: UUID | None = None
+    actor_user_id: UUID | None = None
+
     event_name: ClassVar[str] = "store.verified"
+
+    @property
+    def payload(self) -> dict[str, JsonValue]:
+        payload: dict[str, JsonValue] = {
+            "store_id": str(self.store_id),
+            "owner_id": str(self.owner_id),
+            "store_status": self.status.value,
+            "verification_status": self.verification_status.value,
+        }
+        if self.verification_id is not None:
+            payload["verification_id"] = str(self.verification_id)
+        if self.actor_user_id is not None:
+            payload["actor_user_id"] = str(self.actor_user_id)
+        return payload
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -70,7 +88,11 @@ class StoreOperationalEvent(StoreEvent):
 
     @property
     def payload(self) -> dict[str, JsonValue]:
-        return {**super().payload, "store_status": self.status.value}
+        return {
+            "store_id": str(self.store_id),
+            "owner_id": str(self.owner_id),
+            "store_status": self.status.value,
+        }
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

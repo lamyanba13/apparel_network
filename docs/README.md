@@ -70,6 +70,7 @@ Read these documents in order when joining the project:
 34. [Phase 2.6 Identity Module Freeze](phase-2.6-identity-freeze.md)
 35. [Identity Enterprise Review](identity-enterprise-review.md)
 36. [Phase 3.1 Store Domain](phase-3.1-store-domain.md)
+37. [Phase 3.2 Store Verification](phase-3.2-store-verification.md)
 
 ## Decision authority
 

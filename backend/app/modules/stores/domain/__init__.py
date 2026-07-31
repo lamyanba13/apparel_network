@@ -15,6 +15,17 @@ from app.modules.stores.domain.models import (
     StoreStatus,
     VerificationStatus,
 )
+from app.modules.stores.domain.verification import (
+    StoreVerification,
+    StoreVerificationMetadata,
+    StoreVerificationStatus,
+)
+from app.modules.stores.domain.verification_events import (
+    StoreVerificationRejected,
+    StoreVerificationReopened,
+    StoreVerificationStarted,
+    StoreVerificationSubmitted,
+)
 
 __all__ = [
     "Store",
@@ -26,6 +37,13 @@ __all__ = [
     "StoreSubmitted",
     "StoreSuspended",
     "StoreUpdated",
+    "StoreVerification",
+    "StoreVerificationMetadata",
+    "StoreVerificationRejected",
+    "StoreVerificationReopened",
+    "StoreVerificationStarted",
+    "StoreVerificationStatus",
+    "StoreVerificationSubmitted",
     "StoreVerified",
     "VerificationStatus",
 ]

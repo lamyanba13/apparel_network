@@ -46,6 +46,7 @@ _SAFE_EXTRA_FIELDS = frozenset(
         "user_id",
         "verification_tokens_deleted",
         "verification_status",
+        "verification_id",
         "violation_codes",
     }
 )

@@ -11,8 +11,11 @@ from app.core.config import get_settings
 from app.database.metadata import metadata
 from app.modules.identity.infrastructure.persistence import models as identity_models
 from app.modules.stores.infrastructure.persistence import models as store_models
+from app.modules.stores.infrastructure.persistence import (
+    verification_models as store_verification_models,
+)
 
-_ = identity_models, store_models
+_ = identity_models, store_models, store_verification_models
 
 config = context.config
 

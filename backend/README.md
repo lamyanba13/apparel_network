@@ -69,6 +69,12 @@ Alembic migration. Verification workflows, staff, catalog, inventory, media,
 search, reservations, and commerce behavior remain outside this phase. See
 [`docs/phase-3.1-store-domain.md`](../docs/phase-3.1-store-domain.md).
 
+Phase 3.2 adds Store verification submission, administrative review,
+approval/rejection, reopening, private evidence metadata, atomic Store-state
+synchronization, audit events, and metrics. It changes no Identity behavior or
+Phase 3.1 CRUD contract. See
+[`docs/phase-3.2-store-verification.md`](../docs/phase-3.2-store-verification.md).
+
 From this directory:
 
 ```text
