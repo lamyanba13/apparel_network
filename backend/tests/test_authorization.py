@@ -284,7 +284,7 @@ async def test_business_policy_placeholders_deny_by_default() -> None:
     )
     assert contexts[0].metadata == {"source": "test"}
     with pytest.raises(TypeError):
-        contexts[0].metadata["source"] = "changed"  # type: ignore[index]
+        contexts[0].metadata["source"] = "changed"
 
 
 def test_policy_decision_can_capture_missing_permission() -> None:

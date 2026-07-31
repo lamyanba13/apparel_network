@@ -1,5 +1,15 @@
 # Platform Runbook
 
+## Identity security incident
+
+For suspected refresh-token reuse, credential compromise, unexpected privilege,
+or signing-key exposure: preserve correlated audit events, revoke affected
+sessions, invalidate disposable Redis authorization state, and rotate signing
+keys when indicated. Never copy bearer, refresh, verification, reset, password,
+email, or IP values into tickets. A Redis flush does not revoke authoritative
+sessions; PostgreSQL is the source of truth. Follow the containment and recovery
+invariants in the [Phase 2.6 freeze](phase-2.6-identity-freeze.md).
+
 ## Operating rules
 
 Confirm the environment, incident owner, start time, affected users, and current release before changing state. Prefer reversible actions. Never repair business data with direct SQL. Preserve logs and evidence, record every intervention, and escalate security or integrity symptoms immediately.

@@ -65,6 +65,8 @@ Read these documents in order when joining the project:
 31. [Phase 2.3 Session Management](phase-2.3-session-management.md)
 32. [Phase 2.4 Authorization](phase-2.4-authorization.md)
 33. [Phase 2.5 Account Security](phase-2.5-account-security.md)
+34. [Phase 2.6 Identity Module Freeze](phase-2.6-identity-freeze.md)
+35. [Identity Enterprise Review](identity-enterprise-review.md)
 
 ## Decision authority
 

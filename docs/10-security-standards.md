@@ -1,5 +1,10 @@
 # Security Standards
 
+> The implemented Identity controls were reviewed and frozen in
+> [Phase 2.6](phase-2.6-identity-freeze.md). Changes to its token, credential,
+> session, authorization, logging, or recovery invariants require security
+> review; architectural changes also require an ADR.
+
 ## Security objectives
 
 Security protects customer accounts, store isolation, inventory integrity, reservation correctness, administrative power, and service availability. Controls are risk-based, deny-by-default, and designed into each feature.

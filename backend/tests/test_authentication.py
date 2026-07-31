@@ -11,6 +11,7 @@ import pytest
 from alembic import command
 from alembic.config import Config
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import SecretStr
 from pytest import MonkeyPatch
@@ -247,6 +248,44 @@ def test_tampered_and_expired_access_tokens_are_rejected(
     )
     with pytest.raises(AppError):
         service.decode_access_token(expired)
+
+
+def test_jwt_key_type_and_header_type_are_enforced(
+    test_settings: Settings,
+) -> None:
+    ec_private_key = ec.generate_private_key(ec.SECP256R1())
+    ec_private_key_pem = ec_private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption(),
+    ).decode()
+    mismatched = test_settings.model_copy(
+        update={"jwt_private_key_pem": SecretStr(ec_private_key_pem)}
+    )
+    with pytest.raises(ValueError, match="does not match"):
+        JwtTokenService(mismatched)
+
+    service = JwtTokenService(test_settings)
+    now = datetime.now(UTC)
+    wrong_type = jwt.encode(
+        {
+            "ver": 1,
+            "sub": str(UUID(int=1)),
+            "sid": str(UUID(int=2)),
+            "jti": str(UUID(int=3)),
+            "iss": test_settings.jwt_issuer,
+            "aud": test_settings.jwt_audience,
+            "iat": now,
+            "nbf": now,
+            "exp": now + timedelta(minutes=15),
+            "type": "access",
+        },
+        test_settings.jwt_private_key_pem.get_secret_value(),  # type: ignore[union-attr]
+        algorithm="EdDSA",
+        headers={"kid": test_settings.jwt_current_key_id, "typ": "not-jwt"},
+    )
+    with pytest.raises(AppError):
+        service.decode_access_token(wrong_type)
 
 
 def test_previous_public_key_validates_tokens_during_rotation(
@@ -515,6 +554,23 @@ def test_authentication_routes_and_bearer_scheme_are_in_openapi(
     schemes = schema["components"]["securitySchemes"]
     assert schemes["HTTPBearer"]["type"] == "http"
     assert schemes["HTTPBearer"]["scheme"] == "bearer"
+    assert {tag["name"] for tag in schema["tags"]} >= {
+        "Authentication",
+        "Sessions",
+        "Account Security",
+    }
+    assert "ProblemDetails" in schema["components"]["schemas"]
+    for path, path_item in schema["paths"].items():
+        if not path.startswith("/api/v1/"):
+            continue
+        for operation in path_item.values():
+            for status_code, response in operation.get("responses", {}).items():
+                if int(status_code) < 400:
+                    continue
+                assert set(response["content"]) == {"application/problem+json"}
+                assert response["content"]["application/problem+json"]["schema"] == {
+                    "$ref": "#/components/schemas/ProblemDetails"
+                }
 
 
 def test_authentication_routes_receive_dedicated_rate_limit_scopes() -> None:

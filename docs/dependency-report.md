@@ -44,3 +44,19 @@ If the exception expires before an upstream-compatible update is available, Plat
 CI runs Python and production Node dependency audits, CodeQL for Python and JavaScript/TypeScript, production image builds, and fixed HIGH/CRITICAL container scans. Scheduled security checks run weekly in addition to pull request and protected-branch checks.
 
 Release evidence must retain the lockfile revisions, image digests, scanner version/database timestamp, scan policy, accepted exceptions, and workflow run URL.
+
+## Phase 2.6 Identity freeze revalidation
+
+The Phase 2.6 gate rechecks the Python environment, production Node graph, and
+lockfile consistency without changing application dependency versions. No
+project dependency-license allowlist or denylist is currently documented. The
+first local Python scan found advisories
+only in an out-of-date host Poetry 2.1.3 installation and its Dulwich 0.22.8
+dependency. Neither is part of the application runtime graph. The local tool was
+aligned with the backend Docker build pin (Poetry 2.4.1, Dulwich 1.2.12), which
+exceeds the advisory fix versions; the repository lock remained valid.
+
+The development-only `brace-expansion` exception remains time-bounded to
+2026-08-30 and must not be renewed implicitly. Command results are recorded in
+the Phase 2.6 delivery evidence; a newly discovered production advisory is a
+release blocker.

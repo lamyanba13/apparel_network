@@ -64,6 +64,10 @@ class AuthenticationEventPublisher(EventPublisher):
         extra = {
             "event": event.event_name,
             "event_id": str(event.event_id),
+            "event_occurred_at": event.occurred_at.isoformat(),
+            "event_correlation_id": (
+                str(event.correlation_id) if event.correlation_id is not None else None
+            ),
             "schema_version": event.schema_version,
             **event.payload,
         }

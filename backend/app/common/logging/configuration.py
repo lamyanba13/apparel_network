@@ -13,13 +13,36 @@ from app.common.enums import Environment
 _STANDARD_LOG_RECORD_FIELDS = frozenset(logging.makeLogRecord({}).__dict__)
 _SAFE_EXTRA_FIELDS = frozenset(
     {
+        "accepted",
+        "accounts_unlocked",
+        "actor_user_id",
         "duration_ms",
         "dependency",
         "event",
+        "event_correlation_id",
+        "event_id",
+        "event_occurred_at",
+        "expired_sessions",
+        "expired_sessions_revoked",
+        "family_id",
         "http_method",
         "http_path",
         "operation",
+        "permission_name",
+        "reason",
+        "requirement",
+        "reset_tokens_deleted",
+        "revoked_sessions",
+        "risk_score",
+        "role_name",
+        "rotation_count",
+        "schema_version",
+        "session_id",
+        "sessions_deleted",
         "status_code",
+        "user_id",
+        "verification_tokens_deleted",
+        "violation_codes",
     }
 )
 

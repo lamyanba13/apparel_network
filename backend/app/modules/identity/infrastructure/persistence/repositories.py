@@ -535,13 +535,20 @@ class SqlAlchemyRefreshSessionRepository(SqlAlchemyRepository):
         )
         return int(active or 0), int(revoked or 0)
 
-    async def revoke_expired(self, *, now: datetime) -> int:
-        result = await self._session.execute(
-            update(RefreshSessionModel)
+    async def revoke_expired(self, *, now: datetime, limit: int) -> int:
+        candidate_ids = (
+            select(RefreshSessionModel.id)
             .where(
                 RefreshSessionModel.is_revoked.is_(False),
                 RefreshSessionModel.expires_at <= now,
             )
+            .order_by(RefreshSessionModel.expires_at, RefreshSessionModel.id)
+            .limit(limit)
+            .with_for_update(skip_locked=True)
+        )
+        result = await self._session.execute(
+            update(RefreshSessionModel)
+            .where(RefreshSessionModel.id.in_(candidate_ids))
             .values(
                 is_revoked=True,
                 version=RefreshSessionModel.version + 1,
@@ -572,6 +579,7 @@ class SqlAlchemyRefreshSessionRepository(SqlAlchemyRepository):
                 RefreshSessionModel.id,
             )
             .limit(limit)
+            .with_for_update(skip_locked=True)
         )
         result = await self._session.execute(
             delete(RefreshSessionModel)

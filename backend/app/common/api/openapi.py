@@ -8,6 +8,7 @@ from fastapi.routing import APIRoute
 
 from app.common.config import Settings
 from app.common.constants import REQUEST_ID_HEADER
+from app.common.errors import ProblemDetails
 
 _HTTP_METHODS = {"delete", "get", "head", "options", "patch", "post", "put", "trace"}
 
@@ -34,6 +35,23 @@ def install_custom_openapi(application: FastAPI, settings: Settings) -> None:
             "url": settings.application_license_url,
         }
         schema["servers"] = [{"url": url} for url in settings.api_server_urls]
+        schema["tags"] = [
+            {
+                "name": "Authentication",
+                "description": (
+                    "Identity authentication and token lifecycle operations."
+                ),
+            },
+            {
+                "name": "Sessions",
+                "description": "Authenticated device-session lifecycle operations.",
+            },
+            {
+                "name": "Account Security",
+                "description": "Password and email-verification security operations.",
+            },
+        ]
+        _install_problem_details_schema(schema)
 
         request_id_parameter = {
             "name": REQUEST_ID_HEADER,
@@ -51,6 +69,7 @@ def install_custom_openapi(application: FastAPI, settings: Settings) -> None:
                     operation.setdefault("parameters", []).append(
                         request_id_parameter.copy()
                     )
+                    _normalize_error_responses(operation)
 
         for route in application.routes:
             if not isinstance(route, APIRoute):
@@ -68,6 +87,39 @@ def install_custom_openapi(application: FastAPI, settings: Settings) -> None:
         return schema
 
     application.openapi = custom_openapi  # type: ignore[method-assign]
+
+
+def _install_problem_details_schema(schema: dict[str, Any]) -> None:
+    generated = ProblemDetails.model_json_schema(
+        ref_template="#/components/schemas/{model}"
+    )
+    definitions = generated.pop("$defs", {})
+    components = schema.setdefault("components", {}).setdefault("schemas", {})
+    components.update(definitions)
+    components["ProblemDetails"] = generated
+
+
+def _normalize_error_responses(operation: dict[str, Any]) -> None:
+    for status_code, response in operation.get("responses", {}).items():
+        try:
+            is_error = int(status_code) >= 400
+        except ValueError:
+            is_error = False
+        if not is_error:
+            continue
+        content = response.setdefault("content", {})
+        problem = content.pop("application/problem+json", {})
+        content.pop("application/json", None)
+        problem["schema"] = {
+            "$ref": "#/components/schemas/ProblemDetails",
+        }
+        example = problem.get("example")
+        if isinstance(example, dict):
+            example.setdefault("type", "https://docs.example.invalid/problems/error")
+            example.setdefault("instance", "/api/v1/example")
+            example.setdefault("request_id", "01912345-6789-7abc-8def-0123456789ab")
+            example.setdefault("errors", [])
+        content["application/problem+json"] = problem
 
 
 def _authorization_requirements(dependant: Any) -> list[dict[str, Any]]:

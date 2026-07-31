@@ -1,5 +1,15 @@
 # Disaster Recovery
 
+## Identity-specific recovery
+
+Identity state is restored from PostgreSQL; Redis Identity data is disposable
+and rebuilt. Because point-in-time recovery can restore previously revoked
+sessions or unused credential hashes, revoke all sessions after an
+identity-affecting rollback unless incident command documents a narrower safe
+boundary. Validate signing keys, issuer/audience, RBAC assignments, token
+expiry, and cleanup before reopening traffic. See the
+[Phase 2.6 freeze](phase-2.6-identity-freeze.md).
+
 ## Objectives
 
 The initial PostgreSQL disaster objective is RPO at most 15 minutes and RTO at most 4 hours. Search is rebuildable from PostgreSQL with a launch-volume target of two hours. Media recovery depends on the approved R2 versioning/backup policy. Redis is never restored as authoritative data. RabbitMQ topology is reproducible and future business effects are recovered from PostgreSQL outbox/reconciliation.

@@ -1,5 +1,15 @@
 # Observability
 
+## Identity telemetry boundary
+
+Identity security events include safe event metadata and low-cardinality
+outcomes/counts. Passwords, tokens, email addresses, IP addresses, user agents,
+and device fingerprints are excluded from metric labels and the structured-log
+allowlist. Event IDs, occurrence times, correlation IDs, internal subject or
+session IDs, policy requirements, reasons, and bounded counts support incident
+correlation. The reviewed inventory and operational expectations are in the
+[Phase 2.6 freeze](phase-2.6-identity-freeze.md).
+
 ## Purpose and architecture
 
 Phase 1.5 provides vendor-neutral diagnostics for the FastAPI modular monolith and its infrastructure. It does not add business metrics.

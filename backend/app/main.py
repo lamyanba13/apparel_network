@@ -113,6 +113,7 @@ def create_application(
         lifespan=_application_lifespan(
             resolved_settings,
             resolved_permission_cache,
+            resolved_rate_limiter,
         ),
     )
     application.state.settings = resolved_settings
@@ -203,6 +204,7 @@ def create_application(
 def _application_lifespan(
     application_settings: Settings,
     permission_cache: PermissionCache,
+    rate_limiter: RateLimiter | None,
 ) -> Lifespan:
     database_lifespan = create_database_lifespan(application_settings)
 
@@ -213,6 +215,8 @@ def _application_lifespan(
                 yield
         finally:
             await permission_cache.close()
+            if rate_limiter is not None:
+                await rate_limiter.close()
 
     return lifespan
 

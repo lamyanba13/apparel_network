@@ -154,7 +154,10 @@ class SessionCleanupService:
     async def run(self) -> tuple[int, int]:
         now = datetime.now(UTC)
         async with _transaction(self._db_session):
-            newly_revoked = await self._repository.revoke_expired(now=now)
+            newly_revoked = await self._repository.revoke_expired(
+                now=now,
+                limit=self._batch_size,
+            )
             deleted = await self._repository.delete_expired_revoked(
                 expired_before=now - self._retention,
                 limit=self._batch_size,

@@ -284,11 +284,11 @@ class ExpiringTokenCreate(PersistenceSchema):
 
 
 class EmailVerificationTokenCreate(ExpiringTokenCreate):
-    pass
+    """Persistence input for an email-verification credential."""
 
 
 class PasswordResetTokenCreate(ExpiringTokenCreate):
-    pass
+    """Persistence input for a password-reset credential."""
 
 
 class ExpiringTokenRecord(ExpiringTokenCreate):
@@ -297,8 +297,8 @@ class ExpiringTokenRecord(ExpiringTokenCreate):
 
 
 class EmailVerificationTokenRecord(ExpiringTokenRecord):
-    pass
+    """Persisted email-verification credential metadata."""
 
 
 class PasswordResetTokenRecord(ExpiringTokenRecord):
-    pass
+    """Persisted password-reset credential metadata."""

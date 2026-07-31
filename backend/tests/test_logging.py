@@ -56,6 +56,45 @@ def test_json_logging_contains_required_process_and_request_context() -> None:
     }
 
 
+def test_json_logging_allows_auditable_identity_fields_and_drops_secrets() -> None:
+    record = logging.LogRecord(
+        name="app.modules.identity",
+        level=logging.WARNING,
+        pathname=__file__,
+        lineno=1,
+        msg="identity.refresh_reuse_detected",
+        args=(),
+        exc_info=None,
+    )
+    event_id = str(uuid4())
+    user_id = str(uuid4())
+    session_id = str(uuid4())
+    record.__dict__.update(
+        {
+            "event": "identity.refresh_reuse_detected",
+            "event_id": event_id,
+            "event_occurred_at": utc_now().isoformat(),
+            "user_id": user_id,
+            "session_id": session_id,
+            "reason": "refresh_reuse",
+            "password": "must-not-appear",
+            "refresh_token": "must-not-appear",
+            "email": "must-not-appear@example.com",
+        }
+    )
+
+    payload = json.loads(JsonFormatter().format(record))
+
+    assert payload["event"] == "identity.refresh_reuse_detected"
+    assert payload["event_id"] == event_id
+    assert payload["user_id"] == user_id
+    assert payload["session_id"] == session_id
+    assert payload["reason"] == "refresh_reuse"
+    assert "password" not in payload
+    assert "refresh_token" not in payload
+    assert "email" not in payload
+
+
 def test_request_logging_middleware_includes_request_identifiers(
     test_settings: Settings,
     monkeypatch: pytest.MonkeyPatch,

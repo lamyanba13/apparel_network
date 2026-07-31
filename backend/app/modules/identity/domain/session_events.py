@@ -30,12 +30,12 @@ class SessionRenamed(SessionSecurityEvent):
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class SessionRevoked(SessionRenamed):
+class SessionRevoked(SessionSecurityEvent):
     event_name: ClassVar[str] = "identity.session_revoked"
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class OtherSessionsRevoked(SessionRenamed):
+class OtherSessionsRevoked(SessionSecurityEvent):
     revoked_sessions: int
     event_name: ClassVar[str] = "identity.other_sessions_revoked"
 

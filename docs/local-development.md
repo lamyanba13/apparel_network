@@ -1,5 +1,14 @@
 # Local Development Environment
 
+## Identity contributor gate
+
+Before submitting an Identity-adjacent change, read
+[ADR 0009](adr/0009-identity-access-and-refresh-tokens.md) and the
+[Phase 2.6 freeze](phase-2.6-identity-freeze.md). Run Black, Ruff, strict MyPy,
+the complete Pytest suite, `alembic check`, and the OpenAPI tests. Use synthetic
+credentials only; never paste production keys or user data into fixtures, logs,
+screenshots, or issue reports.
+
 ## Scope
 
 Phase 1.5 uses the complete containerized development runtime and adds the

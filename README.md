@@ -46,6 +46,11 @@ PostgreSQL is the authoritative future system of record. RabbitMQ is the only Ce
 
 The approved product and architecture documentation remains authoritative in [`docs/`](docs/README.md).
 
+The Identity foundation implemented in Phases 2.1 through 2.5 is production
+hardened and frozen by the
+[Phase 2.6 review](docs/phase-2.6-identity-freeze.md). New business modules
+consume its stable interfaces without extending Identity behavior.
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

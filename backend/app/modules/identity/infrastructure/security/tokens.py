@@ -7,6 +7,8 @@ from uuid import UUID
 
 import jwt
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from jwt import InvalidTokenError
 from pydantic import SecretStr
 from uuid6 import uuid7
@@ -39,6 +41,15 @@ class JwtTokenService:
             self._private_key.encode(),
             password=None,
         )
+        if self._algorithm == "EdDSA" and not isinstance(
+            private_key, Ed25519PrivateKey
+        ):
+            raise ValueError("JWT signing key does not match the configured algorithm")
+        if self._algorithm == "ES256" and (
+            not isinstance(private_key, ec.EllipticCurvePrivateKey)
+            or not isinstance(private_key.curve, ec.SECP256R1)
+        ):
+            raise ValueError("JWT signing key does not match the configured algorithm")
         current_public_key = (
             private_key.public_key()
             .public_bytes(
@@ -83,7 +94,12 @@ class JwtTokenService:
             header = jwt.get_unverified_header(token)
             key_id = header.get("kid")
             algorithm = header.get("alg")
-            if not isinstance(key_id, str) or algorithm not in _ALLOWED_ALGORITHMS:
+            token_type = header.get("typ")
+            if (
+                not isinstance(key_id, str)
+                or algorithm not in _ALLOWED_ALGORITHMS
+                or token_type != "JWT"
+            ):
                 raise InvalidTokenError("Invalid JWT header")
             public_key = self._public_keys.get(key_id)
             if public_key is None:

@@ -1,5 +1,10 @@
 # System Architecture
 
+> Identity implementation note: Phases 2.1 through 2.5 implement the Identity
+> module within this unchanged modular-monolith boundary. Its final conformance
+> review is [Phase 2.6 Identity Module Freeze](phase-2.6-identity-freeze.md).
+> Store ownership and other business policies remain outside Identity.
+
 ## Architectural style
 
 Fashion Network is a feature-oriented modular monolith following Clean Architecture and SOLID principles. All backend modules share one codebase, runtime release, and PostgreSQL database, but communicate through explicit public interfaces and application events.

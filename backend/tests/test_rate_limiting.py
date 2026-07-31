@@ -16,6 +16,7 @@ from app.main import create_application
 class FakeRateLimiter:
     decision: RateLimitDecision
     calls: list[tuple[RateLimitScope, str]] = field(default_factory=list)
+    closed: bool = False
 
     async def check(
         self,
@@ -25,6 +26,9 @@ class FakeRateLimiter:
     ) -> RateLimitDecision:
         self.calls.append((scope, key))
         return self.decision
+
+    async def close(self) -> None:
+        self.closed = True
 
 
 def admin_scope(_: Scope) -> RateLimitScope:
@@ -75,6 +79,7 @@ def test_rate_limiter_can_apply_a_future_route_scope(
     assert response.headers["RateLimit-Limit"] == "50"
     assert response.headers["RateLimit-Remaining"] == "49"
     assert limiter.calls == [(RateLimitScope.ADMIN, "testclient")]
+    assert limiter.closed
 
 
 def test_rate_limiter_returns_standard_429_problem(

@@ -1,5 +1,16 @@
 # Production Deployment Checklist
 
+## Identity freeze gate
+
+- [ ] Complete every operational-verification item in the
+      [Phase 2.6 Identity freeze](phase-2.6-identity-freeze.md).
+- [ ] Confirm the active signing-key type matches the configured JWT algorithm
+      and every published `kid` resolves to the intended public key.
+- [ ] Confirm Identity RFC 9457 responses, bearer declarations, rate limits,
+      cleanup execution, event scrubbing, metrics, and alerts in staging.
+- [ ] Treat any dependency advisory affecting production Identity execution as
+      a release blocker unless Security records a time-bounded exception.
+
 ## Release identity and approvals
 
 - [ ] Change list, commit SHA, immutable image digests, SBOMs, scan results, owner, and incident contact are recorded.

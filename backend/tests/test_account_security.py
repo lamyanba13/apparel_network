@@ -487,7 +487,9 @@ async def test_cleanup_is_bounded_and_emits_an_event(
 
 
 def test_account_security_schema_and_indexes_are_explicit() -> None:
-    user_table = UserModel.__table__
+    user_table = UserModel.metadata.tables["identity_users"]
+    reset_table = UserModel.metadata.tables["identity_password_reset_tokens"]
+    verification_table = UserModel.metadata.tables["identity_email_verification_tokens"]
     assert {"locked_until", "lock_reason", "unlock_count"} <= set(
         user_table.columns.keys()
     )
@@ -498,10 +500,10 @@ def test_account_security_schema_and_indexes_are_explicit() -> None:
         index.name for index in user_table.indexes
     }
     assert "ix_identity_password_reset_tokens_expiry_cleanup" in {
-        index.name for index in PasswordResetTokenModel.__table__.indexes
+        index.name for index in reset_table.indexes
     }
     assert "ix_identity_email_verification_tokens_expiry_cleanup" in {
-        index.name for index in EmailVerificationTokenModel.__table__.indexes
+        index.name for index in verification_table.indexes
     }
 
 

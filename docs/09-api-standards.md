@@ -1,5 +1,11 @@
 # API Standards
 
+> Identity conformance: all Identity error responses, including framework
+> validation failures, are documented and returned as RFC 9457-style
+> `application/problem+json` using the shared `ProblemDetails` schema. Protected
+> operations declare HTTP bearer security. See the
+> [Phase 2.6 freeze](phase-2.6-identity-freeze.md).
+
 ## Scope
 
 The FastAPI HTTP API is the authoritative client contract for the public frontend, dashboard, and approved integrations. These standards apply to synchronous HTTP endpoints. Asynchronous event contracts follow the architecture event rules.

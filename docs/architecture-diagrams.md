@@ -145,3 +145,62 @@ flowchart LR
 ```
 
 Feature routes and services are future work. The flow fixes dependency direction: HTTP and provider details remain outside domain behavior.
+
+## Completed Identity module
+
+The Phase 2.6 Identity implementation remains one feature module inside the
+modular monolith. The branches below are capabilities, not separately deployed
+services.
+
+```mermaid
+flowchart TB
+    identity[Identity]
+
+    persistence[Persistence]
+    authentication[Authentication]
+    sessions[Sessions]
+    authorization[Authorization]
+    accountSecurity[Account Security]
+    cleanup[Cleanup]
+    events[Events]
+    metrics[Metrics]
+    notifications[Notifications]
+    publicApi[Public API]
+
+    postgres[(PostgreSQL)]
+    redis[(Redis)]
+    shared[Shared platform contracts]
+    futureModules[Future business modules]
+
+    identity --> persistence
+    identity --> authentication
+    identity --> sessions
+    identity --> authorization
+    identity --> accountSecurity
+    identity --> cleanup
+    identity --> events
+    identity --> metrics
+    identity --> notifications
+    identity --> publicApi
+
+    persistence --> postgres
+    authentication --> persistence
+    sessions --> persistence
+    authorization --> redis
+    authorization --> persistence
+    accountSecurity --> persistence
+    cleanup --> persistence
+    events --> shared
+    metrics --> shared
+    notifications --> shared
+    publicApi --> authentication
+    publicApi --> sessions
+    publicApi --> accountSecurity
+    futureModules --> authorization
+    futureModules -. principal and policy contracts .-> identity
+```
+
+Identity does not import Store, Catalog, Inventory, Reservation, or Marketplace
+packages. Its known Phase 2.4 business-vocabulary qualification and supported
+interface allowlist are documented in the
+[Identity Enterprise Review](identity-enterprise-review.md).

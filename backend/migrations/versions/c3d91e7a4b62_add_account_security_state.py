@@ -75,7 +75,7 @@ def downgrade() -> None:
         table_name="identity_users",
     )
     op.drop_constraint(
-        "ck_identity_users_unlock_count_nonnegative",
+        op.f("ck_identity_users_unlock_count_nonnegative"),
         "identity_users",
         type_="check",
     )

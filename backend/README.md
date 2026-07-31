@@ -56,6 +56,13 @@ verification, progressive expiring lockouts, and bounded cleanup. It does not
 add MFA, external identity providers, notification providers, or business
 modules.
 
+Phase 2.6 freezes the reviewed Identity module. Its architecture, security and
+operational invariants, public API contract, and production verification gates
+are recorded in
+[`docs/phase-2.6-identity-freeze.md`](../docs/phase-2.6-identity-freeze.md).
+Phase 3 modules may consume Identity ports and principal context but must not
+place business ownership rules inside Identity.
+
 From this directory:
 
 ```text

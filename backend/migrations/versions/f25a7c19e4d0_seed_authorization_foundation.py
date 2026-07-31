@@ -187,22 +187,22 @@ def downgrade() -> None:
     )
     bind.execute(sa.delete(roles).where(roles.c.id.in_(tuple(ROLE_IDS.values()))))
     op.drop_constraint(
-        "ck_identity_permissions_name_matches_resource_action",
+        op.f("ck_identity_permissions_name_matches_resource_action"),
         "identity_permissions",
         type_="check",
     )
     op.drop_constraint(
-        "ck_identity_permissions_action_canonical",
+        op.f("ck_identity_permissions_action_canonical"),
         "identity_permissions",
         type_="check",
     )
     op.drop_constraint(
-        "ck_identity_permissions_resource_canonical",
+        op.f("ck_identity_permissions_resource_canonical"),
         "identity_permissions",
         type_="check",
     )
     op.drop_constraint(
-        "ck_identity_roles_name_canonical",
+        op.f("ck_identity_roles_name_canonical"),
         "identity_roles",
         type_="check",
     )
