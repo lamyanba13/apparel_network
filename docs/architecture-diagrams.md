@@ -204,3 +204,49 @@ Identity does not import Store, Catalog, Inventory, Reservation, or Marketplace
 packages. Its known Phase 2.4 business-vocabulary qualification and supported
 interface allowlist are documented in the
 [Identity Enterprise Review](identity-enterprise-review.md).
+
+## Completed Store capabilities through Phase 3.5
+
+The Store feature remains one bounded context and one deployable part of the
+modular monolith. Its subdomains share the Store ownership boundary but expose
+separate application contracts.
+
+```mermaid
+flowchart TB
+    store[Store bounded context]
+    profile[Profile and lifecycle]
+    verification[Verification]
+    membership[Membership]
+    media[Media]
+    hours[Operating hours]
+    status[Business status resolver]
+
+    identity[Identity public contracts]
+    postgres[(PostgreSQL)]
+    objects[(R2 / local MinIO)]
+    telemetry[Safe events and metrics]
+    future[Future approved consumers]
+
+    store --> profile
+    store --> verification
+    store --> membership
+    store --> media
+    store --> hours
+    hours --> status
+
+    profile --> postgres
+    verification --> postgres
+    membership --> postgres
+    media --> postgres
+    media --> objects
+    hours --> postgres
+
+    store -. principal and permission contracts .-> identity
+    store --> telemetry
+    future -. application contracts only .-> status
+```
+
+Operating hours do not represent inventory availability, reservation
+capacity, delivery windows, or employee shifts. PostgreSQL remains
+authoritative; the status resolver requires no Redis, RabbitMQ, search, or
+background-job dependency.

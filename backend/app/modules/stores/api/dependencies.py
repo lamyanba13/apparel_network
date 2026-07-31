@@ -26,6 +26,11 @@ from app.modules.stores.application.membership_services import (
     StoreInvitationService,
     StoreMembershipService,
 )
+from app.modules.stores.application.operating_hours_services import (
+    StoreOperatingHoursAuditService,
+    StoreOperatingHoursService,
+    StoreOperatingHoursValidationService,
+)
 from app.modules.stores.application.services import (
     StoreService,
     StoreSlugService,
@@ -46,6 +51,9 @@ from app.modules.stores.infrastructure.persistence.media_repositories import (
 )
 from app.modules.stores.infrastructure.persistence.membership_repositories import (
     SqlAlchemyStoreMembershipRepository,
+)
+from app.modules.stores.infrastructure.persistence.operating_hours_repositories import (
+    SqlAlchemyStoreOperatingHoursRepository,
 )
 from app.modules.stores.infrastructure.persistence.repositories import (
     SqlAlchemyStoreRepository,
@@ -193,4 +201,28 @@ async def store_media_service_dependency(
 StoreMediaServiceDependency = Annotated[
     StoreMediaService,
     Depends(store_media_service_dependency),
+]
+
+
+async def store_operating_hours_service_dependency(
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> AsyncIterator[StoreOperatingHoursService]:
+    events = cast(EventPublisher, request.app.state.store_events)
+    try:
+        yield StoreOperatingHoursService(
+            SqlAlchemyStoreRepository(session),
+            SqlAlchemyStoreOperatingHoursRepository(session),
+            StoreOperatingHoursValidationService(),
+            StoreOperatingHoursAuditService(events),
+        )
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
+
+
+StoreOperatingHoursServiceDependency = Annotated[
+    StoreOperatingHoursService,
+    Depends(store_operating_hours_service_dependency),
 ]

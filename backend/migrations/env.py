@@ -10,12 +10,15 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from app.core.config import get_settings
 from app.database.metadata import metadata
 from app.modules.identity.infrastructure.persistence import models as identity_models
-from app.modules.stores.infrastructure.persistence import models as store_models
 from app.modules.stores.infrastructure.persistence import (
     media_models as store_media_models,
 )
 from app.modules.stores.infrastructure.persistence import (
     membership_models as store_membership_models,
+)
+from app.modules.stores.infrastructure.persistence import models as store_models
+from app.modules.stores.infrastructure.persistence import (
+    operating_hours_models as store_operating_hours_models,
 )
 from app.modules.stores.infrastructure.persistence import (
     verification_models as store_verification_models,
@@ -25,6 +28,7 @@ _ = (
     identity_models,
     store_media_models,
     store_membership_models,
+    store_operating_hours_models,
     store_models,
     store_verification_models,
 )

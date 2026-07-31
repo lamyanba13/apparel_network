@@ -205,6 +205,22 @@ STORE_MEMBER_REMOVALS = Counter(
     "fashion_network_store_member_removals_total",
     "Store memberships removed.",
 )
+STORE_HOURS_UPDATES = Counter(
+    "fashion_network_store_hours_updates_total",
+    "Completed Store operating-hours mutations.",
+)
+STORE_HOURS_QUERIES = Counter(
+    "fashion_network_store_hours_queries_total",
+    "Completed Store operating-hours and business-status queries.",
+)
+STORE_OPEN = Counter(
+    "fashion_network_store_open_total",
+    "Store status calculations that resolved to open.",
+)
+STORE_CLOSED = Counter(
+    "fashion_network_store_closed_total",
+    "Store status calculations that resolved to closed.",
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)

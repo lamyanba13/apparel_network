@@ -43,6 +43,22 @@ from app.modules.stores.domain.models import (
     StoreStatus,
     VerificationStatus,
 )
+from app.modules.stores.domain.operating_hours import (
+    BusinessStatus,
+    OpenState,
+    OperatingInterval,
+    StoreOperatingHours,
+    StoreSchedule,
+)
+from app.modules.stores.domain.operating_hours_events import (
+    StoreHoursCreated,
+    StoreHoursDeleted,
+    StoreHoursEvent,
+    StoreHoursUpdated,
+    StoreOpened,
+    StoreScheduleActivated,
+    StoreScheduleExpired,
+)
 from app.modules.stores.domain.verification import (
     StoreVerification,
     StoreVerificationMetadata,
@@ -56,6 +72,9 @@ from app.modules.stores.domain.verification_events import (
 )
 
 __all__ = [
+    "BusinessStatus",
+    "OpenState",
+    "OperatingInterval",
     "Store",
     "StoreAddress",
     "StoreBannerUploaded",
@@ -63,6 +82,10 @@ __all__ = [
     "StoreContact",
     "StoreCreated",
     "StoreGalleryUploaded",
+    "StoreHoursCreated",
+    "StoreHoursDeleted",
+    "StoreHoursEvent",
+    "StoreHoursUpdated",
     "StoreLogoUploaded",
     "StoreMedia",
     "StoreMediaDeleted",
@@ -81,6 +104,11 @@ __all__ = [
     "StoreMembershipEvent",
     "StoreMembershipRole",
     "StoreMembershipStatus",
+    "StoreOpened",
+    "StoreOperatingHours",
+    "StoreSchedule",
+    "StoreScheduleActivated",
+    "StoreScheduleExpired",
     "StoreStatus",
     "StoreSubmitted",
     "StoreSuspended",

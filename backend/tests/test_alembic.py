@@ -21,6 +21,7 @@ STORE_DOMAIN_REVISION = "d48004d70e46"
 STORE_VERIFICATION_REVISION = "0f7538229016"
 STORE_MEMBERSHIP_REVISION = "47f0ff7d40b8"
 STORE_MEDIA_REVISION = "2eb2bce458d5"
+STORE_OPERATING_HOURS_REVISION = "077498dfaa91"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -37,6 +38,7 @@ STORE_TABLES = {
     "store_media",
     "stores",
     "store_memberships",
+    "store_operating_hours",
     "store_verifications",
 }
 
@@ -59,7 +61,7 @@ def test_alembic_upgrades_application_schema_without_drift(
         assert store_models is not None
         assert IDENTITY_TABLES.issubset(metadata.tables)
         assert STORE_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [STORE_MEDIA_REVISION]
+        assert script.get_heads() == [STORE_OPERATING_HOURS_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -74,6 +76,7 @@ def test_alembic_upgrades_application_schema_without_drift(
             f"{STORE_VERIFICATION_REVISION}_create_store_verification_workflow",
             f"{STORE_MEMBERSHIP_REVISION}_create_store_membership_management",
             f"{STORE_MEDIA_REVISION}_create_store_media_platform",
+            f"{STORE_OPERATING_HOURS_REVISION}_create_store_operating_hours",
         }
 
         command.check(config)

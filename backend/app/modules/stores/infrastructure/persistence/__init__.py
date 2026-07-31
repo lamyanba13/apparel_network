@@ -5,6 +5,9 @@ from app.modules.stores.infrastructure.persistence.membership_models import (
     StoreMembershipModel,
 )
 from app.modules.stores.infrastructure.persistence.models import StoreModel
+from app.modules.stores.infrastructure.persistence.operating_hours_models import (
+    StoreOperatingHoursModel,
+)
 from app.modules.stores.infrastructure.persistence.verification_models import (
     StoreVerificationModel,
 )
@@ -13,5 +16,6 @@ __all__ = [
     "StoreMediaModel",
     "StoreMembershipModel",
     "StoreModel",
+    "StoreOperatingHoursModel",
     "StoreVerificationModel",
 ]
