@@ -50,6 +50,10 @@ def install_custom_openapi(application: FastAPI, settings: Settings) -> None:
                 "name": "Account Security",
                 "description": "Password and email-verification security operations.",
             },
+            {
+                "name": "Stores",
+                "description": "Owned Store profile and lifecycle foundation.",
+            },
         ]
         _install_problem_details_schema(schema)
 
@@ -71,9 +75,7 @@ def install_custom_openapi(application: FastAPI, settings: Settings) -> None:
                     )
                     _normalize_error_responses(operation)
 
-        for route in application.routes:
-            if not isinstance(route, APIRoute):
-                continue
+        for route in _effective_api_routes(application):
             requirements = _authorization_requirements(route.dependant)
             if not requirements:
                 continue
@@ -87,6 +89,19 @@ def install_custom_openapi(application: FastAPI, settings: Settings) -> None:
         return schema
 
     application.openapi = custom_openapi  # type: ignore[method-assign]
+
+
+def _effective_api_routes(application: FastAPI) -> list[Any]:
+    """Return concrete routes across eager and lazy FastAPI router versions."""
+    routes: list[Any] = []
+    for route in application.routes:
+        if isinstance(route, APIRoute):
+            routes.append(route)
+            continue
+        effective_route_contexts = getattr(route, "effective_route_contexts", None)
+        if callable(effective_route_contexts):
+            routes.extend(effective_route_contexts())
+    return routes
 
 
 def _install_problem_details_schema(schema: dict[str, Any]) -> None:

@@ -8,6 +8,7 @@ from pytest import MonkeyPatch
 from app.core.config import get_settings
 from app.database.metadata import metadata
 from app.modules.identity.infrastructure.persistence import models as identity_models
+from app.modules.stores.infrastructure.persistence import models as store_models
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 IDENTITY_REVISION = "b6d38dd509e1"
@@ -16,6 +17,7 @@ SESSION_RISK_REVISION = "a9c2cc1d183e"
 SESSION_LIFECYCLE_REVISION = "d41f63a709b2"
 AUTHORIZATION_REVISION = "f25a7c19e4d0"
 ACCOUNT_SECURITY_REVISION = "c3d91e7a4b62"
+STORE_DOMAIN_REVISION = "d48004d70e46"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -28,9 +30,10 @@ IDENTITY_TABLES = {
     "identity_user_roles",
     "identity_users",
 }
+STORE_TABLES = {"stores"}
 
 
-def test_alembic_upgrades_identity_schema_without_drift(
+def test_alembic_upgrades_application_schema_without_drift(
     monkeypatch: MonkeyPatch,
     database_url: str,
 ) -> None:
@@ -45,8 +48,10 @@ def test_alembic_upgrades_identity_schema_without_drift(
         command.upgrade(config, "head")
 
         assert identity_models is not None
+        assert store_models is not None
         assert IDENTITY_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [ACCOUNT_SECURITY_REVISION]
+        assert STORE_TABLES.issubset(metadata.tables)
+        assert script.get_heads() == [STORE_DOMAIN_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -57,6 +62,7 @@ def test_alembic_upgrades_identity_schema_without_drift(
             f"{SESSION_LIFECYCLE_REVISION}_add_session_lifecycle_metadata",
             f"{AUTHORIZATION_REVISION}_seed_authorization_foundation",
             f"{ACCOUNT_SECURITY_REVISION}_add_account_security_state",
+            f"{STORE_DOMAIN_REVISION}_create_store_domain",
         }
 
         command.check(config)

@@ -1,0 +1,1 @@
+"""Store HTTP transport boundary."""

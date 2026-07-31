@@ -34,6 +34,7 @@ from app.modules.identity.infrastructure.security import (
     JwtTokenService,
     PwdlibPasswordService,
 )
+from app.modules.stores.infrastructure.events import StoreEventPublisher
 from app.observability import (
     MetricsMiddleware,
     configure_fastapi_telemetry,
@@ -119,6 +120,7 @@ def create_application(
     application.state.settings = resolved_settings
     application.state.password_service = PwdlibPasswordService()
     application.state.authentication_events = AuthenticationEventPublisher()
+    application.state.store_events = StoreEventPublisher()
     application.state.account_notifications = None
     application.state.token_service = (
         JwtTokenService(resolved_settings)

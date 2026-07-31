@@ -28,6 +28,7 @@ _SAFE_EXTRA_FIELDS = frozenset(
         "http_method",
         "http_path",
         "operation",
+        "owner_id",
         "permission_name",
         "reason",
         "requirement",
@@ -40,8 +41,11 @@ _SAFE_EXTRA_FIELDS = frozenset(
         "session_id",
         "sessions_deleted",
         "status_code",
+        "store_id",
+        "store_status",
         "user_id",
         "verification_tokens_deleted",
+        "verification_status",
         "violation_codes",
     }
 )

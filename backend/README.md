@@ -63,6 +63,12 @@ are recorded in
 Phase 3 modules may consume Identity ports and principal context but must not
 place business ownership rules inside Identity.
 
+Phase 3.1 adds the separate Store bounded context: owner-scoped Store profile
+CRUD, lifecycle foundations, persistence, typed events, metrics, and a reviewed
+Alembic migration. Verification workflows, staff, catalog, inventory, media,
+search, reservations, and commerce behavior remain outside this phase. See
+[`docs/phase-3.1-store-domain.md`](../docs/phase-3.1-store-domain.md).
+
 From this directory:
 
 ```text

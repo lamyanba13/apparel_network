@@ -145,11 +145,25 @@ ACCOUNT_SECURITY_CLEANUP_RECORDS = Counter(
     "fashion_network_identity_account_security_cleanup_records_total",
     "Expired tokens deleted and expired account locks cleared.",
 )
+STORES_CREATED = Counter(
+    "fashion_network_stores_created_total",
+    "Created Store aggregates.",
+)
+STORES_ACTIVE = Gauge(
+    "fashion_network_stores_active_total",
+    "Current active, non-deleted stores.",
+)
+STORES_VERIFIED = Gauge(
+    "fashion_network_stores_verified_total",
+    "Current verified, non-deleted stores.",
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)
 SESSION_ACTIVE.set(0)
 SESSION_REVOKED.set(0)
+STORES_ACTIVE.set(0)
+STORES_VERIFIED.set(0)
 
 
 def _route_template(scope: Scope) -> str:

@@ -11,9 +11,9 @@ deployment, and incident runbooks. The accepted decisions and review evidence
 are recorded in the [ADRs](docs/adr/README.md) and
 [architecture freeze review](docs/phase-1.6-architecture-freeze.md).
 
-The foundation introduces no authentication, authorization, business logic,
-business models, migrations, or business APIs. `/api/v1` remains an empty
-composition boundary for future reviewed contracts.
+The frozen foundation remains unchanged. Identity is complete and frozen;
+Phase 3.1 introduces the first isolated business bounded context for
+owner-scoped Store profiles and lifecycle foundations.
 
 The Phase 1.4 transport foundations remain unchanged and include disabled-by-default
 rate-limiting and conditional-ETag middleware, validated `Idempotency-Key`
@@ -50,6 +50,10 @@ The Identity foundation implemented in Phases 2.1 through 2.5 is production
 hardened and frozen by the
 [Phase 2.6 review](docs/phase-2.6-identity-freeze.md). New business modules
 consume its stable interfaces without extending Identity behavior.
+
+The [Phase 3.1 Store Domain](docs/phase-3.1-store-domain.md) documents Store
+profile persistence, owner-scoped CRUD, lifecycle states, permissions, events,
+metrics, migration, and the strict boundary before Store Verification.
 
 ## Prerequisite
 

@@ -2,7 +2,9 @@
 
 Fashion Network is a searchable digital inventory network for existing clothing stores in Manipur. It helps customers discover which participating store currently carries a product while each store keeps ownership and physical control of its inventory.
 
-The `docs/` directory is the source of truth for product and technical decisions. The repository contains an implementation-ready application and infrastructure foundation, but no business logic, authentication, business models, or business migrations at the `foundation-v1` freeze.
+The `docs/` directory is the source of truth for product and technical
+decisions. The `foundation-v1` baseline remains frozen; Identity was completed
+and frozen in Phase 2.6, and Phase 3.1 adds the isolated Store domain.
 
 ## Product boundary
 
@@ -67,6 +69,7 @@ Read these documents in order when joining the project:
 33. [Phase 2.5 Account Security](phase-2.5-account-security.md)
 34. [Phase 2.6 Identity Module Freeze](phase-2.6-identity-freeze.md)
 35. [Identity Enterprise Review](identity-enterprise-review.md)
+36. [Phase 3.1 Store Domain](phase-3.1-store-domain.md)
 
 ## Decision authority
 
