@@ -1,5 +1,8 @@
 # Backend foundation
 
+Phase 4.3 includes isolated Product Media persistence, validation, storage
+compensation, and owner-scoped `/api/v1/products/{product_id}/media` routes.
+
 The backend is a Python 3.13 FastAPI modular monolith managed by Poetry.
 
 The frozen `foundation-v1` baseline provides the production operations

@@ -324,3 +324,19 @@ flowchart LR
 Products are Catalog-owned and Store-scoped. Product persistence does not
 introduce inventory, pricing, variants, media, reservations, or new
 infrastructure.
+
+## Phase 4.3 Product Media
+
+```mermaid
+flowchart LR
+    product[Product] --> api[Product Media API]
+    api --> service[Media service]
+    service --> postgres[(PostgreSQL metadata)]
+    service --> storage[StorageProvider / MinIO]
+    service --> events[Safe media events]
+```
+
+Product Media is metadata-owned by Products while binary objects remain in the
+existing storage abstraction. Database transactions and compensating object
+operations are coordinated by the HTTP dependency; Redis and RabbitMQ are not
+used for media persistence.

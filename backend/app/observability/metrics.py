@@ -285,6 +285,18 @@ PRODUCT_COLLECTION_ASSIGNMENTS = Counter(
     "fashion_network_product_collection_assignments_total",
     "Product collection assignments.",
 )
+PRODUCT_MEDIA_UPLOADS = Counter(
+    "fashion_network_product_media_upload_total", "Product media uploads."
+)
+PRODUCT_MEDIA_DELETES = Counter(
+    "fashion_network_product_media_delete_total", "Product media deletions."
+)
+PRODUCT_MEDIA_BYTES = Counter(
+    "fashion_network_product_media_bytes_total", "Product media bytes."
+)
+PRODUCT_MEDIA_FAILURES = Counter(
+    "fashion_network_product_media_failures_total", "Product media failures."
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)

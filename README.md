@@ -22,6 +22,11 @@ contracts, opt-in API deprecation/sunset headers, and adaptive Brotli/GZip
 response compression. No rate policy, Redis limiter, idempotency table, or
 catalog cache behavior is enabled or implemented prematurely.
 
+Phase 4.3 adds Product Media metadata and storage orchestration using the
+existing MinIO-compatible StorageProvider. Product media objects are owned by
+the Product/Catalog boundary and presigned download URLs are generated only at
+request time.
+
 ## Local architecture
 
 ```mermaid
