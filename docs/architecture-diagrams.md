@@ -303,3 +303,24 @@ flowchart LR
 Catalog is Store-owned metadata. It has no dependency on Products, Inventory,
 Pricing, Reservations, or search. PostgreSQL remains the system of record and
 catalog repositories never commit transactions.
+
+## Phase 4.1 Product foundation
+
+```mermaid
+flowchart LR
+    store[Owned Store]
+    catalog[Catalog]
+    api[Product API]
+    product[Product services]
+    postgres[(PostgreSQL products)]
+    events[Safe Product events]
+
+    store --> catalog
+    catalog --> api
+    api --> product --> postgres
+    product --> events
+```
+
+Products are Catalog-owned and Store-scoped. Product persistence does not
+introduce inventory, pricing, variants, media, reservations, or new
+infrastructure.

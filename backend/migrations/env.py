@@ -11,6 +11,7 @@ from app.core.config import get_settings
 from app.database.metadata import metadata
 from app.modules.identity.infrastructure.persistence import models as identity_models
 from app.modules.catalogs.infrastructure import models as catalog_models
+from app.modules.products.infrastructure import models as product_models
 from app.modules.stores.infrastructure.persistence import (
     media_models as store_media_models,
 )
@@ -31,6 +32,7 @@ from app.modules.stores.infrastructure.persistence import (
 _ = (
     identity_models,
     catalog_models,
+    product_models,
     store_analytics_models,
     store_media_models,
     store_membership_models,

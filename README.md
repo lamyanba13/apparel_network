@@ -79,6 +79,10 @@ safe events, and permissions are documented in
 [`docs/phase-4.0-catalog-foundation.md`](docs/phase-4.0-catalog-foundation.md).
 Products, variants, pricing, inventory, and reservations remain out of scope.
 
+Phase 4.1 adds Store-scoped Products inside Catalogs with lifecycle,
+optimistic locking, SKU/slug uniqueness, and permission-protected CRUD. See
+[`docs/phase-4.1-product-foundation.md`](docs/phase-4.1-product-foundation.md).
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

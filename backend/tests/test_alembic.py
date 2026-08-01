@@ -25,6 +25,7 @@ STORE_OPERATING_HOURS_REVISION = "077498dfaa91"
 STORE_ANALYTICS_REVISION = "0f01b7088f73"
 CATALOG_REVISION = "a91c7d4e2f10"
 CATALOG_METADATA_REVISION = "b72e8d19c4f1"
+PRODUCT_REVISION = "c83f1a9e2d04"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -47,6 +48,7 @@ STORE_TABLES = {
     "store_verifications",
 }
 CATALOG_TABLES = {"catalogs"}
+PRODUCT_TABLES = {"products"}
 
 
 def test_alembic_upgrades_application_schema_without_drift(
@@ -68,7 +70,8 @@ def test_alembic_upgrades_application_schema_without_drift(
         assert IDENTITY_TABLES.issubset(metadata.tables)
         assert STORE_TABLES.issubset(metadata.tables)
         assert CATALOG_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [CATALOG_METADATA_REVISION]
+        assert PRODUCT_TABLES.issubset(metadata.tables)
+        assert script.get_heads() == [PRODUCT_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -87,6 +90,7 @@ def test_alembic_upgrades_application_schema_without_drift(
             f"{STORE_ANALYTICS_REVISION}_create_store_analytics_foundation",
             f"{CATALOG_REVISION}_create_catalogs",
             f"{CATALOG_METADATA_REVISION}_add_catalog_lifecycle_metadata",
+            f"{PRODUCT_REVISION}_create_products",
         }
 
         command.check(config)

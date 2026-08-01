@@ -104,3 +104,7 @@ persisted in PostgreSQL with scoped ownership, lifecycle validation, soft
 deletion, optimistic locking, safe events, and catalog permissions. Products,
 variants, pricing, and inventory are intentionally not implemented. See
 [`docs/phase-4.0-catalog-foundation.md`](../docs/phase-4.0-catalog-foundation.md).
+
+Phase 4.1 adds Product persistence and owner-scoped CRUD beneath Catalogs.
+Variants, inventory, pricing, product media, and reservations remain excluded.
+See [`docs/phase-4.1-product-foundation.md`](../docs/phase-4.1-product-foundation.md).

@@ -79,6 +79,7 @@ Read these documents in order when joining the project:
 41. [Phase 3.6 Store Analytics Foundation](phase-3.6-store-analytics-foundation.md)
 42. [Phase 3.7 Store Search and Discovery](phase-3.7-store-search.md)
 43. [Phase 4.0 Catalog Foundation](phase-4.0-catalog-foundation.md)
+44. [Phase 4.1 Product Foundation](phase-4.1-product-foundation.md)
 
 ## Decision authority
 

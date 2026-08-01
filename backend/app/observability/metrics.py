@@ -259,6 +259,12 @@ CATALOGS_DELETED = Counter("fashion_network_catalog_deleted_total", "Catalogs de
 CATALOGS_ARCHIVED = Counter(
     "fashion_network_catalog_archived_total", "Catalogs archived."
 )
+PRODUCTS_CREATED = Counter("fashion_network_product_created_total", "Products created.")
+PRODUCTS_UPDATED = Counter("fashion_network_product_updated_total", "Products updated.")
+PRODUCTS_DELETED = Counter("fashion_network_product_deleted_total", "Products deleted.")
+PRODUCTS_ARCHIVED = Counter(
+    "fashion_network_product_archived_total", "Products archived."
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)
