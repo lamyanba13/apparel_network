@@ -503,6 +503,7 @@ def test_analytics_migration_downgrades_and_reupgrades(
     try:
         command.downgrade(config, "077498dfaa91")
         command.upgrade(config, "0f01b7088f73")
+        command.upgrade(config, "head")
         command.check(config)
     finally:
         get_settings.cache_clear()

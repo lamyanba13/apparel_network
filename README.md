@@ -73,6 +73,12 @@ MinIO/R2 abstraction. PostgreSQL remains authoritative for lifecycle metadata;
 object mutations use rollback compensation; and no product media, workers,
 CDN, frontend, or generic upload API is added.
 
+Phase 4.0 introduces the Store-owned Catalog foundation. Catalog metadata,
+ownership scoping, lifecycle validation, optimistic locking, soft deletion,
+safe events, and permissions are documented in
+[`docs/phase-4.0-catalog-foundation.md`](docs/phase-4.0-catalog-foundation.md).
+Products, variants, pricing, inventory, and reservations remain out of scope.
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

@@ -98,3 +98,9 @@ poetry run uvicorn app.main:app --reload
 
 The normal repository workflow runs these commands through Docker Compose; see
 the root `README.md`.
+
+Phase 4.0 adds the Store-owned Catalog bounded context. Catalog metadata is
+persisted in PostgreSQL with scoped ownership, lifecycle validation, soft
+deletion, optimistic locking, safe events, and catalog permissions. Products,
+variants, pricing, and inventory are intentionally not implemented. See
+[`docs/phase-4.0-catalog-foundation.md`](../docs/phase-4.0-catalog-foundation.md).

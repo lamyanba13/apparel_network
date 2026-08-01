@@ -253,6 +253,12 @@ STORE_SEARCH_FAILURES = Counter(
     "fashion_network_store_search_failures_total",
     "Store search provider or indexing failures.",
 )
+CATALOGS_CREATED = Counter("fashion_network_catalog_created_total", "Catalogs created.")
+CATALOGS_UPDATED = Counter("fashion_network_catalog_updated_total", "Catalogs updated.")
+CATALOGS_DELETED = Counter("fashion_network_catalog_deleted_total", "Catalogs deleted.")
+CATALOGS_ARCHIVED = Counter(
+    "fashion_network_catalog_archived_total", "Catalogs archived."
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)

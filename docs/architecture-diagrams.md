@@ -282,3 +282,24 @@ Meilisearch directly. Only verified, active, public, non-deleted stores are
 projected; owner, contact, membership, audit, and verification-note data is
 never indexed. RabbitMQ is the Celery broker and Redis remains unrelated to
 search durability.
+
+## Phase 4.0 Catalog foundation
+
+```mermaid
+flowchart LR
+    identity[Identity permissions]
+    store[Owned Store]
+    api[Catalog API]
+    service[Catalog application services]
+    postgres[(PostgreSQL catalogs)]
+    events[Safe Catalog events]
+
+    identity --> api
+    store --> api
+    api --> service --> postgres
+    service --> events
+```
+
+Catalog is Store-owned metadata. It has no dependency on Products, Inventory,
+Pricing, Reservations, or search. PostgreSQL remains the system of record and
+catalog repositories never commit transactions.

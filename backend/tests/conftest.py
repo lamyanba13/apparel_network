@@ -34,6 +34,10 @@ def test_settings(database_url: str, test_private_key_pem: str) -> Settings:
         _env_file=None,
         environment="test",
         database_url=database_url,
+        redis_url=os.getenv(
+            "FASHION_NETWORK_TEST_REDIS_URL",
+            "redis://:fashion_network_dev_redis@localhost:6379/0",
+        ),
         database_pool_size=1,
         database_max_overflow=0,
         opentelemetry_exporter_otlp_endpoint=None,

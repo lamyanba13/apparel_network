@@ -23,6 +23,8 @@ STORE_MEMBERSHIP_REVISION = "47f0ff7d40b8"
 STORE_MEDIA_REVISION = "2eb2bce458d5"
 STORE_OPERATING_HOURS_REVISION = "077498dfaa91"
 STORE_ANALYTICS_REVISION = "0f01b7088f73"
+CATALOG_REVISION = "a91c7d4e2f10"
+CATALOG_METADATA_REVISION = "b72e8d19c4f1"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -44,6 +46,7 @@ STORE_TABLES = {
     "store_metric_events",
     "store_verifications",
 }
+CATALOG_TABLES = {"catalogs"}
 
 
 def test_alembic_upgrades_application_schema_without_drift(
@@ -64,7 +67,8 @@ def test_alembic_upgrades_application_schema_without_drift(
         assert store_models is not None
         assert IDENTITY_TABLES.issubset(metadata.tables)
         assert STORE_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [STORE_ANALYTICS_REVISION]
+        assert CATALOG_TABLES.issubset(metadata.tables)
+        assert script.get_heads() == [CATALOG_METADATA_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -81,6 +85,8 @@ def test_alembic_upgrades_application_schema_without_drift(
             f"{STORE_MEDIA_REVISION}_create_store_media_platform",
             f"{STORE_OPERATING_HOURS_REVISION}_create_store_operating_hours",
             f"{STORE_ANALYTICS_REVISION}_create_store_analytics_foundation",
+            f"{CATALOG_REVISION}_create_catalogs",
+            f"{CATALOG_METADATA_REVISION}_add_catalog_lifecycle_metadata",
         }
 
         command.check(config)

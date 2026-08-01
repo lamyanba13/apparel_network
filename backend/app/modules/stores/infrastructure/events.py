@@ -10,7 +10,6 @@ from app.modules.stores.domain.search_events import StoreSearchSyncRequested
 _SYNC_EVENTS = {
     "store.created": "index",
     "store.updated": "update",
-    "store.submitted": "delete",
     "store.verified": "index",
     "store.suspended": "delete",
     "store.closed": "delete",
