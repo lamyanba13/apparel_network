@@ -221,6 +221,22 @@ STORE_CLOSED = Counter(
     "fashion_network_store_closed_total",
     "Store status calculations that resolved to closed.",
 )
+STORE_METRIC_EVENTS = Counter(
+    "fashion_network_store_metric_events_total",
+    "Store operational metric events recorded.",
+)
+STORE_DAILY_UPDATES = Counter(
+    "fashion_network_store_daily_updates_total",
+    "Store daily metric aggregates created or updated.",
+)
+STORE_STORAGE_BYTES = Gauge(
+    "fashion_network_store_storage_bytes",
+    "Latest observed active Store media bytes.",
+)
+STORE_PROFILE_VIEWS = Counter(
+    "fashion_network_store_profile_views_total",
+    "Store profile view metric events recorded.",
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)

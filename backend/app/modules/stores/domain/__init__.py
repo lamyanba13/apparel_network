@@ -1,5 +1,19 @@
 """Framework-independent Store domain contracts."""
 
+from app.modules.stores.domain.analytics import (
+    AnalyticsPeriod,
+    AnalyticsSummary,
+    DailyMetrics,
+    MetricEvent,
+    MetricType,
+    StoreAnalytics,
+)
+from app.modules.stores.domain.analytics_events import (
+    DailyMetricsCreated,
+    StoreAnalyticsEvent,
+    StoreAnalyticsUpdated,
+    StoreMetricRecorded,
+)
 from app.modules.stores.domain.events import (
     StoreClosed,
     StoreCreated,
@@ -72,11 +86,20 @@ from app.modules.stores.domain.verification_events import (
 )
 
 __all__ = [
+    "AnalyticsPeriod",
+    "AnalyticsSummary",
     "BusinessStatus",
+    "DailyMetrics",
+    "DailyMetricsCreated",
+    "MetricEvent",
+    "MetricType",
     "OpenState",
     "OperatingInterval",
     "Store",
     "StoreAddress",
+    "StoreAnalytics",
+    "StoreAnalyticsEvent",
+    "StoreAnalyticsUpdated",
     "StoreBannerUploaded",
     "StoreClosed",
     "StoreContact",
@@ -104,6 +127,7 @@ __all__ = [
     "StoreMembershipEvent",
     "StoreMembershipRole",
     "StoreMembershipStatus",
+    "StoreMetricRecorded",
     "StoreOpened",
     "StoreOperatingHours",
     "StoreSchedule",

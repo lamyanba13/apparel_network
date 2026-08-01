@@ -671,6 +671,7 @@ def test_operating_hours_migration_downgrades_and_reupgrades(
     try:
         command.downgrade(config, "2eb2bce458d5")
         command.upgrade(config, "077498dfaa91")
+        command.upgrade(config, "head")
         command.check(config)
     finally:
         get_settings.cache_clear()

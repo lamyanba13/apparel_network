@@ -12,6 +12,10 @@ from app.database.session import get_db
 from app.modules.identity.infrastructure.persistence.repositories import (
     SqlAlchemyUserRepository,
 )
+from app.modules.stores.application.analytics_services import (
+    StoreAnalyticsAuditService,
+    StoreAnalyticsService,
+)
 from app.modules.stores.application.media_services import (
     StoreMediaAuditService,
     StoreMediaService,
@@ -42,9 +46,16 @@ from app.modules.stores.application.verification_services import (
     VerificationLifecycleService,
     VerificationPolicyService,
 )
+from app.modules.stores.infrastructure.analytics_events import (
+    StoreAnalyticsEventPublisher,
+)
 from app.modules.stores.infrastructure.media_storage import MinIOStorageProvider
 from app.modules.stores.infrastructure.media_transactions import (
     StoreMediaStorageTransaction,
+)
+from app.modules.stores.infrastructure.persistence.analytics_repositories import (
+    SqlAlchemyStoreAnalyticsRepository,
+    SqlAlchemyStoreAnalyticsSourceRepository,
 )
 from app.modules.stores.infrastructure.persistence.media_repositories import (
     SqlAlchemyStoreMediaRepository,
@@ -63,11 +74,32 @@ from app.modules.stores.infrastructure.persistence.verification_repositories imp
 )
 
 
+def _analytics_service(
+    request: Request,
+    session: AsyncSession,
+) -> StoreAnalyticsService:
+    delegate = cast(EventPublisher, request.app.state.store_events)
+    return StoreAnalyticsService(
+        SqlAlchemyStoreRepository(session),
+        SqlAlchemyStoreAnalyticsRepository(session),
+        SqlAlchemyStoreAnalyticsSourceRepository(session),
+        StoreAnalyticsAuditService(delegate),
+    )
+
+
+def _store_events(request: Request, session: AsyncSession) -> EventPublisher:
+    delegate = cast(EventPublisher, request.app.state.store_events)
+    return StoreAnalyticsEventPublisher(
+        delegate,
+        _analytics_service(request, session),
+    )
+
+
 async def store_service_dependency(
     request: Request,
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> AsyncIterator[StoreService]:
-    events = cast(EventPublisher, request.app.state.store_events)
+    events = _store_events(request, session)
     try:
         yield StoreService(
             SqlAlchemyStoreRepository(session),
@@ -91,7 +123,7 @@ async def store_verification_service_dependency(
     request: Request,
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> AsyncIterator[StoreVerificationService]:
-    events = cast(EventPublisher, request.app.state.store_events)
+    events = _store_events(request, session)
     stores = SqlAlchemyStoreRepository(session)
     verifications = SqlAlchemyStoreVerificationRepository(session)
     policy = VerificationPolicyService()
@@ -122,7 +154,7 @@ async def store_membership_service_dependency(
     request: Request,
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> AsyncIterator[StoreMembershipService]:
-    events = cast(EventPublisher, request.app.state.store_events)
+    events = _store_events(request, session)
     stores = SqlAlchemyStoreRepository(session)
     memberships = SqlAlchemyStoreMembershipRepository(session)
     audit = MembershipAuditService(events)
@@ -173,7 +205,7 @@ async def store_media_service_dependency(
         region=settings.s3_region,
     )
     storage_transaction = StoreMediaStorageTransaction(storage)
-    events = cast(EventPublisher, request.app.state.store_events)
+    events = _store_events(request, session)
     committed = False
     try:
         yield StoreMediaService(
@@ -208,7 +240,7 @@ async def store_operating_hours_service_dependency(
     request: Request,
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> AsyncIterator[StoreOperatingHoursService]:
-    events = cast(EventPublisher, request.app.state.store_events)
+    events = _store_events(request, session)
     try:
         yield StoreOperatingHoursService(
             SqlAlchemyStoreRepository(session),
@@ -225,4 +257,22 @@ async def store_operating_hours_service_dependency(
 StoreOperatingHoursServiceDependency = Annotated[
     StoreOperatingHoursService,
     Depends(store_operating_hours_service_dependency),
+]
+
+
+async def store_analytics_service_dependency(
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> AsyncIterator[StoreAnalyticsService]:
+    try:
+        yield _analytics_service(request, session)
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
+
+
+StoreAnalyticsServiceDependency = Annotated[
+    StoreAnalyticsService,
+    Depends(store_analytics_service_dependency),
 ]

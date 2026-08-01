@@ -220,6 +220,7 @@ flowchart TB
     media[Media]
     hours[Operating hours]
     status[Business status resolver]
+    storeAnalytics[Operational analytics]
 
     identity[Identity public contracts]
     postgres[(PostgreSQL)]
@@ -232,6 +233,7 @@ flowchart TB
     store --> membership
     store --> media
     store --> hours
+    store --> storeAnalytics
     hours --> status
 
     profile --> postgres
@@ -240,6 +242,7 @@ flowchart TB
     media --> postgres
     media --> objects
     hours --> postgres
+    storeAnalytics --> postgres
 
     store -. principal and permission contracts .-> identity
     store --> telemetry
@@ -250,3 +253,7 @@ Operating hours do not represent inventory availability, reservation
 capacity, delivery windows, or employee shifts. PostgreSQL remains
 authoritative; the status resolver requires no Redis, RabbitMQ, search, or
 background-job dependency.
+
+Store operational analytics is a transactional PostgreSQL projection over
+safe Store events. It is not a separate service, warehouse, PostHog dataset,
+or business-intelligence boundary. Redis and RabbitMQ are not involved.

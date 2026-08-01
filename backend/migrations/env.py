@@ -18,6 +18,9 @@ from app.modules.stores.infrastructure.persistence import (
 )
 from app.modules.stores.infrastructure.persistence import models as store_models
 from app.modules.stores.infrastructure.persistence import (
+    analytics_models as store_analytics_models,
+)
+from app.modules.stores.infrastructure.persistence import (
     operating_hours_models as store_operating_hours_models,
 )
 from app.modules.stores.infrastructure.persistence import (
@@ -26,6 +29,7 @@ from app.modules.stores.infrastructure.persistence import (
 
 _ = (
     identity_models,
+    store_analytics_models,
     store_media_models,
     store_membership_models,
     store_operating_hours_models,
