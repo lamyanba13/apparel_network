@@ -85,6 +85,7 @@ module = [
 ]
 ignore_missing_imports = true
 follow_untyped_imports = false
+disable_error_code = ["import-untyped"]
 
 [tool.pytest.ini_options]
 addopts = "--strict-config --strict-markers -p no:cacheprovider"

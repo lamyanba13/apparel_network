@@ -80,6 +80,7 @@ Read these documents in order when joining the project:
 42. [Phase 3.7 Store Search and Discovery](phase-3.7-store-search.md)
 43. [Phase 4.0 Catalog Foundation](phase-4.0-catalog-foundation.md)
 44. [Phase 4.1 Product Foundation](phase-4.1-product-foundation.md)
+45. [Phase 4.2 Product Categories and Collections](phase-4.2-product-categories-collections.md)
 
 ## Decision authority
 

@@ -265,6 +265,26 @@ PRODUCTS_DELETED = Counter("fashion_network_product_deleted_total", "Products de
 PRODUCTS_ARCHIVED = Counter(
     "fashion_network_product_archived_total", "Products archived."
 )
+CATEGORIES_CREATED = Counter(
+    "fashion_network_category_created_total", "Categories created."
+)
+CATEGORIES_DELETED = Counter(
+    "fashion_network_category_deleted_total", "Categories deleted."
+)
+COLLECTIONS_CREATED = Counter(
+    "fashion_network_collection_created_total", "Collections created."
+)
+COLLECTIONS_DELETED = Counter(
+    "fashion_network_collection_deleted_total", "Collections deleted."
+)
+PRODUCT_CATEGORY_ASSIGNMENTS = Counter(
+    "fashion_network_product_category_assignments_total",
+    "Product category assignments.",
+)
+PRODUCT_COLLECTION_ASSIGNMENTS = Counter(
+    "fashion_network_product_collection_assignments_total",
+    "Product collection assignments.",
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)

@@ -154,8 +154,8 @@ class SessionService:
         session = await self._repository.add(
             RefreshSessionCreate(
                 user_id=user_id,
-                refresh_token_hash=self._token_service.hash_refresh_token(
-                    refresh_token
+                refresh_token_hash=SecretStr(
+                    self._token_service.hash_refresh_token(refresh_token)
                 ),
                 family_id=uuid7(),
                 device_name=context.device_name,
@@ -210,7 +210,9 @@ class SessionService:
         child = await self._repository.add(
             RefreshSessionCreate(
                 user_id=current.user_id,
-                refresh_token_hash=self._token_service.hash_refresh_token(next_token),
+                refresh_token_hash=SecretStr(
+                    self._token_service.hash_refresh_token(next_token)
+                ),
                 family_id=current.family_id,
                 parent_session_id=current.id,
                 rotation_count=current.rotation_count + 1,

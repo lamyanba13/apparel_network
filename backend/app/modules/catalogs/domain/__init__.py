@@ -11,6 +11,14 @@ from app.modules.catalogs.domain.models import (
     CatalogStatus,
     CatalogVisibility,
 )
+from app.modules.catalogs.domain.taxonomy import (
+    Category,
+    CategoryStatus,
+    Collection,
+    CollectionStatus,
+    CollectionType,
+    Visibility,
+)
 
 __all__ = [
     "Catalog",
@@ -22,4 +30,10 @@ __all__ = [
     "CatalogUpdated",
     "CatalogVisibility",
     "CatalogVisibilityChanged",
+    "Category",
+    "CategoryStatus",
+    "Collection",
+    "CollectionStatus",
+    "CollectionType",
+    "Visibility",
 ]

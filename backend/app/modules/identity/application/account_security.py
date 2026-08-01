@@ -306,7 +306,7 @@ class AccountSecurityService:
                 await self._reset_tokens.add(
                     PasswordResetTokenCreate(
                         user_id=user.id,
-                        token_hash=self._token_service.hash(token),
+                        token_hash=SecretStr(self._token_service.hash(token)),
                         expires_at=expires_at,
                     )
                 )
@@ -382,7 +382,7 @@ class AccountSecurityService:
                 await self._verification_tokens.add(
                     EmailVerificationTokenCreate(
                         user_id=user.id,
-                        token_hash=self._token_service.hash(token),
+                        token_hash=SecretStr(self._token_service.hash(token)),
                         expires_at=expires_at,
                     )
                 )

@@ -26,6 +26,8 @@ STORE_ANALYTICS_REVISION = "0f01b7088f73"
 CATALOG_REVISION = "a91c7d4e2f10"
 CATALOG_METADATA_REVISION = "b72e8d19c4f1"
 PRODUCT_REVISION = "c83f1a9e2d04"
+TAXONOMY_REVISION = "d94e2f7a1b05"
+COLLECTION_TYPE_REVISION = "e12f4a6b8c90"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -49,6 +51,12 @@ STORE_TABLES = {
 }
 CATALOG_TABLES = {"catalogs"}
 PRODUCT_TABLES = {"products"}
+TAXONOMY_TABLES = {
+    "categories",
+    "product_categories",
+    "collections",
+    "collection_products",
+}
 
 
 def test_alembic_upgrades_application_schema_without_drift(
@@ -71,7 +79,8 @@ def test_alembic_upgrades_application_schema_without_drift(
         assert STORE_TABLES.issubset(metadata.tables)
         assert CATALOG_TABLES.issubset(metadata.tables)
         assert PRODUCT_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [PRODUCT_REVISION]
+        assert TAXONOMY_TABLES.issubset(metadata.tables)
+        assert script.get_heads() == [COLLECTION_TYPE_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -91,6 +100,8 @@ def test_alembic_upgrades_application_schema_without_drift(
             f"{CATALOG_REVISION}_create_catalogs",
             f"{CATALOG_METADATA_REVISION}_add_catalog_lifecycle_metadata",
             f"{PRODUCT_REVISION}_create_products",
+            f"{TAXONOMY_REVISION}_create_product_taxonomy",
+            f"{COLLECTION_TYPE_REVISION}_add_collection_type",
         }
 
         command.check(config)
