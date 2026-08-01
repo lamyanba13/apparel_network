@@ -257,3 +257,28 @@ background-job dependency.
 Store operational analytics is a transactional PostgreSQL projection over
 safe Store events. It is not a separate service, warehouse, PostHog dataset,
 or business-intelligence boundary. Redis and RabbitMQ are not involved.
+
+## Phase 3.7 Store search and discovery
+
+```mermaid
+flowchart LR
+    postgres[(PostgreSQL authoritative Store data)]
+    events[Store domain events]
+    rabbit[RabbitMQ]
+    worker[Celery store-search worker]
+    projection[Public Store projection]
+    meili[(Meilisearch stores index)]
+    api[Public search API]
+    admin[System rebuild API]
+
+    postgres --> events --> rabbit --> worker
+    worker --> projection --> meili
+    api --> meili
+    admin --> rabbit
+```
+
+Search is a rebuildable, asynchronous projection. HTTP requests never write
+Meilisearch directly. Only verified, active, public, non-deleted stores are
+projected; owner, contact, membership, audit, and verification-note data is
+never indexed. RabbitMQ is the Celery broker and Redis remains unrelated to
+search durability.

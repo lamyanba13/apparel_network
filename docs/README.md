@@ -77,6 +77,7 @@ Read these documents in order when joining the project:
 39. [Phase 3.4 Store Media](phase-3.4-store-media.md)
 40. [Phase 3.5 Store Operating Hours](phase-3.5-store-operating-hours.md)
 41. [Phase 3.6 Store Analytics Foundation](phase-3.6-store-analytics-foundation.md)
+42. [Phase 3.7 Store Search and Discovery](phase-3.7-store-search.md)
 
 ## Decision authority
 

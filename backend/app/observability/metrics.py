@@ -237,6 +237,22 @@ STORE_PROFILE_VIEWS = Counter(
     "fashion_network_store_profile_views_total",
     "Store profile view metric events recorded.",
 )
+STORE_SEARCH_QUERIES = Counter(
+    "fashion_network_store_search_queries_total",
+    "Public Store search and autocomplete queries.",
+)
+STORE_SEARCH_RESULTS = Counter(
+    "fashion_network_store_search_results_total",
+    "Public Store search results returned.",
+)
+STORE_SEARCH_INDEX_UPDATES = Counter(
+    "fashion_network_store_search_index_updates_total",
+    "Successful Store search index updates.",
+)
+STORE_SEARCH_FAILURES = Counter(
+    "fashion_network_store_search_failures_total",
+    "Store search provider or indexing failures.",
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)

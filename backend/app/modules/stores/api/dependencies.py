@@ -35,6 +35,7 @@ from app.modules.stores.application.operating_hours_services import (
     StoreOperatingHoursService,
     StoreOperatingHoursValidationService,
 )
+from app.modules.stores.application.search_services import StoreSearchService
 from app.modules.stores.application.services import (
     StoreService,
     StoreSlugService,
@@ -71,6 +72,9 @@ from app.modules.stores.infrastructure.persistence.repositories import (
 )
 from app.modules.stores.infrastructure.persistence.verification_repositories import (
     SqlAlchemyStoreVerificationRepository,
+)
+from app.modules.stores.infrastructure.search_repository import (
+    MeilisearchStoreRepository,
 )
 
 
@@ -275,4 +279,18 @@ async def store_analytics_service_dependency(
 StoreAnalyticsServiceDependency = Annotated[
     StoreAnalyticsService,
     Depends(store_analytics_service_dependency),
+]
+
+
+async def store_search_service_dependency(
+    request: Request,
+) -> AsyncIterator[StoreSearchService]:
+    yield StoreSearchService(
+        MeilisearchStoreRepository(cast(Settings, request.app.state.settings))
+    )
+
+
+StoreSearchServiceDependency = Annotated[
+    StoreSearchService,
+    Depends(store_search_service_dependency),
 ]

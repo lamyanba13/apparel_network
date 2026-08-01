@@ -1,4 +1,5 @@
 from celery import Celery
+from kombu import Exchange, Queue
 
 from app.core.config import settings
 from app.observability import configure_celery_telemetry, configure_sentry
@@ -17,4 +18,32 @@ celery_app.conf.update(
     task_ignore_result=True,
     task_serializer="json",
     timezone="UTC",
+    include=["app.modules.stores.infrastructure.search_tasks"],
+    task_default_queue="store-search",
+    task_queues=(
+        Queue(
+            "store-search",
+            exchange=Exchange("store-search"),
+            routing_key="store-search",
+            queue_arguments={
+                "x-dead-letter-exchange": "store-search-dlx",
+                "x-dead-letter-routing-key": "store-search-dead-letter",
+            },
+        ),
+        Queue(
+            "store-search-dead-letter",
+            exchange=Exchange("store-search-dlx"),
+            routing_key="store-search-dead-letter",
+        ),
+    ),
+    task_routes={
+        "stores.search.*": {
+            "queue": "store-search",
+            "routing_key": "store-search",
+        }
+    },
+)
+
+from app.modules.stores.infrastructure import (  # noqa: E402,F401
+    search_tasks as _search_tasks,
 )

@@ -34,6 +34,7 @@ from app.modules.identity.infrastructure.security import (
     JwtTokenService,
     PwdlibPasswordService,
 )
+from app.modules.stores.domain.search_events import StoreSearchSyncRequested
 from app.modules.stores.infrastructure.events import StoreEventPublisher
 from app.observability import (
     MetricsMiddleware,
@@ -120,7 +121,9 @@ def create_application(
     application.state.settings = resolved_settings
     application.state.password_service = PwdlibPasswordService()
     application.state.authentication_events = AuthenticationEventPublisher()
-    application.state.store_events = StoreEventPublisher()
+    application.state.store_events = StoreEventPublisher(
+        dispatcher=_dispatch_store_search_sync,
+    )
     application.state.account_notifications = None
     application.state.token_service = (
         JwtTokenService(resolved_settings)
@@ -201,6 +204,18 @@ def create_application(
     install_custom_openapi(application, resolved_settings)
     configure_fastapi_telemetry(application, resolved_settings)
     return application
+
+
+def _dispatch_store_search_sync(event: StoreSearchSyncRequested) -> None:
+    from app.worker import celery_app
+
+    celery_app.send_task(
+        "stores.search.sync",
+        kwargs={
+            "store_id": str(event.store_id),
+            "operation": event.operation,
+        },
+    )
 
 
 def _application_lifespan(
