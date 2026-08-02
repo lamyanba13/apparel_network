@@ -29,6 +29,7 @@ PRODUCT_REVISION = "c83f1a9e2d04"
 TAXONOMY_REVISION = "d94e2f7a1b05"
 COLLECTION_TYPE_REVISION = "e12f4a6b8c90"
 PRODUCT_MEDIA_REVISION = "f43b2c1d9e80"
+PRODUCT_VARIANTS_REVISION = "697a9e0d3c1b"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -51,7 +52,7 @@ STORE_TABLES = {
     "store_verifications",
 }
 CATALOG_TABLES = {"catalogs"}
-PRODUCT_TABLES = {"products"}
+PRODUCT_TABLES = {"products", "product_variants"}
 TAXONOMY_TABLES = {
     "categories",
     "product_categories",
@@ -83,7 +84,7 @@ def test_alembic_upgrades_application_schema_without_drift(
         assert PRODUCT_TABLES.issubset(metadata.tables)
         assert TAXONOMY_TABLES.issubset(metadata.tables)
         assert PRODUCT_MEDIA_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [PRODUCT_MEDIA_REVISION]
+        assert script.get_heads() == [PRODUCT_VARIANTS_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -106,6 +107,7 @@ def test_alembic_upgrades_application_schema_without_drift(
             f"{TAXONOMY_REVISION}_create_product_taxonomy",
             f"{COLLECTION_TYPE_REVISION}_add_collection_type",
             f"{PRODUCT_MEDIA_REVISION}_create_product_media",
+            f"{PRODUCT_VARIANTS_REVISION}_create_product_variants",
         }
 
         command.check(config)

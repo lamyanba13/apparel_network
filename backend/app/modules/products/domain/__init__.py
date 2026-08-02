@@ -9,6 +9,7 @@ from app.modules.products.domain.models import (
     ProductStatus,
     ProductVisibility,
 )
+from app.modules.products.domain.variants import ProductVariant
 
 __all__ = [
     "Product",
@@ -17,5 +18,6 @@ __all__ = [
     "ProductDeleted",
     "ProductStatus",
     "ProductUpdated",
+    "ProductVariant",
     "ProductVisibility",
 ]

@@ -265,6 +265,15 @@ PRODUCTS_DELETED = Counter("fashion_network_product_deleted_total", "Products de
 PRODUCTS_ARCHIVED = Counter(
     "fashion_network_product_archived_total", "Products archived."
 )
+PRODUCT_VARIANTS_CREATED = Counter(
+    "fashion_network_product_variant_created_total", "Product variants created."
+)
+PRODUCT_VARIANTS_UPDATED = Counter(
+    "fashion_network_product_variant_updated_total", "Product variants updated."
+)
+PRODUCT_VARIANTS_DELETED = Counter(
+    "fashion_network_product_variant_deleted_total", "Product variants deleted."
+)
 CATEGORIES_CREATED = Counter(
     "fashion_network_category_created_total", "Categories created."
 )

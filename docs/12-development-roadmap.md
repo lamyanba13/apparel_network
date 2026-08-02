@@ -148,6 +148,32 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Upload security and object-permission reviews pass.
 - Catalog changes are transactional, audited, and observable.
 
+## Phase 4.8 — Variant Normalization and Event Outbox
+
+### Outcomes
+
+- Product variants become controlled, searchable, localized domain records while
+  preserving the Phase 4.4 management API.
+
+### Work
+
+- Introduce controlled attribute definitions, valid attribute values, and
+  normalized variant-attribute associations.
+- Backfill existing Phase 4.4 JSONB attributes, retain the canonical signature,
+  and reject unmapped attributes before public product publication depends on
+  them.
+- Emit safe `ProductVariantCreated`, `ProductVariantUpdated`, and
+  `ProductVariantDeleted` domain events through the transactional outbox.
+- Project idempotent variant events to search, analytics, cache invalidation,
+  notifications, and future inventory consumers.
+
+### Exit gate
+
+- Variant attributes are controlled, queryable, and localization-ready.
+- The existing variant API remains backward-compatible during migration.
+- Variant writes, audit records, and outbox events commit atomically.
+- Search and analytics consumers tolerate replay and duplicate delivery.
+
 ## Phase 5 — Inventory
 
 ### Outcomes

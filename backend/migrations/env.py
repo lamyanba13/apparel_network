@@ -12,6 +12,7 @@ from app.database.metadata import metadata
 from app.modules.identity.infrastructure.persistence import models as identity_models
 from app.modules.catalogs.infrastructure import models as catalog_models
 from app.modules.products.infrastructure import models as product_models
+from app.modules.products.infrastructure import variant_models as product_variant_models
 from app.modules.products.infrastructure import media_models as product_media_models
 from app.modules.catalogs.infrastructure import taxonomy_models
 from app.modules.stores.infrastructure.persistence import (
@@ -35,6 +36,7 @@ _ = (
     identity_models,
     catalog_models,
     product_models,
+    product_variant_models,
     product_media_models,
     taxonomy_models,
     store_analytics_models,

@@ -7,7 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.common.events import EventPublisher
 from app.database.session import get_db
 from app.modules.products.application.services import ProductService
+from app.modules.products.application.variant_services import ProductVariantService
 from app.modules.products.infrastructure.repositories import SqlAlchemyProductRepository
+from app.modules.products.infrastructure.variant_repositories import (
+    SqlAlchemyProductVariantRepository,
+)
 
 
 async def product_service_dependency(
@@ -24,4 +28,20 @@ async def product_service_dependency(
 
 ProductServiceDependency = Annotated[
     ProductService, Depends(product_service_dependency)
+]
+
+
+async def product_variant_service_dependency(
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> AsyncIterator[ProductVariantService]:
+    try:
+        yield ProductVariantService(SqlAlchemyProductVariantRepository(session))
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
+
+
+ProductVariantServiceDependency = Annotated[
+    ProductVariantService, Depends(product_variant_service_dependency)
 ]

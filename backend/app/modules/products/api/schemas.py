@@ -54,3 +54,31 @@ class ProductResponse(BaseModel):
 class ProductListResponse(BaseModel):
     items: list[ProductResponse]
     page: PageMetadata
+
+
+class ProductVariantCreateRequest(BaseModel):
+    reference: str = Field(max_length=64, examples=["LN-SHIRT-NAVY-M"])
+    attributes: dict[str, str] = Field(min_length=1, max_length=12)
+    sort_order: int = Field(default=0, ge=0)
+
+
+class ProductVariantUpdateRequest(BaseModel):
+    reference: str | None = Field(default=None, max_length=64)
+    attributes: dict[str, str] | None = Field(default=None, min_length=1, max_length=12)
+    sort_order: int | None = Field(default=None, ge=0)
+    is_active: bool | None = None
+    version: int = Field(ge=1)
+
+
+class ProductVariantResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    product_id: UUID
+    store_id: UUID
+    reference: str
+    attributes: dict[str, str]
+    sort_order: int
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    version: int
