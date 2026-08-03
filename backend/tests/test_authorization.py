@@ -160,6 +160,9 @@ async def test_default_roles_permissions_assignment_and_resolution(
         "reservation:create",
         "admin:access",
         "system:manage",
+        "price:create",
+        "price:view",
+        "price:update",
     }
 
     user = await SqlAlchemyUserRepository(authorization_session).add(

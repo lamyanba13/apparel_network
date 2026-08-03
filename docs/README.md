@@ -84,6 +84,7 @@ Read these documents in order when joining the project:
 46. [Phase 4.3 Product Media](phase-4.3-product-media.md)
 47. [Phase 4.4 Product Variants](phase-4.4-product-variants.md)
 48. [Phase 4.5 Inventory Foundation](phase-4.5-inventory-foundation.md)
+49. [Phase 4.6 Product Pricing Foundation](phase-4.6-product-pricing.md)
 
 ## Decision authority
 

@@ -277,6 +277,18 @@ INVENTORY_DELETED = Counter(
 INVENTORY_ADJUSTMENTS = Counter(
     "fashion_network_inventory_adjustments_total", "Inventory adjustments completed."
 )
+PRICES_CREATED = Counter(
+    "fashion_network_price_created_total", "Product prices created."
+)
+PRICES_UPDATED = Counter(
+    "fashion_network_price_updated_total", "Product prices updated."
+)
+PRICES_DELETED = Counter(
+    "fashion_network_price_deleted_total", "Product prices deleted."
+)
+PRICES_ACTIVATED = Counter(
+    "fashion_network_price_activated_total", "Product prices activated."
+)
 PRODUCT_VARIANTS_CREATED = Counter(
     "fashion_network_product_variant_created_total", "Product variants created."
 )

@@ -94,6 +94,11 @@ optimistic locking, and safe inventory events. Reservations, movements, and
 public availability projections remain outside scope. See
 [`docs/phase-4.5-inventory-foundation.md`](docs/phase-4.5-inventory-foundation.md).
 
+Phase 4.6 adds Product Pricing as a bounded context separate from Product, with
+decimal Money validation, multi-currency-ready effective periods, lifecycle,
+owner-scoped CRUD, optimistic locking, audit attribution, safe events, and metrics.
+See [`docs/phase-4.6-product-pricing.md`](docs/phase-4.6-product-pricing.md).
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

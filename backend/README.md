@@ -117,3 +117,9 @@ enforces one inventory record per variant and the non-negative derived quantity
 invariant; repositories flush only and request dependencies own commits and
 rollbacks. See
 [`docs/phase-4.5-inventory-foundation.md`](../docs/phase-4.5-inventory-foundation.md).
+
+Phase 4.6 introduces Product Pricing as an independent bounded context. Pricing
+owns fixed-precision commercial amounts, currency and effective-period validation,
+lifecycle, optimistic locking, soft deletion, events, metrics, and owner-scoped
+HTTP persistence. See
+[`docs/phase-4.6-product-pricing.md`](../docs/phase-4.6-product-pricing.md).

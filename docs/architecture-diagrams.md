@@ -355,3 +355,25 @@ flowchart LR
 Inventory is a separate bounded context. It owns one authoritative stock record
 per active Product Variant and does not own reservations, movement history,
 search projections, pricing, or multi-location operations.
+
+## Phase 4.6 Product Pricing Foundation
+
+```mermaid
+flowchart LR
+    identity[Pricing permissions] --> api[Product Pricing API]
+    store[Owned Store] --> policy[Pricing ownership policy]
+    catalog[Catalog] --> policy
+    product[Product] --> policy
+    variant[Optional Product Variant] --> policy
+    api --> service[Pricing application service]
+    service --> policy
+    service --> repository[Pricing repository]
+    repository --> postgres[(PostgreSQL product_prices)]
+    service --> events[Identifier-only Pricing events]
+    service --> metrics[Low-cardinality Pricing metrics]
+```
+
+Pricing is independent from Product description and Inventory quantity. Its
+application policy validates the complete Store/Catalog/Product/Variant ownership
+chain, while PostgreSQL owns price constraints, effective periods, audit state,
+soft deletion, and optimistic version persistence.

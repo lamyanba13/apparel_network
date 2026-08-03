@@ -154,6 +154,16 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Enforce derived available quantity, tenant isolation, optimistic locking, and
   identifier-only inventory events without adding reservations or movements.
 
+### Phase 4.6 — Product Pricing Foundation
+
+- Separate commercial pricing from descriptive Product data.
+- Persist Store/Product/optional Variant prices with decimal Money rules,
+  currency and effective-period validation, lifecycle, optimistic locking,
+  ownership enforcement, audit attribution, safe events, and metrics.
+- Establish extension points for promotions, coupons, regional and customer-group
+  pricing, scheduled prices, multi-currency selection, and flash sales without
+  implementing those capabilities in the foundation.
+
 ## Phase 4.8 — Variant Normalization and Event Outbox
 
 ### Outcomes
