@@ -7,8 +7,8 @@ Create Date: 2026-07-31 07:34:54.888132+00:00
 
 from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision: str = "47f0ff7d40b8"
 down_revision: str | Sequence[str] | None = "0f7538229016"
@@ -67,11 +67,15 @@ def upgrade() -> None:
         ),
         sa.Column("version", sa.Integer(), server_default=sa.text("1"), nullable=False),
         sa.CheckConstraint(
-            "(role = 'owner' AND status = 'active' AND accepted_at IS NOT NULL AND invitation_expires_at IS NULL) OR role <> 'owner'",
+            "(role = 'owner' AND status = 'active' AND accepted_at IS NOT NULL AND "
+            "invitation_expires_at IS NULL) OR role <> 'owner'",
             name=op.f("ck_store_memberships_owner_active"),
         ),
         sa.CheckConstraint(
-            "(status = 'pending' AND accepted_at IS NULL AND removed_at IS NULL AND invitation_expires_at IS NOT NULL) OR (status IN ('active', 'suspended') AND accepted_at IS NOT NULL AND removed_at IS NULL) OR (status IN ('declined', 'removed', 'expired') AND removed_at IS NOT NULL)",
+            "(status = 'pending' AND accepted_at IS NULL AND removed_at IS NULL AND "
+            "invitation_expires_at IS NOT NULL) OR (status IN ('active', 'suspended') "
+            "AND accepted_at IS NOT NULL AND removed_at IS NULL) OR (status IN "
+            "('declined', 'removed', 'expired') AND removed_at IS NOT NULL)",
             name=op.f("ck_store_memberships_lifecycle_consistent"),
         ),
         sa.CheckConstraint(

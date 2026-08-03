@@ -1,5 +1,7 @@
 """create product categories and collections"""
+
 from collections.abc import Sequence
+
 import sqlalchemy as sa
 from alembic import op
 
@@ -10,16 +12,162 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    op.create_table("categories", sa.Column("id", sa.Uuid(), nullable=False), sa.Column("store_id", sa.Uuid(), nullable=False), sa.Column("name", sa.String(150), nullable=False), sa.Column("slug", sa.String(180), nullable=False), sa.Column("description", sa.Text()), sa.Column("parent_category_id", sa.Uuid()), sa.Column("sort_order", sa.Integer(), server_default="0", nullable=False), sa.Column("status", sa.Enum("draft", "active", "archived", native_enum=False), server_default="draft", nullable=False), sa.Column("visibility", sa.Enum("public", "private", "hidden", native_enum=False), server_default="private", nullable=False), sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False), sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False), sa.Column("deleted_at", sa.DateTime(timezone=True)), sa.Column("version", sa.Integer(), server_default="1", nullable=False), sa.Column("created_by_id", sa.Uuid()), sa.Column("updated_by_id", sa.Uuid()), sa.ForeignKeyConstraint(["store_id"], ["stores.id"], ondelete="RESTRICT"), sa.ForeignKeyConstraint(["parent_category_id"], ["categories.id"], ondelete="RESTRICT"), sa.PrimaryKeyConstraint("id"), sa.UniqueConstraint("store_id", "slug", name="uq_categories_store_slug"), sa.CheckConstraint("version >= 1", name="categories_version_positive"), sa.CheckConstraint("sort_order >= 0", name="categories_sort_order_non_negative"), sa.CheckConstraint("deleted_at IS NULL OR status = 'archived'", name="categories_deleted_archived"))
-    op.create_table("collections", sa.Column("id", sa.Uuid(), nullable=False), sa.Column("store_id", sa.Uuid(), nullable=False), sa.Column("name", sa.String(150), nullable=False), sa.Column("slug", sa.String(180), nullable=False), sa.Column("description", sa.Text()), sa.Column("sort_order", sa.Integer(), server_default="0", nullable=False), sa.Column("status", sa.Enum("draft", "active", "archived", native_enum=False), server_default="draft", nullable=False), sa.Column("visibility", sa.Enum("public", "private", "hidden", native_enum=False), server_default="private", nullable=False), sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False), sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False), sa.Column("deleted_at", sa.DateTime(timezone=True)), sa.Column("version", sa.Integer(), server_default="1", nullable=False), sa.Column("created_by_id", sa.Uuid()), sa.Column("updated_by_id", sa.Uuid()), sa.ForeignKeyConstraint(["store_id"], ["stores.id"], ondelete="RESTRICT"), sa.PrimaryKeyConstraint("id"), sa.UniqueConstraint("store_id", "slug", name="uq_collections_store_slug"), sa.CheckConstraint("version >= 1", name="collections_version_positive"), sa.CheckConstraint("sort_order >= 0", name="collections_sort_order_non_negative"), sa.CheckConstraint("deleted_at IS NULL OR status = 'archived'", name="collections_deleted_archived"))
-    op.create_table("product_categories", sa.Column("product_id", sa.Uuid(), nullable=False), sa.Column("category_id", sa.Uuid(), nullable=False), sa.ForeignKeyConstraint(["product_id"], ["products.id"], ondelete="CASCADE"), sa.ForeignKeyConstraint(["category_id"], ["categories.id"], ondelete="CASCADE"), sa.PrimaryKeyConstraint("product_id", "category_id"))
-    op.create_table("collection_products", sa.Column("collection_id", sa.Uuid(), nullable=False), sa.Column("product_id", sa.Uuid(), nullable=False), sa.Column("display_order", sa.Integer(), server_default="0", nullable=False), sa.ForeignKeyConstraint(["collection_id"], ["collections.id"], ondelete="CASCADE"), sa.ForeignKeyConstraint(["product_id"], ["products.id"], ondelete="CASCADE"), sa.PrimaryKeyConstraint("collection_id", "product_id"), sa.CheckConstraint("display_order >= 0", name="collection_products_order_non_negative"))
-    for name, table, columns in (("ix_categories_store_id", "categories", ["store_id"]), ("ix_categories_parent", "categories", ["parent_category_id"]), ("ix_categories_status", "categories", ["status"]), ("ix_categories_visibility", "categories", ["visibility"]), ("ix_categories_slug", "categories", ["slug"]), ("ix_collections_store_id", "collections", ["store_id"]), ("ix_collections_status", "collections", ["status"]), ("ix_collections_visibility", "collections", ["visibility"]), ("ix_collections_slug", "collections", ["slug"]), ("ix_product_categories_product", "product_categories", ["product_id"]), ("ix_product_categories_category", "product_categories", ["category_id"]), ("ix_collection_products_collection", "collection_products", ["collection_id"]), ("ix_collection_products_product", "collection_products", ["product_id"])):
+    op.create_table(
+        "categories",
+        sa.Column("id", sa.Uuid(), nullable=False),
+        sa.Column("store_id", sa.Uuid(), nullable=False),
+        sa.Column("name", sa.String(150), nullable=False),
+        sa.Column("slug", sa.String(180), nullable=False),
+        sa.Column("description", sa.Text()),
+        sa.Column("parent_category_id", sa.Uuid()),
+        sa.Column("sort_order", sa.Integer(), server_default="0", nullable=False),
+        sa.Column(
+            "status",
+            sa.Enum("draft", "active", "archived", native_enum=False),
+            server_default="draft",
+            nullable=False,
+        ),
+        sa.Column(
+            "visibility",
+            sa.Enum("public", "private", "hidden", native_enum=False),
+            server_default="private",
+            nullable=False,
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
+        sa.Column("deleted_at", sa.DateTime(timezone=True)),
+        sa.Column("version", sa.Integer(), server_default="1", nullable=False),
+        sa.Column("created_by_id", sa.Uuid()),
+        sa.Column("updated_by_id", sa.Uuid()),
+        sa.ForeignKeyConstraint(["store_id"], ["stores.id"], ondelete="RESTRICT"),
+        sa.ForeignKeyConstraint(
+            ["parent_category_id"], ["categories.id"], ondelete="RESTRICT"
+        ),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("store_id", "slug", name="uq_categories_store_slug"),
+        sa.CheckConstraint("version >= 1", name="categories_version_positive"),
+        sa.CheckConstraint(
+            "sort_order >= 0", name="categories_sort_order_non_negative"
+        ),
+        sa.CheckConstraint(
+            "deleted_at IS NULL OR status = 'archived'",
+            name="categories_deleted_archived",
+        ),
+    )
+    op.create_table(
+        "collections",
+        sa.Column("id", sa.Uuid(), nullable=False),
+        sa.Column("store_id", sa.Uuid(), nullable=False),
+        sa.Column("name", sa.String(150), nullable=False),
+        sa.Column("slug", sa.String(180), nullable=False),
+        sa.Column("description", sa.Text()),
+        sa.Column("sort_order", sa.Integer(), server_default="0", nullable=False),
+        sa.Column(
+            "status",
+            sa.Enum("draft", "active", "archived", native_enum=False),
+            server_default="draft",
+            nullable=False,
+        ),
+        sa.Column(
+            "visibility",
+            sa.Enum("public", "private", "hidden", native_enum=False),
+            server_default="private",
+            nullable=False,
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
+        sa.Column("deleted_at", sa.DateTime(timezone=True)),
+        sa.Column("version", sa.Integer(), server_default="1", nullable=False),
+        sa.Column("created_by_id", sa.Uuid()),
+        sa.Column("updated_by_id", sa.Uuid()),
+        sa.ForeignKeyConstraint(["store_id"], ["stores.id"], ondelete="RESTRICT"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("store_id", "slug", name="uq_collections_store_slug"),
+        sa.CheckConstraint("version >= 1", name="collections_version_positive"),
+        sa.CheckConstraint(
+            "sort_order >= 0", name="collections_sort_order_non_negative"
+        ),
+        sa.CheckConstraint(
+            "deleted_at IS NULL OR status = 'archived'",
+            name="collections_deleted_archived",
+        ),
+    )
+    op.create_table(
+        "product_categories",
+        sa.Column("product_id", sa.Uuid(), nullable=False),
+        sa.Column("category_id", sa.Uuid(), nullable=False),
+        sa.ForeignKeyConstraint(["product_id"], ["products.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["category_id"], ["categories.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("product_id", "category_id"),
+    )
+    op.create_table(
+        "collection_products",
+        sa.Column("collection_id", sa.Uuid(), nullable=False),
+        sa.Column("product_id", sa.Uuid(), nullable=False),
+        sa.Column("display_order", sa.Integer(), server_default="0", nullable=False),
+        sa.ForeignKeyConstraint(
+            ["collection_id"], ["collections.id"], ondelete="CASCADE"
+        ),
+        sa.ForeignKeyConstraint(["product_id"], ["products.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("collection_id", "product_id"),
+        sa.CheckConstraint(
+            "display_order >= 0", name="collection_products_order_non_negative"
+        ),
+    )
+    for name, table, columns in (
+        ("ix_categories_store_id", "categories", ["store_id"]),
+        ("ix_categories_parent", "categories", ["parent_category_id"]),
+        ("ix_categories_status", "categories", ["status"]),
+        ("ix_categories_visibility", "categories", ["visibility"]),
+        ("ix_categories_slug", "categories", ["slug"]),
+        ("ix_collections_store_id", "collections", ["store_id"]),
+        ("ix_collections_status", "collections", ["status"]),
+        ("ix_collections_visibility", "collections", ["visibility"]),
+        ("ix_collections_slug", "collections", ["slug"]),
+        ("ix_product_categories_product", "product_categories", ["product_id"]),
+        ("ix_product_categories_category", "product_categories", ["category_id"]),
+        ("ix_collection_products_collection", "collection_products", ["collection_id"]),
+        ("ix_collection_products_product", "collection_products", ["product_id"]),
+    ):
         op.create_index(name, table, columns)
 
 
 def downgrade() -> None:
-    for name, table in (("ix_collection_products_product", "collection_products"), ("ix_collection_products_collection", "collection_products"), ("ix_product_categories_category", "product_categories"), ("ix_product_categories_product", "product_categories"), ("ix_collections_slug", "collections"), ("ix_collections_visibility", "collections"), ("ix_collections_status", "collections"), ("ix_collections_store_id", "collections"), ("ix_categories_slug", "categories"), ("ix_categories_visibility", "categories"), ("ix_categories_status", "categories"), ("ix_categories_parent", "categories"), ("ix_categories_store_id", "categories")):
+    for name, table in (
+        ("ix_collection_products_product", "collection_products"),
+        ("ix_collection_products_collection", "collection_products"),
+        ("ix_product_categories_category", "product_categories"),
+        ("ix_product_categories_product", "product_categories"),
+        ("ix_collections_slug", "collections"),
+        ("ix_collections_visibility", "collections"),
+        ("ix_collections_status", "collections"),
+        ("ix_collections_store_id", "collections"),
+        ("ix_categories_slug", "categories"),
+        ("ix_categories_visibility", "categories"),
+        ("ix_categories_status", "categories"),
+        ("ix_categories_parent", "categories"),
+        ("ix_categories_store_id", "categories"),
+    ):
         op.drop_index(name, table_name=table)
     op.drop_table("collection_products")
     op.drop_table("product_categories")

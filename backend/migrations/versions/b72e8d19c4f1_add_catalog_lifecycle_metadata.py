@@ -16,7 +16,9 @@ def upgrade() -> None:
     op.add_column("catalogs", sa.Column("archived_at", sa.DateTime(timezone=True)))
     op.add_column(
         "catalogs",
-        sa.Column("is_default", sa.Boolean(), server_default=sa.text("false"), nullable=False),
+        sa.Column(
+            "is_default", sa.Boolean(), server_default=sa.text("false"), nullable=False
+        ),
     )
     op.create_check_constraint(
         "catalogs_default_active", "catalogs", "is_default = false OR status = 'active'"

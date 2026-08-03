@@ -21,13 +21,33 @@ def upgrade() -> None:
         sa.Column("slug", sa.String(length=180), nullable=False),
         sa.Column("short_description", sa.String(length=500), nullable=True),
         sa.Column("description", sa.Text(), nullable=True),
-        sa.Column("status", sa.Enum("draft", "active", "archived", native_enum=False), server_default="draft", nullable=False),
-        sa.Column("visibility", sa.Enum("public", "private", "hidden", native_enum=False), server_default="private", nullable=False),
+        sa.Column(
+            "status",
+            sa.Enum("draft", "active", "archived", native_enum=False),
+            server_default="draft",
+            nullable=False,
+        ),
+        sa.Column(
+            "visibility",
+            sa.Enum("public", "private", "hidden", native_enum=False),
+            server_default="private",
+            nullable=False,
+        ),
         sa.Column("sku", sa.String(length=64), nullable=False),
         sa.Column("brand", sa.String(length=150), nullable=True),
         sa.Column("sort_order", sa.Integer(), server_default="0", nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("version", sa.Integer(), server_default="1", nullable=False),
         sa.Column("created_by_id", sa.Uuid(), nullable=True),
@@ -39,8 +59,13 @@ def upgrade() -> None:
         sa.UniqueConstraint("store_id", "sku", name="uq_products_store_sku"),
         sa.CheckConstraint("version >= 1", name="products_version_positive"),
         sa.CheckConstraint("sort_order >= 0", name="products_sort_order_non_negative"),
-        sa.CheckConstraint("deleted_at IS NULL OR status = 'archived'", name="products_deleted_archived"),
-        sa.CheckConstraint("char_length(name) BETWEEN 2 AND 200", name="products_name_length"),
+        sa.CheckConstraint(
+            "deleted_at IS NULL OR status = 'archived'",
+            name="products_deleted_archived",
+        ),
+        sa.CheckConstraint(
+            "char_length(name) BETWEEN 2 AND 200", name="products_name_length"
+        ),
     )
     for name, columns in (
         ("ix_products_store_id", ["store_id"]),

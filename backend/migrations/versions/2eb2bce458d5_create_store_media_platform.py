@@ -7,8 +7,8 @@ Create Date: 2026-07-31 08:24:13.119832+00:00
 
 from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision: str = "2eb2bce458d5"
 down_revision: str | Sequence[str] | None = "47f0ff7d40b8"
@@ -77,7 +77,8 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("version", sa.Integer(), server_default=sa.text("1"), nullable=False),
         sa.CheckConstraint(
-            "(status = 'deleted' AND deleted_at IS NOT NULL) OR (status <> 'deleted' AND deleted_at IS NULL)",
+            "(status = 'deleted' AND deleted_at IS NOT NULL) OR "
+            "(status <> 'deleted' AND deleted_at IS NULL)",
             name=op.f("ck_store_media_soft_delete_consistent"),
         ),
         sa.CheckConstraint(
