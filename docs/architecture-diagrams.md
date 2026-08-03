@@ -377,3 +377,27 @@ Pricing is independent from Product description and Inventory quantity. Its
 application policy validates the complete Store/Catalog/Product/Variant ownership
 chain, while PostgreSQL owns price constraints, effective periods, audit state,
 soft deletion, and optimistic version persistence.
+
+## Phase 4.7 Price Lists & Multi-Currency
+
+```mermaid
+flowchart LR
+    identity[Price List and resolution permissions] --> api[Price List API]
+    api --> lists[Price List service]
+    api --> resolver[Pricing resolver]
+    store[Owned Store] --> lists
+    product[Product and optional Variant] --> resolver
+    lists --> listrepo[Price List repositories]
+    listrepo --> postgres[(PostgreSQL)]
+    resolver --> order[Specificity, group, priority, schedule, UUID]
+    order --> postgres
+    lists --> events[Identifier-only events]
+    resolver --> events
+    lists --> metrics[Low-cardinality metrics]
+    resolver --> metrics
+```
+
+Price Lists reference authoritative Product Prices through assignments. The
+resolver never converts currency: it selects only explicit records matching the
+requested ISO-4217 code and timestamp. Unassigned Product Prices provide the
+backward-compatible default-Store fallback.

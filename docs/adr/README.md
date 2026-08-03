@@ -25,6 +25,7 @@ Accepted ADRs are immutable historical records. A material change is documented 
 | [0008](0008-observability.md) | Layered observability strategy | Accepted |
 | [0009](0009-identity-access-and-refresh-tokens.md) | Identity access and refresh token architecture | Accepted |
 | [0010](0010-product-variant-mvp-deferral.md) | Product Variant MVP deferral | Proposed |
+| [0011](0011-pricing-resolution-algorithm.md) | Pricing resolution algorithm | Accepted |
 
 The implementation conformance review and frozen Identity invariants are
 recorded in the [Phase 2.6 Identity Module Freeze](../phase-2.6-identity-freeze.md).

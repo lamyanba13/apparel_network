@@ -1,0 +1,26 @@
+from __future__ import annotations
+
+# ruff: noqa: SIM905
+
+# ISO 4217 active currency and fund codes. Values are deliberately local and
+# versioned with the application; Phase 4.7 performs validation, not conversion
+# or exchange-rate synchronization.
+ISO_4217_CODES = frozenset("""
+    AED AFN ALL AMD ANG AOA ARS AUD AWG AZN BAM BBD BDT BGN BHD BIF BMD BND BOB
+    BOV BRL BSD BTN BWP BYN BZD CAD CDF CHE CHF CHW CLF CLP CNY COP COU CRC CUC
+    CUP CVE CZK DJF DKK DOP DZD EGP ERN ETB EUR FJD FKP GBP GEL GHS GIP GMD GNF
+    GTQ GYD HKD HNL HTG HUF IDR ILS INR IQD IRR ISK JMD JOD JPY KES KGS KHR
+    KMF KPW KRW KWD KYD KZT LAK LBP LKR LRD LSL LYD MAD MDL MGA MKD MMK MNT
+    MOP MRU MUR MVR MWK MXN MXV MYR MZN NAD NGN NIO NOK NPR NZD OMR PAB PEN
+    PGK PHP PKR PLN PYG QAR RON RSD RUB RWF SAR SBD SCR SDG SEK SGD SHP SLE SLL
+    SOS SRD SSP STN SVC SYP SZL THB TJS TMT TND TOP TRY TTD TWD TZS UAH UGX
+    USD USN UYI UYU UYW UZS VED VES VND VUV WST XAF XAG XAU XBA XBB XBC XBD
+    XCD XDR XOF XPD XPF XPT XSU XTS XUA XXX YER ZAR ZMW ZWG
+    """.split())
+
+
+def normalize_currency_code(value: str) -> str:
+    normalized = value.strip().upper()
+    if normalized not in ISO_4217_CODES:
+        raise ValueError("currency_code must be an active ISO-4217 code")
+    return normalized

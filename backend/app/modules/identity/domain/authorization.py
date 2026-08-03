@@ -24,6 +24,10 @@ class PermissionName(StrEnum):
     PRICE_CREATE = "price:create"
     PRICE_VIEW = "price:view"
     PRICE_UPDATE = "price:update"
+    PRICE_LIST_CREATE = "price:list:create"
+    PRICE_LIST_VIEW = "price:list:view"
+    PRICE_LIST_UPDATE = "price:list:update"
+    PRICE_RESOLVE = "price:resolve"
     RESERVATION_CREATE = "reservation:create"
     RESERVATION_CANCEL = "reservation:cancel"
     ADMIN_ACCESS = "admin:access"
@@ -57,10 +61,11 @@ class PermissionRegistry:
 
     def parse(self, value: str | PermissionName) -> Permission:
         normalized = value.strip()
-        if normalized.count(":") != 1:
+        segments = normalized.split(":")
+        if len(segments) < 2:
             raise ValueError("permission must use resource:action format")
-        resource, action = normalized.split(":", maxsplit=1)
-        if not _SEGMENT_PATTERN.fullmatch(resource):
+        resource, action = ":".join(segments[:-1]), segments[-1]
+        if not all(_SEGMENT_PATTERN.fullmatch(segment) for segment in segments[:-1]):
             raise ValueError("permission resource must be lowercase snake_case")
         if not _SEGMENT_PATTERN.fullmatch(action):
             raise ValueError("permission action must be lowercase snake_case")

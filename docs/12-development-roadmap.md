@@ -164,6 +164,15 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
   pricing, scheduled prices, multi-currency selection, and flash sales without
   implementing those capabilities in the foundation.
 
+### Phase 4.7 — Price Lists & Multi-Currency
+
+- Add Store-owned Price Lists and Product Price assignments.
+- Resolve explicit ISO-4217 prices by Variant/Product specificity, customer
+  group, priority, effective period, and deterministic tie-breakers.
+- Preserve unassigned Phase 4.6 prices as the default-Store fallback.
+- Exclude promotions, coupons, campaign orchestration, conversion, and
+  exchange-rate synchronization.
+
 ## Phase 4.8 — Variant Normalization and Event Outbox
 
 ### Outcomes

@@ -85,6 +85,7 @@ Read these documents in order when joining the project:
 47. [Phase 4.4 Product Variants](phase-4.4-product-variants.md)
 48. [Phase 4.5 Inventory Foundation](phase-4.5-inventory-foundation.md)
 49. [Phase 4.6 Product Pricing Foundation](phase-4.6-product-pricing.md)
+50. [Phase 4.7 Price Lists & Multi-Currency](phase-4.7-price-lists-and-multi-currency.md)
 
 ## Decision authority
 

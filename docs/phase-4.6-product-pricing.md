@@ -21,7 +21,7 @@ repository implementation into its application layer.
 ## Persistence
 
 `product_prices` stores UUIDv7 identifiers, Store/Product/optional Variant keys,
-ISO-style three-letter currency codes, fixed-precision decimal amounts, tax class,
+ISO-4217 currency codes, fixed-precision decimal amounts, tax class,
 effective bounds, lifecycle status, optimistic version, timestamps, actor audit
 fields, and deletion attribution. PostgreSQL enforces non-negative amounts,
 sale/base and compare-at/base relationships, valid effective periods, archived
@@ -58,3 +58,7 @@ This foundation does not implement promotions, coupons, region/customer-group
 selection, automatic scheduling jobs, tax calculation, flash-sale orchestration,
 or checkout totals. It establishes the schema and module boundary those features
 will extend.
+
+Phase 4.7 extends this foundation with Price Lists, explicit multi-currency
+resolution, schedules, customer groups, and deterministic selection while
+retaining Product Price as the authoritative amount record.

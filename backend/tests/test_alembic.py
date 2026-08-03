@@ -32,6 +32,7 @@ PRODUCT_MEDIA_REVISION = "f43b2c1d9e80"
 PRODUCT_VARIANTS_REVISION = "697a9e0d3c1b"
 INVENTORY_REVISION = "1d2e3f4a5b6c"
 PRICING_REVISION = "2f4a6c8e0b12"
+PRICE_LIST_REVISION = "3a5b7d9f1c24"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -56,7 +57,7 @@ STORE_TABLES = {
 CATALOG_TABLES = {"catalogs"}
 PRODUCT_TABLES = {"products", "product_variants"}
 INVENTORY_TABLES = {"inventory_items"}
-PRICING_TABLES = {"product_prices"}
+PRICING_TABLES = {"product_prices", "price_lists", "price_list_assignments"}
 TAXONOMY_TABLES = {
     "categories",
     "product_categories",
@@ -90,7 +91,7 @@ def test_alembic_upgrades_application_schema_without_drift(
         assert PRICING_TABLES.issubset(metadata.tables)
         assert TAXONOMY_TABLES.issubset(metadata.tables)
         assert PRODUCT_MEDIA_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [PRICING_REVISION]
+        assert script.get_heads() == [PRICE_LIST_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -116,6 +117,7 @@ def test_alembic_upgrades_application_schema_without_drift(
             f"{PRODUCT_VARIANTS_REVISION}_create_product_variants",
             f"{INVENTORY_REVISION}_create_inventory",
             f"{PRICING_REVISION}_create_product_prices",
+            f"{PRICE_LIST_REVISION}_create_price_lists",
         }
 
         command.check(config)

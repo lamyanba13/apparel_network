@@ -251,7 +251,7 @@ class PermissionModel(
             name="action_length",
         ),
         CheckConstraint(
-            "resource ~ '^[a-z][a-z0-9_]{0,99}$'",
+            "resource ~ '^[a-z][a-z0-9_]{0,99}" "(:[a-z][a-z0-9_]{0,99})*$'",
             name="resource_canonical",
         ),
         CheckConstraint(

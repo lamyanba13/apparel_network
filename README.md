@@ -99,6 +99,11 @@ decimal Money validation, multi-currency-ready effective periods, lifecycle,
 owner-scoped CRUD, optimistic locking, audit attribution, safe events, and metrics.
 See [`docs/phase-4.6-product-pricing.md`](docs/phase-4.6-product-pricing.md).
 
+Phase 4.7 adds Store-owned Price Lists, strict ISO-4217 multi-currency selection,
+scheduled and customer-group pricing, assignments, and deterministic resolution
+without promotions or currency conversion. See
+[`docs/phase-4.7-price-lists-and-multi-currency.md`](docs/phase-4.7-price-lists-and-multi-currency.md).
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

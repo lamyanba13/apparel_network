@@ -123,3 +123,9 @@ owns fixed-precision commercial amounts, currency and effective-period validatio
 lifecycle, optimistic locking, soft deletion, events, metrics, and owner-scoped
 HTTP persistence. See
 [`docs/phase-4.6-product-pricing.md`](../docs/phase-4.6-product-pricing.md).
+
+Phase 4.7 extends Pricing with Price Lists, explicit ISO-4217 currencies,
+effective schedules, customer groups, assignments, and the production-backed
+resolver at `/api/v1/pricing/resolve`. It performs no conversion or promotion
+logic. See
+[`docs/phase-4.7-price-lists-and-multi-currency.md`](../docs/phase-4.7-price-lists-and-multi-currency.md).

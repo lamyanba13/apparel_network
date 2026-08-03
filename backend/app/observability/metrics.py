@@ -289,6 +289,22 @@ PRICES_DELETED = Counter(
 PRICES_ACTIVATED = Counter(
     "fashion_network_price_activated_total", "Product prices activated."
 )
+PRICE_LISTS_CREATED = Counter(
+    "fashion_network_price_list_created_total", "Price Lists created."
+)
+PRICE_LISTS_UPDATED = Counter(
+    "fashion_network_price_list_updated_total", "Price Lists updated."
+)
+PRICES_ASSIGNED = Counter(
+    "fashion_network_price_assigned_total", "Prices assigned to Price Lists."
+)
+PRICES_RESOLVED = Counter(
+    "fashion_network_price_resolved_total", "Prices successfully resolved."
+)
+PRICE_RESOLUTION_DURATION = Histogram(
+    "fashion_network_price_resolution_duration_seconds",
+    "Price resolution duration in seconds.",
+)
 PRODUCT_VARIANTS_CREATED = Counter(
     "fashion_network_product_variant_created_total", "Product variants created."
 )
