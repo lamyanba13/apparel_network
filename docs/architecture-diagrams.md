@@ -340,3 +340,18 @@ Product Media is metadata-owned by Products while binary objects remain in the
 existing storage abstraction. Database transactions and compensating object
 operations are coordinated by the HTTP dependency; Redis and RabbitMQ are not
 used for media persistence.
+
+## Phase 4.5 Inventory Foundation
+
+```mermaid
+flowchart LR
+    api[Inventory API] --> service[Inventory application service]
+    service --> repository[Inventory repository]
+    repository --> postgres[(PostgreSQL inventory_items)]
+    service --> events[Safe inventory events]
+    variant[Product Variant] --> repository
+```
+
+Inventory is a separate bounded context. It owns one authoritative stock record
+per active Product Variant and does not own reservations, movement history,
+search projections, pricing, or multi-location operations.

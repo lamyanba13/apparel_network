@@ -9,12 +9,16 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.core.config import get_settings
 from app.database.metadata import metadata
-from app.modules.identity.infrastructure.persistence import models as identity_models
 from app.modules.catalogs.infrastructure import models as catalog_models
+from app.modules.catalogs.infrastructure import taxonomy_models
+from app.modules.identity.infrastructure.persistence import models as identity_models
+from app.modules.inventory.infrastructure import models as inventory_models
+from app.modules.products.infrastructure import media_models as product_media_models
 from app.modules.products.infrastructure import models as product_models
 from app.modules.products.infrastructure import variant_models as product_variant_models
-from app.modules.products.infrastructure import media_models as product_media_models
-from app.modules.catalogs.infrastructure import taxonomy_models
+from app.modules.stores.infrastructure.persistence import (
+    analytics_models as store_analytics_models,
+)
 from app.modules.stores.infrastructure.persistence import (
     media_models as store_media_models,
 )
@@ -22,9 +26,6 @@ from app.modules.stores.infrastructure.persistence import (
     membership_models as store_membership_models,
 )
 from app.modules.stores.infrastructure.persistence import models as store_models
-from app.modules.stores.infrastructure.persistence import (
-    analytics_models as store_analytics_models,
-)
 from app.modules.stores.infrastructure.persistence import (
     operating_hours_models as store_operating_hours_models,
 )
@@ -34,6 +35,7 @@ from app.modules.stores.infrastructure.persistence import (
 
 _ = (
     identity_models,
+    inventory_models,
     catalog_models,
     product_models,
     product_variant_models,

@@ -111,3 +111,9 @@ variants, pricing, and inventory are intentionally not implemented. See
 Phase 4.1 adds Product persistence and owner-scoped CRUD beneath Catalogs.
 Variants, inventory, pricing, product media, and reservations remain excluded.
 See [`docs/phase-4.1-product-foundation.md`](../docs/phase-4.1-product-foundation.md).
+
+Phase 4.5 adds the Inventory Foundation beneath Product Variants. PostgreSQL
+enforces one inventory record per variant and the non-negative derived quantity
+invariant; repositories flush only and request dependencies own commits and
+rollbacks. See
+[`docs/phase-4.5-inventory-foundation.md`](../docs/phase-4.5-inventory-foundation.md).

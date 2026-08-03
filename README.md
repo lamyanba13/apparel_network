@@ -88,6 +88,12 @@ Phase 4.1 adds Store-scoped Products inside Catalogs with lifecycle,
 optimistic locking, SKU/slug uniqueness, and permission-protected CRUD. See
 [`docs/phase-4.1-product-foundation.md`](docs/phase-4.1-product-foundation.md).
 
+Phase 4.5 adds the Inventory Foundation: one PostgreSQL-authoritative inventory
+record per Product Variant, derived available quantity, tenant-scoped CRUD,
+optimistic locking, and safe inventory events. Reservations, movements, and
+public availability projections remain outside scope. See
+[`docs/phase-4.5-inventory-foundation.md`](docs/phase-4.5-inventory-foundation.md).
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

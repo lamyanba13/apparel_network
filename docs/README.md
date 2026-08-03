@@ -83,6 +83,7 @@ Read these documents in order when joining the project:
 45. [Phase 4.2 Product Categories and Collections](phase-4.2-product-categories-collections.md)
 46. [Phase 4.3 Product Media](phase-4.3-product-media.md)
 47. [Phase 4.4 Product Variants](phase-4.4-product-variants.md)
+48. [Phase 4.5 Inventory Foundation](phase-4.5-inventory-foundation.md)
 
 ## Decision authority
 

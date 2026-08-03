@@ -148,6 +148,12 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Upload security and object-permission reviews pass.
 - Catalog changes are transactional, audited, and observable.
 
+### Phase 4.5 — Inventory Foundation
+
+- Establish one PostgreSQL-authoritative inventory record per Product Variant.
+- Enforce derived available quantity, tenant isolation, optimistic locking, and
+  identifier-only inventory events without adding reservations or movements.
+
 ## Phase 4.8 — Variant Normalization and Event Outbox
 
 ### Outcomes

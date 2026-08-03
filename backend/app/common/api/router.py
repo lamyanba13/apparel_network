@@ -5,6 +5,7 @@ from app.modules.catalogs.api.taxonomy_router import router as taxonomy_router
 from app.modules.identity.api.account_router import router as identity_account_router
 from app.modules.identity.api.router import router as identity_auth_router
 from app.modules.identity.api.session_router import router as identity_session_router
+from app.modules.inventory.api.router import router as inventory_router
 from app.modules.products.api.media_router import router as product_media_router
 from app.modules.products.api.router import router as products_router
 from app.modules.products.api.variant_router import router as product_variant_router
@@ -28,6 +29,7 @@ v1_router.include_router(catalogs_router)
 v1_router.include_router(taxonomy_router)
 v1_router.include_router(products_router)
 v1_router.include_router(product_variant_router)
+v1_router.include_router(inventory_router)
 v1_router.include_router(product_media_router)
 v1_router.include_router(store_search_router)
 v1_router.include_router(stores_router)
