@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import fields
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -72,12 +73,39 @@ class FakeSearchRepository:
             processing_time_ms=2,
         )
 
-    async def search(self, **kwargs: object) -> StoreSearchPage:
-        self.search_calls.append(kwargs)
+    async def search(
+        self,
+        *,
+        query: str,
+        filters: Mapping[str, object],
+        sort: str,
+        latitude: float | None,
+        longitude: float | None,
+        radius: int | None,
+        limit: int,
+        offset: int,
+    ) -> StoreSearchPage:
+        self.search_calls.append(
+            {
+                "query": query,
+                "filters": filters,
+                "sort": sort,
+                "latitude": latitude,
+                "longitude": longitude,
+                "radius": radius,
+                "limit": limit,
+                "offset": offset,
+            }
+        )
         return self.page
 
-    async def autocomplete(self, **kwargs: object) -> list[StoreAutocompleteItem]:
-        self.autocomplete_calls.append(kwargs)
+    async def autocomplete(
+        self,
+        *,
+        query: str,
+        limit: int,
+    ) -> Sequence[StoreAutocompleteItem]:
+        self.autocomplete_calls.append({"query": query, "limit": limit})
         return [
             StoreAutocompleteItem(
                 store_id=UUID(int=1),
@@ -85,6 +113,24 @@ class FakeSearchRepository:
                 slug="imphal-fashion",
             )
         ]
+
+    async def index_store(self, document: StoreSearchDocument) -> None:
+        pass
+
+    async def update_store(self, document: StoreSearchDocument) -> None:
+        pass
+
+    async def delete_store(self, store_id: UUID) -> None:
+        pass
+
+    async def bulk_rebuild(
+        self,
+        documents: Sequence[StoreSearchDocument],
+    ) -> None:
+        pass
+
+    async def configure_index(self) -> None:
+        pass
 
 
 async def test_search_normalizes_filters_pagination_and_sorting() -> None:
@@ -215,7 +261,6 @@ def test_public_document_has_no_private_fields() -> None:
 
 
 def test_search_event_payloads_are_safe() -> None:
-    kwargs = {"store_id": UUID(int=1), "operation": "update"}
     for event_type in (
         StoreSearchSyncRequested,
         StoreIndexed,
@@ -223,7 +268,7 @@ def test_search_event_payloads_are_safe() -> None:
         StoreRemovedFromSearch,
         StoreSearchRebuilt,
     ):
-        event = event_type(**kwargs)
+        event = event_type(store_id=UUID(int=1), operation="update")
         assert set(event.payload) == {"store_id", "operation"}
 
 

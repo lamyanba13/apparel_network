@@ -161,6 +161,7 @@ class InventoryService:
     async def delete_owned(
         self, inventory_id: UUID, owner_id: UUID, version: int
     ) -> None:
+        await self.get_owned(inventory_id, owner_id)
         item = await self._repository.archive(
             inventory_id,
             owner_id,
@@ -168,7 +169,7 @@ class InventoryService:
             deleted_at=datetime.now(UTC),
         )
         if item is None:
-            raise _not_found()
+            raise _conflict("The inventory item was modified by another request.")
         INVENTORY_DELETED.inc()
         await self._publish(InventoryDeleted, item)
 

@@ -29,7 +29,13 @@ class SqlAlchemyCatalogRepository:
         )
 
     async def add(self, values: Mapping[str, object]) -> Catalog:
-        model = CatalogModel(**dict(values))
+        persisted = dict(values)
+        actor_id = persisted.pop("actor_id", None)
+        model = CatalogModel(
+            **persisted,
+            created_by_id=actor_id,
+            updated_by_id=actor_id,
+        )
         self._session.add(model)
         await self._session.flush()
         await self._session.refresh(model)

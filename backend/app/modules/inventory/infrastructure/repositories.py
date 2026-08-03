@@ -59,7 +59,11 @@ class SqlAlchemyInventoryRepository:
 
     async def add(self, values: Mapping[str, object]) -> InventoryItem:
         model = InventoryItemModel(
-            **{key: value for key, value in values.items() if key != "actor_id"}
+            **{
+                key: value
+                for key, value in values.items()
+                if key not in {"actor_id", "reference"}
+            }
         )
         self._session.add(model)
         await self._session.flush()

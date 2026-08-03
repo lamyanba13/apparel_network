@@ -70,7 +70,10 @@ from app.modules.stores.infrastructure.persistence.repositories import (
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 ARGON2_HASH = "$argon2id$v=19$m=65536,t=3,p=4$c2FsdA$ZGlnaWVzdA"
-MONDAY_MORNING = datetime(2026, 8, 3, 4, 30, tzinfo=UTC)  # 10:00 Asia/Kolkata
+_TODAY = datetime.now(UTC)
+MONDAY_MORNING = (_TODAY + timedelta(days=7 - _TODAY.weekday())).replace(
+    hour=4, minute=30, second=0, microsecond=0
+)  # 10:00 Asia/Kolkata
 
 
 class RecordingPublisher:
@@ -352,12 +355,12 @@ async def test_next_opening_and_closing_are_calculated_in_store_timezone(
     store_id = await _store(hours_session, owner_id)
     service = _service(hours_session, RecordingPublisher())
     await service.create(store_id, owner_id, _values())
-    before_open = datetime(2026, 8, 3, 2, 30, tzinfo=UTC)  # 08:00 local
+    before_open = MONDAY_MORNING - timedelta(hours=2)  # 08:00 local
 
     status = await service.status(store_id, owner_id, now=before_open)
 
-    assert status.next_opening == datetime(2026, 8, 3, 3, 30, tzinfo=UTC)
-    assert status.next_closing == datetime(2026, 8, 3, 11, 30, tzinfo=UTC)
+    assert status.next_opening == MONDAY_MORNING - timedelta(hours=1)
+    assert status.next_closing == MONDAY_MORNING + timedelta(hours=7)
     assert status.timezone == "Asia/Kolkata"
 
 
@@ -553,11 +556,6 @@ async def test_events_are_safe_and_metrics_are_low_cardinality(
 
 
 def test_all_operating_hours_event_contracts_have_safe_payloads() -> None:
-    kwargs = {
-        "store_id": UUID(int=1),
-        "schedule_id": UUID(int=2),
-        "status": OpenState.CLOSED,
-    }
     for event_type in (
         StoreHoursCreated,
         StoreHoursUpdated,
@@ -567,7 +565,11 @@ def test_all_operating_hours_event_contracts_have_safe_payloads() -> None:
         StoreScheduleActivated,
         StoreScheduleExpired,
     ):
-        event = event_type(**kwargs)
+        event = event_type(
+            store_id=UUID(int=1),
+            schedule_id=UUID(int=2),
+            status=OpenState.CLOSED,
+        )
         assert set(event.payload) == {"store_id", "schedule_id", "status"}
 
 

@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -63,7 +64,7 @@ class Repository:
     ) -> bool:
         return slug == self.value.slug and exclude_id != self.value.id
 
-    async def add(self, values: dict[str, object]) -> Catalog:
+    async def add(self, values: Mapping[str, object]) -> Catalog:
         self.flushes += 1
         return self.value
 
@@ -80,7 +81,7 @@ class Repository:
         catalog_id: UUID,
         owner_id: UUID,
         *,
-        values: dict[str, object],
+        values: Mapping[str, object],
         expected_version: int,
     ) -> Catalog | None:
         return self.value if expected_version == self.value.version else None

@@ -29,7 +29,11 @@ class SqlAlchemyProductVariantRepository:
         return cast(UUID | None, await self._session.scalar(query))
 
     async def add(self, values: Mapping[str, object]) -> ProductVariant:
-        model = ProductVariantModel(**dict(values))
+        persisted = dict(values)
+        actor_id = persisted.pop("actor_id", None)
+        persisted["created_by_id"] = actor_id
+        persisted["updated_by_id"] = actor_id
+        model = ProductVariantModel(**persisted)
         self._session.add(model)
         await self._session.flush()
         await self._session.refresh(model)

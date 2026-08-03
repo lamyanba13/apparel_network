@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -56,7 +57,7 @@ class Repository:
     async def catalog_store(self, catalog_id: UUID, owner_id: UUID) -> UUID | None:
         return STORE if catalog_id == CATALOG and owner_id == OWNER else None
 
-    async def add(self, values: dict[str, object]) -> Product:
+    async def add(self, values: Mapping[str, object]) -> Product:
         return self.value
 
     async def list_for_owner(
@@ -82,7 +83,7 @@ class Repository:
         product_id: UUID,
         owner_id: UUID,
         *,
-        values: dict[str, object],
+        values: Mapping[str, object],
         expected_version: int,
     ) -> Product | None:
         return self.value if expected_version == 1 else None

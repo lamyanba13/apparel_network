@@ -31,7 +31,13 @@ class SqlAlchemyProductRepository:
         return cast(UUID | None, await self._session.scalar(query))
 
     async def add(self, values: Mapping[str, object]) -> Product:
-        model = ProductModel(**dict(values))
+        persisted = dict(values)
+        actor_id = persisted.pop("actor_id", None)
+        model = ProductModel(
+            **persisted,
+            created_by_id=actor_id,
+            updated_by_id=actor_id,
+        )
         self._session.add(model)
         await self._session.flush()
         await self._session.refresh(model)
