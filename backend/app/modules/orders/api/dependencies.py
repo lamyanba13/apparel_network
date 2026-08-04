@@ -22,20 +22,24 @@ async def order_service_dependency(
     request: Request,
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> AsyncIterator[OrderService]:
-    orders = SqlAlchemyOrderRepository(session)
-    service = OrderService(
-        orders,
-        SqlAlchemyOrderItemRepository(session),
-        build_checkout_service(request, session),
-        OrderNumberService(orders),
-        OrderOutboxService(SqlAlchemyOrderOutboxRepository(session)),
-    )
+    service = build_order_service(request, session)
     try:
         yield service
         await session.commit()
     except Exception:
         await session.rollback()
         raise
+
+
+def build_order_service(request: Request, session: AsyncSession) -> OrderService:
+    orders = SqlAlchemyOrderRepository(session)
+    return OrderService(
+        orders,
+        SqlAlchemyOrderItemRepository(session),
+        build_checkout_service(request, session),
+        OrderNumberService(orders),
+        OrderOutboxService(SqlAlchemyOrderOutboxRepository(session)),
+    )
 
 
 OrderServiceDependency = Annotated[OrderService, Depends(order_service_dependency)]

@@ -154,3 +154,10 @@ Checkout Sessions. It copies Checkout snapshots, enforces customer ownership and
 the `PENDING -> CONFIRMED -> CANCELLED` lifecycle, and persists identifier-only
 outbox events without Payments or Inventory mutation. See
 [`docs/phase-5.2-order-foundation.md`](../docs/phase-5.2-order-foundation.md).
+
+Phase 5.3 introduces Payment Intents for pending Orders through a provider-neutral
+gateway protocol and deterministic Null adapter. It adds idempotent creation,
+optimistic lifecycle transitions, private provider transaction history, outbox
+events, metrics, and capture-driven Order confirmation without a real financial
+provider. See
+[`docs/phase-5.3-payment-foundation.md`](../docs/phase-5.3-payment-foundation.md).

@@ -273,6 +273,32 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Production-backed HTTP tests cover persistence, lifecycle, outbox, metrics,
   ownership, numbering, summaries, and OpenAPI.
 
+## Phase 5.3 — Payment Foundation
+
+### Outcomes
+
+- Customers can create and progress a provider-neutral Payment Intent for a pending
+  Order without introducing a real financial provider.
+
+### Work
+
+- Persist customer- and Store-owned Payment Intents and append-only provider
+  transaction history.
+- Require idempotent creation and optimistic lifecycle transitions.
+- Introduce the Payment gateway protocol and deterministic Null adapter.
+- Confirm Orders through the production Order service only after successful capture.
+- Keep Inventory mutation, refunds, settlements, invoicing, shipping, and
+  fulfillment outside the Payment boundary.
+
+### Exit gate
+
+- Duplicate creation safely returns the original Intent and cross-user access is
+  hidden.
+- Stale transitions return `409` before invoking the provider abstraction.
+- Capture confirms the pending Order without direct Order persistence access.
+- Production-backed HTTP tests cover lifecycle, snapshots, ownership, idempotency,
+  transactions, outbox, metrics, Order interaction, and OpenAPI.
+
 ## Phase 6 — Search
 
 ### Outcomes

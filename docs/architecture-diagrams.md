@@ -487,3 +487,24 @@ flowchart LR
 Order creation copies confirmed Checkout snapshots and never reads mutable Cart
 Items. Orders do not mutate Inventory or implement Payment, tax, shipping,
 invoicing, or fulfillment.
+
+## Phase 5.3 Payment Foundation
+
+```mermaid
+flowchart LR
+    customer[Authenticated customer] --> api[Payment API]
+    api --> service[Payment application service]
+    service --> order[Production Order service]
+    service --> gateway[PaymentGateway protocol]
+    gateway --> null[Deterministic Null gateway]
+    service --> intents[Payment repositories]
+    intents --> postgres[(PostgreSQL Intents and Transactions)]
+    service --> outbox[Identifier-only transactional outbox]
+    outbox --> postgres
+    service -. successful capture .-> order
+    gateway -. future adapters .-> providers[Razorpay / Stripe / Cashfree]
+```
+
+Payment snapshots a pending Order and never reads Checkout or writes Order tables.
+The Null gateway performs no financial transaction. A captured Payment asks the
+Order service to confirm the Order in the shared request transaction.

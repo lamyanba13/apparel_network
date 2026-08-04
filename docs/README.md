@@ -90,6 +90,7 @@ Read these documents in order when joining the project:
 52. [Phase 5.0 Shopping Cart Foundation](phase-5.0-shopping-cart-foundation.md)
 53. [Phase 5.1 Checkout Foundation](phase-5.1-checkout-foundation.md)
 54. [Phase 5.2 Order Foundation](phase-5.2-order-foundation.md)
+55. [Phase 5.3 Payment Foundation](phase-5.3-payment-foundation.md)
 
 ## Decision authority
 

@@ -29,6 +29,7 @@ Accepted ADRs are immutable historical records. A material change is documented 
 | [0012](0012-shopping-cart-design.md) | Shopping Cart design | Accepted |
 | [0013](0013-checkout-boundary.md) | Checkout boundary | Accepted |
 | [0014](0014-order-boundary.md) | Order boundary | Accepted |
+| [0015](0015-payment-boundary.md) | Payment boundary | Accepted |
 
 The implementation conformance review and frozen Identity invariants are
 recorded in the [Phase 2.6 Identity Module Freeze](../phase-2.6-identity-freeze.md).

@@ -37,6 +37,7 @@ VARIANT_NORMALIZATION_REVISION = "4b6c8e0a2d35"
 CART_REVISION = "5c7d9f1a3b46"
 CHECKOUT_REVISION = "6d8e0f2a4c57"
 ORDER_REVISION = "7e9f1a3b5d68"
+PAYMENT_REVISION = "8f0a2b4c6d79"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -71,6 +72,7 @@ ATTRIBUTE_TABLES = {
 CART_TABLES = {"shopping_carts", "shopping_cart_items"}
 CHECKOUT_TABLES = {"checkout_sessions", "checkout_session_items"}
 ORDER_TABLES = {"orders", "order_items"}
+PAYMENT_TABLES = {"payment_intents", "payment_transactions"}
 TAXONOMY_TABLES = {
     "categories",
     "product_categories",
@@ -106,9 +108,10 @@ def test_alembic_upgrades_application_schema_without_drift(
         assert CART_TABLES.issubset(metadata.tables)
         assert CHECKOUT_TABLES.issubset(metadata.tables)
         assert ORDER_TABLES.issubset(metadata.tables)
+        assert PAYMENT_TABLES.issubset(metadata.tables)
         assert TAXONOMY_TABLES.issubset(metadata.tables)
         assert PRODUCT_MEDIA_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [ORDER_REVISION]
+        assert script.get_heads() == [PAYMENT_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -139,6 +142,7 @@ def test_alembic_upgrades_application_schema_without_drift(
             f"{CART_REVISION}_create_carts",
             f"{CHECKOUT_REVISION}_create_checkout_sessions",
             f"{ORDER_REVISION}_create_orders",
+            f"{PAYMENT_REVISION}_create_payments",
         }
 
         command.check(config)

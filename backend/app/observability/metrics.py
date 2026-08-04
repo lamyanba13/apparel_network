@@ -356,6 +356,23 @@ CHECKOUTS_EXPIRED = Counter(
 ORDERS_CREATED = Counter("fashion_network_order_created_total", "Orders created.")
 ORDERS_CONFIRMED = Counter("fashion_network_order_confirmed_total", "Orders confirmed.")
 ORDERS_CANCELLED = Counter("fashion_network_order_cancelled_total", "Orders cancelled.")
+PAYMENTS_CREATED = Counter(
+    "fashion_network_payment_created_total", "Payment Intents created."
+)
+PAYMENTS_AUTHORIZED = Counter(
+    "fashion_network_payment_authorized_total", "Payments authorized."
+)
+PAYMENTS_CAPTURED = Counter(
+    "fashion_network_payment_captured_total", "Payments captured."
+)
+PAYMENTS_FAILED = Counter("fashion_network_payment_failed_total", "Payments failed.")
+PAYMENTS_CANCELLED = Counter(
+    "fashion_network_payment_cancelled_total", "Payments cancelled."
+)
+PAYMENT_PROCESSING_DURATION = Histogram(
+    "fashion_network_payment_processing_duration_seconds",
+    "Time spent invoking the configured Payment gateway.",
+)
 CATEGORIES_CREATED = Counter(
     "fashion_network_category_created_total", "Categories created."
 )

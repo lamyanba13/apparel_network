@@ -131,6 +131,13 @@ Checkout snapshots, enforce a one-way lifecycle and optimistic versions, and do
 not process Payments or mutate Inventory. See
 [`docs/phase-5.2-order-foundation.md`](docs/phase-5.2-order-foundation.md).
 
+Phase 5.3 adds customer-owned Payment Intents for pending Orders, a provider-neutral
+gateway protocol, deterministic Null gateway, idempotent creation, append-only
+provider transactions, and capture-driven Order confirmation. It performs no real
+financial transaction, Inventory mutation, refunds, settlements, invoicing, or
+fulfillment. See
+[`docs/phase-5.3-payment-foundation.md`](docs/phase-5.3-payment-foundation.md).
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.
