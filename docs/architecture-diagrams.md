@@ -443,3 +443,26 @@ Cart reads and summaries use persisted snapshots. Pricing and Inventory are call
 only when an Item is added or its quantity changes. Inventory is not reserved, and
 checkout, Orders, tax, shipping, payments, conversion, and coupons remain outside
 the Phase 5.0 boundary.
+
+## Phase 5.1 Checkout Foundation
+
+```mermaid
+flowchart LR
+    customer[Authenticated customer] --> api[Checkout API]
+    api --> service[Checkout application service]
+    service --> cart[Production Cart service]
+    service --> pricing[Production PricingResolver]
+    service --> inventory[Production InventoryService]
+    pricing --> snapshots[Immutable Checkout Item snapshots]
+    inventory --> snapshots
+    service --> sessions[Checkout repositories]
+    sessions --> postgres[(PostgreSQL)]
+    snapshots --> postgres
+    service --> outbox[Identifier-only transactional outbox]
+    outbox --> postgres
+    service -. confirmed immutable data .-> order[Future Order boundary]
+```
+
+Checkout creation revalidates rather than copying Cart snapshots. Confirmation
+transitions the Cart and Checkout atomically but does not reserve Inventory, create
+an Order, process Payment, or calculate tax or shipping.

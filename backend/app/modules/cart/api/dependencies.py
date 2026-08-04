@@ -26,20 +26,24 @@ async def cart_service_dependency(
     request: Request,
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> AsyncIterator[CartService]:
-    events = cast(EventPublisher, request.app.state.store_events)
-    service = CartService(
-        SqlAlchemyShoppingCartRepository(session),
-        SqlAlchemyShoppingCartItemRepository(session),
-        PricingResolver(SqlAlchemyResolverRepository(session), events),
-        InventoryService(SqlAlchemyInventoryRepository(session), events),
-        CartOutboxService(SqlAlchemyCartOutboxRepository(session)),
-    )
+    service = build_cart_service(request, session)
     try:
         yield service
         await session.commit()
     except Exception:
         await session.rollback()
         raise
+
+
+def build_cart_service(request: Request, session: AsyncSession) -> CartService:
+    events = cast(EventPublisher, request.app.state.store_events)
+    return CartService(
+        SqlAlchemyShoppingCartRepository(session),
+        SqlAlchemyShoppingCartItemRepository(session),
+        PricingResolver(SqlAlchemyResolverRepository(session), events),
+        InventoryService(SqlAlchemyInventoryRepository(session), events),
+        CartOutboxService(SqlAlchemyCartOutboxRepository(session)),
+    )
 
 
 CartServiceDependency = Annotated[CartService, Depends(cart_service_dependency)]

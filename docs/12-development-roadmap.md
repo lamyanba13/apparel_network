@@ -225,6 +225,30 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Production-backed HTTP tests cover Pricing, Inventory, persistence, outbox,
   metrics, ownership, lifecycle, and summary behavior.
 
+## Phase 5.1 — Checkout Foundation
+
+### Outcomes
+
+- Customers can convert an owned active Cart into immutable, revalidated commercial
+  data suitable for a future Order handoff.
+
+### Work
+
+- Implement Checkout Session and immutable Checkout Item persistence.
+- Re-resolve current Pricing and revalidate current Inventory for every Cart Item.
+- Support customer confirmation, expiration, cancellation, optimistic locking,
+  ownership hiding, transactional events, and low-cardinality metrics.
+- Transition the source Cart to checked out on confirmation without creating an
+  Order or reserving Inventory.
+
+### Exit gate
+
+- Empty, expired, inactive, or cross-user Carts cannot enter Checkout.
+- Frozen Checkout values do not change after Pricing, Inventory, or Cart mutations.
+- Stale confirmation and cancellation return `409`; cross-user access returns `404`.
+- Checkout persistence and lifecycle events share one PostgreSQL transaction.
+- Production-backed HTTP and OpenAPI verification cover the complete boundary.
+
 ## Phase 6 — Search
 
 ### Outcomes

@@ -142,3 +142,9 @@ mutations resolve production Pricing and validate production Inventory while
 persisting stable commercial snapshots; Inventory is never reserved. Cart writes
 and identifier-only events share the request transaction. See
 [`docs/phase-5.0-shopping-cart-foundation.md`](../docs/phase-5.0-shopping-cart-foundation.md).
+
+Phase 5.1 introduces Checkout Sessions as an immutable boundary between mutable
+Carts and future Orders. Checkout re-resolves Pricing, revalidates Inventory,
+freezes Item snapshots, and confirms the source Cart transactionally without
+reserving stock or creating Orders or Payments. See
+[`docs/phase-5.1-checkout-foundation.md`](../docs/phase-5.1-checkout-foundation.md).

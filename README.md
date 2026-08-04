@@ -118,6 +118,13 @@ It does not reserve stock or implement checkout, Orders, tax, shipping, payments
 conversion, or coupons. See
 [`docs/phase-5.0-shopping-cart-foundation.md`](docs/phase-5.0-shopping-cart-foundation.md).
 
+Phase 5.1 adds customer-owned Checkout Sessions that revalidate active Cart Items
+through production Pricing and Inventory, freeze immutable commercial snapshots,
+and support confirmation, expiration, and cancellation. Confirmation prepares a
+future Order handoff without reserving stock, creating an Order, or processing a
+payment. See
+[`docs/phase-5.1-checkout-foundation.md`](docs/phase-5.1-checkout-foundation.md).
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

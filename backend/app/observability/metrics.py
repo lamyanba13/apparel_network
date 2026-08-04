@@ -341,6 +341,18 @@ CARTS_CHECKED_OUT = Counter(
 CARTS_ABANDONED = Counter(
     "fashion_network_cart_abandoned_total", "Shopping Carts abandoned."
 )
+CHECKOUTS_CREATED = Counter(
+    "fashion_network_checkout_created_total", "Checkout Sessions created."
+)
+CHECKOUTS_CONFIRMED = Counter(
+    "fashion_network_checkout_confirmed_total", "Checkout Sessions confirmed."
+)
+CHECKOUTS_CANCELLED = Counter(
+    "fashion_network_checkout_cancelled_total", "Checkout Sessions cancelled."
+)
+CHECKOUTS_EXPIRED = Counter(
+    "fashion_network_checkout_expired_total", "Checkout Sessions expired."
+)
 CATEGORIES_CREATED = Counter(
     "fashion_network_category_created_total", "Categories created."
 )

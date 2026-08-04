@@ -1,0 +1,1 @@
+"""Shopping Checkout bounded context."""

@@ -12,6 +12,7 @@ from app.database.metadata import metadata
 from app.modules.cart.infrastructure import models as cart_models
 from app.modules.catalogs.infrastructure import models as catalog_models
 from app.modules.catalogs.infrastructure import taxonomy_models
+from app.modules.checkout.infrastructure import models as checkout_models
 from app.modules.identity.infrastructure.persistence import models as identity_models
 from app.modules.inventory.infrastructure import models as inventory_models
 from app.modules.pricing.infrastructure import models as pricing_models
@@ -41,6 +42,7 @@ _ = (
     inventory_models,
     pricing_models,
     cart_models,
+    checkout_models,
     catalog_models,
     product_models,
     attribute_models,

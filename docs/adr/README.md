@@ -27,6 +27,7 @@ Accepted ADRs are immutable historical records. A material change is documented 
 | [0010](0010-product-variant-mvp-deferral.md) | Product Variant MVP deferral | Accepted; fulfilled in Phase 4.8 |
 | [0011](0011-pricing-resolution-algorithm.md) | Pricing resolution algorithm | Accepted |
 | [0012](0012-shopping-cart-design.md) | Shopping Cart design | Accepted |
+| [0013](0013-checkout-boundary.md) | Checkout boundary | Accepted |
 
 The implementation conformance review and frozen Identity invariants are
 recorded in the [Phase 2.6 Identity Module Freeze](../phase-2.6-identity-freeze.md).
