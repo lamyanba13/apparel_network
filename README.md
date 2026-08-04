@@ -104,6 +104,13 @@ scheduled and customer-group pricing, assignments, and deterministic resolution
 without promotions or currency conversion. See
 [`docs/phase-4.7-price-lists-and-multi-currency.md`](docs/phase-4.7-price-lists-and-multi-currency.md).
 
+Phase 4.8 replaces temporary Product Variant JSONB attributes with Store-owned
+attribute definitions, controlled values, normalized Variant assignments, and
+deterministic combination signatures. Every Variant mutation now writes an
+identifier-only event to a transactional PostgreSQL outbox; publication remains
+deferred. See
+[`docs/phase-4.8-variant-attribute-normalization.md`](docs/phase-4.8-variant-attribute-normalization.md).
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

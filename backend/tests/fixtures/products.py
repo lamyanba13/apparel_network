@@ -5,15 +5,30 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.events import DomainEvent
 from app.modules.catalogs.domain import Catalog
+from app.modules.products.application.attribute_schemas import (
+    AttributeCreate,
+    AttributeValueCreate,
+)
+from app.modules.products.application.attribute_services import (
+    AttributeService,
+    OutboxService,
+)
 from app.modules.products.application.schemas import ProductCreate
 from app.modules.products.application.services import ProductService
 from app.modules.products.application.variant_schemas import ProductVariantCreate
 from app.modules.products.application.variant_services import ProductVariantService
 from app.modules.products.domain import (
+    AttributeStatus,
+    AttributeType,
     Product,
     ProductStatus,
     ProductVariant,
     ProductVisibility,
+)
+from app.modules.products.infrastructure.attribute_repositories import (
+    SqlAlchemyAttributeRepository,
+    SqlAlchemyAttributeValueRepository,
+    SqlAlchemyOutboxRepository,
 )
 from app.modules.products.infrastructure.repositories import (
     SqlAlchemyProductRepository,
@@ -62,7 +77,45 @@ async def create_product_variant(
     actor_id: UUID,
     value: int = 1,
 ) -> ProductVariant:
-    service = ProductVariantService(SqlAlchemyProductVariantRepository(session))
+    attributes = AttributeService(
+        SqlAlchemyAttributeRepository(session),
+        SqlAlchemyAttributeValueRepository(session),
+    )
+    for order, (name, slug_value, attribute_value, value_slug) in enumerate(
+        (
+            ("Color", "color", "Black", "black"),
+            ("Size", "size", "Medium", "medium"),
+        )
+    ):
+        attribute = await attributes.create(
+            AttributeCreate(
+                store_id=product.store_id,
+                name=name,
+                slug=slug_value,
+                attribute_type=AttributeType.ENUM,
+                description=None,
+                required=True,
+                filterable=True,
+                searchable=True,
+                sort_order=order,
+                status=AttributeStatus.ACTIVE,
+                actor_id=actor_id,
+            )
+        )
+        await attributes.create_value(
+            attribute.id,
+            actor_id,
+            AttributeValueCreate(
+                value=attribute_value,
+                slug=value_slug,
+                sort_order=0,
+                actor_id=actor_id,
+            ),
+        )
+    service = ProductVariantService(
+        SqlAlchemyProductVariantRepository(session),
+        OutboxService(SqlAlchemyOutboxRepository(session)),
+    )
     return await service.create(
         product.id,
         ProductVariantCreate(

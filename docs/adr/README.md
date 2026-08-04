@@ -24,7 +24,7 @@ Accepted ADRs are immutable historical records. A material change is documented 
 | [0007](0007-opentelemetry.md) | OpenTelemetry for distributed telemetry | Accepted |
 | [0008](0008-observability.md) | Layered observability strategy | Accepted |
 | [0009](0009-identity-access-and-refresh-tokens.md) | Identity access and refresh token architecture | Accepted |
-| [0010](0010-product-variant-mvp-deferral.md) | Product Variant MVP deferral | Proposed |
+| [0010](0010-product-variant-mvp-deferral.md) | Product Variant MVP deferral | Accepted; fulfilled in Phase 4.8 |
 | [0011](0011-pricing-resolution-algorithm.md) | Pricing resolution algorithm | Accepted |
 
 The implementation conformance review and frozen Identity invariants are

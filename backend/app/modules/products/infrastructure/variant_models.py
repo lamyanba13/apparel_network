@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from sqlalchemy import CheckConstraint, ForeignKey, Index, String, text
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base
@@ -57,7 +56,6 @@ class ProductVariantModel(
         ForeignKey("stores.id", ondelete="RESTRICT"), nullable=False
     )
     reference: Mapped[str] = mapped_column(String(64), nullable=False)
-    attributes: Mapped[dict[str, str]] = mapped_column(JSONB, nullable=False)
     attribute_signature: Mapped[str] = mapped_column(String(64), nullable=False)
     sort_order: Mapped[int] = mapped_column(
         nullable=False, default=0, server_default="0"

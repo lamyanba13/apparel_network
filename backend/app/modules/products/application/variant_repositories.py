@@ -21,6 +21,9 @@ class ProductVariantRepository(Protocol):
     async def signature_exists(
         self, product_id: UUID, signature: str, *, exclude_id: UUID | None = None
     ) -> bool: ...
+    async def resolve_attribute_values(
+        self, store_id: UUID, attributes: Mapping[str, str]
+    ) -> Sequence[Mapping[str, object]] | None: ...
     async def update(
         self,
         variant_id: UUID,

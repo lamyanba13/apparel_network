@@ -14,6 +14,7 @@ from app.modules.catalogs.infrastructure import taxonomy_models
 from app.modules.identity.infrastructure.persistence import models as identity_models
 from app.modules.inventory.infrastructure import models as inventory_models
 from app.modules.pricing.infrastructure import models as pricing_models
+from app.modules.products.infrastructure import attribute_models
 from app.modules.products.infrastructure import media_models as product_media_models
 from app.modules.products.infrastructure import models as product_models
 from app.modules.products.infrastructure import variant_models as product_variant_models
@@ -40,6 +41,7 @@ _ = (
     pricing_models,
     catalog_models,
     product_models,
+    attribute_models,
     product_variant_models,
     product_media_models,
     taxonomy_models,

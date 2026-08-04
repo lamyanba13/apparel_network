@@ -162,7 +162,7 @@ This is a logical model; exact names are finalized during schema design.
 - Lifecycle state replaces blanket soft deletion. `deleted_at` is added only where an approved reversible deletion workflow actually exists.
 - Foreign keys are explicit. Tenant-owned child tables carry `store_id` where it makes authorization/query scoping safer and use composite constraints/foreign keys to prove the referenced row belongs to the same store.
 - Enum-like lifecycle values use reviewed database checks or reference tables. Unknown future values are handled through migrations, not unchecked strings.
-- Free-form JSON is restricted to allowlisted event/audit metadata and provider payload fragments. Queryable domain fields remain normalized. The Phase 4.4 Product Variant `attributes` map is the documented temporary exception in [ADR 0010](adr/0010-product-variant-mvp-deferral.md): it is write-only application data, not a search/filter contract, and must be replaced before public faceting or product publication depends on it.
+- Free-form JSON is restricted to allowlisted event/audit metadata and provider payload fragments. Queryable domain fields remain normalized. Phase 4.8 fulfilled the temporary Phase 4.4 Product Variant exception in [ADR 0010](adr/0010-product-variant-mvp-deferral.md): Variant attributes now resolve to controlled relational values, while outbox JSON remains identifier-only event transport data.
 - User-entered text has length limits and normalization rules, but original display casing is preserved where required.
 
 ### Identity and access
@@ -182,9 +182,8 @@ This is a logical model; exact names are finalized during schema design.
 - `products`: store-owned merchandising record and publication state.
 - `product_variants`: specific attribute combination and stable SKU/reference within a store.
 - `product_media`: association to verified upload objects.
-- Phase 4.4 uses a temporary canonical `attributes` JSONB map and uniqueness signature on `product_variants`. It is not a public filtering or localization contract.
-- Phase 4.8 introduces `attribute_definitions` and `attribute_values`: controlled taxonomy and valid filter values owned by Products.
-- Phase 4.8 introduces `product_variant_attribute_values`: normalized variant attributes; a uniqueness signature prevents duplicate size/color combinations within a product.
+- `product_attributes` and `product_attribute_values` provide the controlled Store-owned taxonomy and valid filter values owned by Products.
+- `product_variant_attribute_values` stores normalized Variant attributes; a deterministic value-identity signature prevents duplicate combinations within a Product.
 - `inventory_levels`: one authoritative stock row per store/variant for the first single-location release, including `on_hand_quantity`, `reserved_quantity`, and `version`.
 - `inventory_movements`: append-only reasoned quantity changes.
 - `inventory_holds`: active/released/consumed hold linked to a reservation.

@@ -177,6 +177,7 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 
 ### Outcomes
 
+- Status: implemented; validation pending final approval.
 - Product variants become controlled, searchable, localized domain records while
   preserving the Phase 4.4 management API.
 
@@ -187,17 +188,17 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Backfill existing Phase 4.4 JSONB attributes, retain the canonical signature,
   and reject unmapped attributes before public product publication depends on
   them.
-- Emit safe `ProductVariantCreated`, `ProductVariantUpdated`, and
-  `ProductVariantDeleted` domain events through the transactional outbox.
-- Project idempotent variant events to search, analytics, cache invalidation,
-  notifications, and future inventory consumers.
+- Persist safe Variant lifecycle and assignment events through the
+  transactional outbox.
+- Defer projection consumers and dispatch infrastructure to a future phase;
+  those consumers must be idempotent and replay-safe.
 
 ### Exit gate
 
 - Variant attributes are controlled, queryable, and localization-ready.
 - The existing variant API remains backward-compatible during migration.
 - Variant writes, audit records, and outbox events commit atomically.
-- Search and analytics consumers tolerate replay and duplicate delivery.
+- Outbox payloads are identifier-only and ready for replay-safe consumers.
 
 ## Phase 5 — Inventory
 

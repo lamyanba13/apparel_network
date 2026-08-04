@@ -129,3 +129,10 @@ effective schedules, customer groups, assignments, and the production-backed
 resolver at `/api/v1/pricing/resolve`. It performs no conversion or promotion
 logic. See
 [`docs/phase-4.7-price-lists-and-multi-currency.md`](../docs/phase-4.7-price-lists-and-multi-currency.md).
+
+Phase 4.8 normalizes Product Variant attributes into controlled Store-owned
+definitions, values, and Variant assignments while preserving the existing
+Variant API shape. Variant mutations persist identifier-only events to the
+transactional `event_outbox` in the same request transaction; no publisher is
+introduced. See
+[`docs/phase-4.8-variant-attribute-normalization.md`](../docs/phase-4.8-variant-attribute-normalization.md).

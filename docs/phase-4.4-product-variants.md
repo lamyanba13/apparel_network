@@ -27,16 +27,16 @@ read models remain outside this phase.
 - `PATCH /api/v1/products/{product_id}/variants/{variant_id}`
 - `DELETE /api/v1/products/{product_id}/variants/{variant_id}?version=N`
 
-The routes reuse `catalog:view` and `catalog:update` permissions. References,
-attribute values, and signatures are not emitted to events or metrics. This MVP
-does not emit variant domain events or transactional outbox records.
+The routes reuse `catalog:view` and `catalog:update` permissions. Phase 4.8
+preserves these routes while resolving their attribute maps to controlled
+normalized values and writing Variant events to the transactional outbox.
 
 ## Deferred completion
 
-Phase 4.8 replaces the JSONB map with controlled, normalized attributes while
-preserving these management APIs. It also adds safe variant domain events and
-transactional outbox publication for Search, Analytics, cache invalidation,
-Notifications, and future Inventory consumers. See
+Phase 4.8 has replaced the JSONB map with controlled, normalized attributes
+while preserving these management APIs. It writes safe Variant lifecycle and
+assignment events to a transactional outbox; direct publication and projection
+consumers remain future work. See the fulfilled
 [ADR 0010](adr/0010-product-variant-mvp-deferral.md).
 
 ## Persistence

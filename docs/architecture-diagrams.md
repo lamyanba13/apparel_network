@@ -378,6 +378,26 @@ application policy validates the complete Store/Catalog/Product/Variant ownershi
 chain, while PostgreSQL owns price constraints, effective periods, audit state,
 soft deletion, and optimistic version persistence.
 
+## Phase 4.8 Variant Attribute Normalization
+
+```mermaid
+flowchart LR
+    identity[Attribute permissions] --> api[Attribute and Variant APIs]
+    store[Owned Store] --> service[Attribute services]
+    api --> service
+    service --> definitions[Product attributes and values]
+    service --> assignments[Normalized Variant assignments]
+    assignments --> signature[Deterministic combination signature]
+    service --> outbox[Transactional event outbox]
+    definitions --> postgres[(PostgreSQL)]
+    assignments --> postgres
+    outbox --> postgres
+```
+
+The Product Variant API remains compatible, but free-form input must resolve to
+controlled values. Variant mutations and identifier-only outbox events flush in
+one request transaction; dispatch and downstream projection are deferred.
+
 ## Phase 4.7 Price Lists & Multi-Currency
 
 ```mermaid

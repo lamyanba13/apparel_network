@@ -314,6 +314,20 @@ PRODUCT_VARIANTS_UPDATED = Counter(
 PRODUCT_VARIANTS_DELETED = Counter(
     "fashion_network_product_variant_deleted_total", "Product variants deleted."
 )
+ATTRIBUTES_CREATED = Counter(
+    "fashion_network_attribute_created_total", "Product Attributes created."
+)
+ATTRIBUTE_VALUES_CREATED = Counter(
+    "fashion_network_attribute_value_created_total",
+    "Product Attribute Values created.",
+)
+VARIANT_ATTRIBUTES_ASSIGNED = Counter(
+    "fashion_network_variant_attribute_assigned_total",
+    "Attribute Values assigned to Product Variants.",
+)
+OUTBOX_WRITTEN = Counter(
+    "fashion_network_outbox_written_total", "Transactional outbox records written."
+)
 CATEGORIES_CREATED = Counter(
     "fashion_network_category_created_total", "Categories created."
 )

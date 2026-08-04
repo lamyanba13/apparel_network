@@ -33,6 +33,7 @@ PRODUCT_VARIANTS_REVISION = "697a9e0d3c1b"
 INVENTORY_REVISION = "1d2e3f4a5b6c"
 PRICING_REVISION = "2f4a6c8e0b12"
 PRICE_LIST_REVISION = "3a5b7d9f1c24"
+VARIANT_NORMALIZATION_REVISION = "4b6c8e0a2d35"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -58,6 +59,12 @@ CATALOG_TABLES = {"catalogs"}
 PRODUCT_TABLES = {"products", "product_variants"}
 INVENTORY_TABLES = {"inventory_items"}
 PRICING_TABLES = {"product_prices", "price_lists", "price_list_assignments"}
+ATTRIBUTE_TABLES = {
+    "product_attributes",
+    "product_attribute_values",
+    "product_variant_attribute_values",
+    "event_outbox",
+}
 TAXONOMY_TABLES = {
     "categories",
     "product_categories",
@@ -89,9 +96,10 @@ def test_alembic_upgrades_application_schema_without_drift(
         assert PRODUCT_TABLES.issubset(metadata.tables)
         assert INVENTORY_TABLES.issubset(metadata.tables)
         assert PRICING_TABLES.issubset(metadata.tables)
+        assert ATTRIBUTE_TABLES.issubset(metadata.tables)
         assert TAXONOMY_TABLES.issubset(metadata.tables)
         assert PRODUCT_MEDIA_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [PRICE_LIST_REVISION]
+        assert script.get_heads() == [VARIANT_NORMALIZATION_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -118,6 +126,7 @@ def test_alembic_upgrades_application_schema_without_drift(
             f"{INVENTORY_REVISION}_create_inventory",
             f"{PRICING_REVISION}_create_product_prices",
             f"{PRICE_LIST_REVISION}_create_price_lists",
+            f"{VARIANT_NORMALIZATION_REVISION}_normalize_variant_attributes",
         }
 
         command.check(config)

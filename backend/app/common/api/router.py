@@ -11,6 +11,11 @@ from app.modules.pricing.api.price_list_router import (
     resolver_router,
 )
 from app.modules.pricing.api.router import router as pricing_router
+from app.modules.products.api.attribute_router import (
+    attribute_router,
+    attribute_value_router,
+    variant_attribute_router,
+)
 from app.modules.products.api.media_router import router as product_media_router
 from app.modules.products.api.router import router as products_router
 from app.modules.products.api.variant_router import router as product_variant_router
@@ -34,6 +39,9 @@ v1_router.include_router(catalogs_router)
 v1_router.include_router(taxonomy_router)
 v1_router.include_router(products_router)
 v1_router.include_router(product_variant_router)
+v1_router.include_router(attribute_router)
+v1_router.include_router(attribute_value_router)
+v1_router.include_router(variant_attribute_router)
 v1_router.include_router(inventory_router)
 v1_router.include_router(pricing_router)
 v1_router.include_router(price_list_router)

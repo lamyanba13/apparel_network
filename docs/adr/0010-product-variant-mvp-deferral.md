@@ -1,7 +1,7 @@
 # ADR 0010: Product Variant MVP Deferral
 
 - Date: 2026-08-02
-- Status: Proposed
+- Status: Accepted (deferral fulfilled by Phase 4.8)
 
 ## Context
 
@@ -18,22 +18,25 @@ Phase 4.4 stores a canonical JSONB `attributes` map and SHA-256 signature on
 each variant as a temporary, management-only representation. It remains outside
 public filtering, faceting, localization, and publication eligibility.
 
-Phase 4.8 will introduce `attribute_definitions`, `attribute_values`, and
-`product_variant_attribute_values`. It will backfill the existing map without
-breaking the Phase 4.4 API, retain duplicate-combination protection, and reject
-unmapped attributes before public publication depends on them.
+Phase 4.8 introduces `product_attributes`, `product_attribute_values`, and
+`product_variant_attribute_values`. It backfills the existing map without
+breaking the Phase 4.4 API, retains duplicate-combination protection, and
+rejects unmapped attributes before public publication depends on them.
 
-Phase 4.8 will also emit safe `ProductVariantCreated`,
-`ProductVariantUpdated`, and `ProductVariantDeleted` events through a
-transactional outbox in the same database transaction as each variant write.
-Consumers must be idempotent and tolerate replay.
+Phase 4.8 also writes safe `VariantCreated`, `VariantUpdated`,
+`VariantDeleted`, `VariantAttributeAssigned`, `VariantAttributeRemoved`, and
+`VariantArchived` events to `event_outbox` in the same database transaction as
+each Variant write. Direct publication is deferred; future consumers must be
+idempotent and tolerate replay.
 
 ## Consequences
 
 - Phase 4.4 can support private catalog management sooner.
 - JSONB attributes cannot become a query, search, facet, or localization
   contract.
-- Phase 4.8 is required before variants support public publication, controlled
-  attributes, or projection consumers.
-- Technical-owner approval is required before this proposed exception becomes
-  binding.
+- The temporary JSONB exception is complete: Variant persistence now uses
+  controlled normalized values and the JSONB column has been removed.
+- The Phase 4.4 management API remains compatible while its inputs resolve to
+  normalized values.
+- Projection consumers remain deferred until the outbox dispatcher is
+  implemented.
