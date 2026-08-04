@@ -328,6 +328,19 @@ VARIANT_ATTRIBUTES_ASSIGNED = Counter(
 OUTBOX_WRITTEN = Counter(
     "fashion_network_outbox_written_total", "Transactional outbox records written."
 )
+CARTS_CREATED = Counter("fashion_network_cart_created_total", "Shopping Carts created.")
+CART_ITEMS_ADDED = Counter(
+    "fashion_network_cart_item_added_total", "Shopping Cart Items added."
+)
+CART_ITEMS_REMOVED = Counter(
+    "fashion_network_cart_item_removed_total", "Shopping Cart Items removed."
+)
+CARTS_CHECKED_OUT = Counter(
+    "fashion_network_cart_checkout_total", "Shopping Carts checked out."
+)
+CARTS_ABANDONED = Counter(
+    "fashion_network_cart_abandoned_total", "Shopping Carts abandoned."
+)
 CATEGORIES_CREATED = Counter(
     "fashion_network_category_created_total", "Categories created."
 )

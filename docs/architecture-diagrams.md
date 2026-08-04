@@ -421,3 +421,25 @@ Price Lists reference authoritative Product Prices through assignments. The
 resolver never converts currency: it selects only explicit records matching the
 requested ISO-4217 code and timestamp. Unassigned Product Prices provide the
 backward-compatible default-Store fallback.
+
+## Phase 5.0 Shopping Cart Foundation
+
+```mermaid
+flowchart LR
+    identity[Authenticated customer and Cart permissions] --> api[Cart API]
+    api --> service[Cart application service]
+    service --> ownership[Customer ownership policy]
+    service --> pricing[Production PricingResolver]
+    service --> inventory[Production InventoryService]
+    pricing --> snapshot[Persisted price snapshot]
+    inventory --> validation[Availability validation only]
+    service --> repositories[Cart repository ports]
+    repositories --> postgres[(PostgreSQL Carts and Items)]
+    service --> outbox[Identifier-only transactional outbox]
+    outbox --> postgres
+```
+
+Cart reads and summaries use persisted snapshots. Pricing and Inventory are called
+only when an Item is added or its quantity changes. Inventory is not reserved, and
+checkout, Orders, tax, shipping, payments, conversion, and coupons remain outside
+the Phase 5.0 boundary.

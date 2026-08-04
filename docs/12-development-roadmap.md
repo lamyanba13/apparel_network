@@ -200,25 +200,30 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Variant writes, audit records, and outbox events commit atomically.
 - Outbox payloads are identifier-only and ready for replay-safe consumers.
 
-## Phase 5 — Inventory
+## Phase 5.0 — Shopping Cart Foundation
 
 ### Outcomes
 
-- Stores can maintain accurate stock while public consumers receive only approved availability information.
+- Customers can maintain one Store-scoped active Cart with stable commercial
+  snapshots and current availability validation.
 
 ### Work
 
-- Implement inventory levels, movement ledger, nonnegative constraints, private exact views, public availability mapping, and freshness rules.
-- Enforce `0 <= reserved <= on_hand`, versioned mutation, and reconciliation.
-- Emit idempotent inventory projection events.
-- Keep bulk import outside MVP unless post-pilot evidence promotes it.
+- Implement customer-owned Carts and Cart Items with positive quantities,
+  optimistic locking, audit attribution, and soft deletion.
+- Resolve explicit prices through Pricing and persist stable Item snapshots.
+- Validate current availability through Inventory without reserving or mutating it.
+- Persist identifier-only Cart events through the transactional outbox.
+- Keep checkout, Orders, tax, shipping, payments, conversion, and coupons outside
+  this foundation.
 
 ### Exit gate
 
-- Concurrent mutations preserve inventory invariants.
-- Exact quantities remain private and public availability follows policy.
-- Reconciliation detects and safely reports drift.
-- Store operators complete core inventory workflows successfully.
+- One active Cart per user and Store is enforced by PostgreSQL.
+- Cross-user access returns `404`, and stale Cart or Item mutations return `409`.
+- Price snapshots remain stable on reads and refresh only on Item mutation.
+- Production-backed HTTP tests cover Pricing, Inventory, persistence, outbox,
+  metrics, ownership, lifecycle, and summary behavior.
 
 ## Phase 6 — Search
 

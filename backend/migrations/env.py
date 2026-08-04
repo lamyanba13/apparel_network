@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.core.config import get_settings
 from app.database.metadata import metadata
+from app.modules.cart.infrastructure import models as cart_models
 from app.modules.catalogs.infrastructure import models as catalog_models
 from app.modules.catalogs.infrastructure import taxonomy_models
 from app.modules.identity.infrastructure.persistence import models as identity_models
@@ -39,6 +40,7 @@ _ = (
     identity_models,
     inventory_models,
     pricing_models,
+    cart_models,
     catalog_models,
     product_models,
     attribute_models,

@@ -136,3 +136,9 @@ Variant API shape. Variant mutations persist identifier-only events to the
 transactional `event_outbox` in the same request transaction; no publisher is
 introduced. See
 [`docs/phase-4.8-variant-attribute-normalization.md`](../docs/phase-4.8-variant-attribute-normalization.md).
+
+Phase 5.0 introduces the customer-owned Shopping Cart bounded context. Cart Item
+mutations resolve production Pricing and validate production Inventory while
+persisting stable commercial snapshots; Inventory is never reserved. Cart writes
+and identifier-only events share the request transaction. See
+[`docs/phase-5.0-shopping-cart-foundation.md`](../docs/phase-5.0-shopping-cart-foundation.md).

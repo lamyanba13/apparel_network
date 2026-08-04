@@ -111,6 +111,13 @@ identifier-only event to a transactional PostgreSQL outbox; publication remains
 deferred. See
 [`docs/phase-4.8-variant-attribute-normalization.md`](docs/phase-4.8-variant-attribute-normalization.md).
 
+Phase 5.0 adds customer-owned, Store-scoped Shopping Carts with quantity
+management, immutable price snapshots, validation-only Inventory checks,
+optimistic locking, soft deletion, transactional outbox events, and summaries.
+It does not reserve stock or implement checkout, Orders, tax, shipping, payments,
+conversion, or coupons. See
+[`docs/phase-5.0-shopping-cart-foundation.md`](docs/phase-5.0-shopping-cart-foundation.md).
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

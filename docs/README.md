@@ -87,6 +87,7 @@ Read these documents in order when joining the project:
 49. [Phase 4.6 Product Pricing Foundation](phase-4.6-product-pricing.md)
 50. [Phase 4.7 Price Lists & Multi-Currency](phase-4.7-price-lists-and-multi-currency.md)
 51. [Phase 4.8 Variant Attribute Normalization](phase-4.8-variant-attribute-normalization.md)
+52. [Phase 5.0 Shopping Cart Foundation](phase-5.0-shopping-cart-foundation.md)
 
 ## Decision authority
 

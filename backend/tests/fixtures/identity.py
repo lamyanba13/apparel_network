@@ -44,7 +44,7 @@ async def create_refresh_session(
     session: AsyncSession,
     user_id: UUID,
 ) -> RefreshSessionRecord:
-    now = deterministic_timestamp()
+    now = datetime.now(UTC)
     return await SqlAlchemyRefreshSessionRepository(session).add(
         RefreshSessionCreate(
             user_id=user_id,
