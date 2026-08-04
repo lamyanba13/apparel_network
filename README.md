@@ -125,6 +125,12 @@ future Order handoff without reserving stock, creating an Order, or processing a
 payment. See
 [`docs/phase-5.1-checkout-foundation.md`](docs/phase-5.1-checkout-foundation.md).
 
+Phase 5.2 adds customer-owned, Store-scoped Orders as immutable commercial
+contracts created only from confirmed Checkout Sessions. Orders copy frozen
+Checkout snapshots, enforce a one-way lifecycle and optimistic versions, and do
+not process Payments or mutate Inventory. See
+[`docs/phase-5.2-order-foundation.md`](docs/phase-5.2-order-foundation.md).
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

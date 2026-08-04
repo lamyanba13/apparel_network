@@ -249,6 +249,30 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Checkout persistence and lifecycle events share one PostgreSQL transaction.
 - Production-backed HTTP and OpenAPI verification cover the complete boundary.
 
+## Phase 5.2 — Order Foundation
+
+### Outcomes
+
+- Customers can create an immutable commercial Order from a confirmed Checkout.
+
+### Work
+
+- Persist customer- and Store-owned Orders with immutable Item snapshots.
+- Allocate concurrency-safe production Order numbers.
+- Enforce the one-way pending, confirmed, and cancelled lifecycle with optimistic
+  locking and soft deletion.
+- Persist identifier-only lifecycle events through the transactional outbox.
+- Keep Payments, Inventory mutation, tax, shipping, invoicing, and fulfillment out
+  of the Order boundary.
+
+### Exit gate
+
+- Only a confirmed owned Checkout can produce its single Order.
+- Order snapshots remain unchanged after Pricing and Inventory changes.
+- Cross-user access returns `404`, and stale lifecycle writes return `409`.
+- Production-backed HTTP tests cover persistence, lifecycle, outbox, metrics,
+  ownership, numbering, summaries, and OpenAPI.
+
 ## Phase 6 — Search
 
 ### Outcomes

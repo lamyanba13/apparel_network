@@ -353,6 +353,9 @@ CHECKOUTS_CANCELLED = Counter(
 CHECKOUTS_EXPIRED = Counter(
     "fashion_network_checkout_expired_total", "Checkout Sessions expired."
 )
+ORDERS_CREATED = Counter("fashion_network_order_created_total", "Orders created.")
+ORDERS_CONFIRMED = Counter("fashion_network_order_confirmed_total", "Orders confirmed.")
+ORDERS_CANCELLED = Counter("fashion_network_order_cancelled_total", "Orders cancelled.")
 CATEGORIES_CREATED = Counter(
     "fashion_network_category_created_total", "Categories created."
 )

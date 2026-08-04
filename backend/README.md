@@ -148,3 +148,9 @@ Carts and future Orders. Checkout re-resolves Pricing, revalidates Inventory,
 freezes Item snapshots, and confirms the source Cart transactionally without
 reserving stock or creating Orders or Payments. See
 [`docs/phase-5.1-checkout-foundation.md`](../docs/phase-5.1-checkout-foundation.md).
+
+Phase 5.2 introduces Orders as immutable contracts produced only from confirmed
+Checkout Sessions. It copies Checkout snapshots, enforces customer ownership and
+the `PENDING -> CONFIRMED -> CANCELLED` lifecycle, and persists identifier-only
+outbox events without Payments or Inventory mutation. See
+[`docs/phase-5.2-order-foundation.md`](../docs/phase-5.2-order-foundation.md).

@@ -466,3 +466,24 @@ flowchart LR
 Checkout creation revalidates rather than copying Cart snapshots. Confirmation
 transitions the Cart and Checkout atomically but does not reserve Inventory, create
 an Order, process Payment, or calculate tax or shipping.
+
+## Phase 5.2 Order Foundation
+
+```mermaid
+flowchart LR
+    customer[Authenticated customer] --> api[Order API]
+    api --> service[Order application service]
+    service --> checkout[Production Checkout service]
+    checkout --> snapshots[Confirmed immutable snapshots]
+    snapshots --> repositories[Order repository ports]
+    service --> numbering[PostgreSQL Order number sequence]
+    repositories --> postgres[(PostgreSQL Orders and Items)]
+    numbering --> postgres
+    service --> outbox[Identifier-only transactional outbox]
+    outbox --> postgres
+    service -. confirmed contract .-> payment[Future Payment boundary]
+```
+
+Order creation copies confirmed Checkout snapshots and never reads mutable Cart
+Items. Orders do not mutate Inventory or implement Payment, tax, shipping,
+invoicing, or fulfillment.

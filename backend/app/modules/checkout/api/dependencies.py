@@ -30,8 +30,18 @@ async def checkout_service_dependency(
     request: Request,
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> AsyncIterator[CheckoutService]:
+    service = build_checkout_service(request, session)
+    try:
+        yield service
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
+
+
+def build_checkout_service(request: Request, session: AsyncSession) -> CheckoutService:
     events = cast(EventPublisher, request.app.state.store_events)
-    service = CheckoutService(
+    return CheckoutService(
         SqlAlchemyCheckoutRepository(session),
         SqlAlchemyCheckoutItemRepository(session),
         build_cart_service(request, session),
@@ -39,12 +49,6 @@ async def checkout_service_dependency(
         InventoryService(SqlAlchemyInventoryRepository(session), events),
         CheckoutOutboxService(SqlAlchemyCheckoutOutboxRepository(session)),
     )
-    try:
-        yield service
-        await session.commit()
-    except Exception:
-        await session.rollback()
-        raise
 
 
 CheckoutServiceDependency = Annotated[

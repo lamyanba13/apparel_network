@@ -89,6 +89,7 @@ Read these documents in order when joining the project:
 51. [Phase 4.8 Variant Attribute Normalization](phase-4.8-variant-attribute-normalization.md)
 52. [Phase 5.0 Shopping Cart Foundation](phase-5.0-shopping-cart-foundation.md)
 53. [Phase 5.1 Checkout Foundation](phase-5.1-checkout-foundation.md)
+54. [Phase 5.2 Order Foundation](phase-5.2-order-foundation.md)
 
 ## Decision authority
 
