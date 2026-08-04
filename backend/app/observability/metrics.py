@@ -373,6 +373,22 @@ PAYMENT_PROCESSING_DURATION = Histogram(
     "fashion_network_payment_processing_duration_seconds",
     "Time spent invoking the configured Payment gateway.",
 )
+RESERVATIONS_CREATED = Counter(
+    "fashion_network_reservation_created_total", "Reservations created."
+)
+RESERVATIONS_CONSUMED = Counter(
+    "fashion_network_reservation_consumed_total", "Reservations consumed."
+)
+RESERVATIONS_RELEASED = Counter(
+    "fashion_network_reservation_released_total", "Reservations released."
+)
+RESERVATIONS_EXPIRED = Counter(
+    "fashion_network_reservation_expired_total", "Reservations expired."
+)
+RESERVATION_DURATION = Histogram(
+    "fashion_network_reservation_duration_seconds",
+    "Lifetime of Reservations before a terminal transition.",
+)
 CATEGORIES_CREATED = Counter(
     "fashion_network_category_created_total", "Categories created."
 )

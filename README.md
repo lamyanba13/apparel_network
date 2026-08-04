@@ -138,6 +138,12 @@ financial transaction, Inventory mutation, refunds, settlements, invoicing, or
 fulfillment. See
 [`docs/phase-5.3-payment-foundation.md`](docs/phase-5.3-payment-foundation.md).
 
+Phase 5.4 adds customer-owned Inventory Reservations for captured Payments. Active
+Reservations hold capacity through immutable Reservation Items, row-locked
+validation, lazy expiration, release, and consumption while leaving every Inventory
+quantity unchanged. See
+[`docs/phase-5.4-inventory-reservation.md`](docs/phase-5.4-inventory-reservation.md).
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

@@ -115,6 +115,20 @@ class SqlAlchemyInventoryRepository:
         )
         return _to_domain(model) if model else None
 
+    async def get_for_store(
+        self, inventory_id: UUID, store_id: UUID
+    ) -> InventoryItem | None:
+        model = await self._session.scalar(
+            select(InventoryItemModel)
+            .where(
+                InventoryItemModel.id == inventory_id,
+                InventoryItemModel.store_id == store_id,
+                InventoryItemModel.deleted_at.is_(None),
+            )
+            .with_for_update()
+        )
+        return _to_domain(model) if model else None
+
     async def update(
         self,
         inventory_id: UUID,

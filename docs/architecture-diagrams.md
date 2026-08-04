@@ -508,3 +508,26 @@ flowchart LR
 Payment snapshots a pending Order and never reads Checkout or writes Order tables.
 The Null gateway performs no financial transaction. A captured Payment asks the
 Order service to confirm the Order in the shared request transaction.
+
+## Phase 5.4 Inventory Reservation
+
+```mermaid
+flowchart LR
+    customer[Authenticated customer] --> api[Reservation API]
+    api --> service[Reservation application service]
+    service --> payment[Production Payment service]
+    service --> order[Production Order service]
+    service --> checkout[Production Checkout service]
+    service --> inventory[Production Inventory service]
+    inventory --> lock[Stable row locks and validation]
+    service --> holds[Active Reservation capacity]
+    holds --> repositories[Reservation repositories]
+    repositories --> postgres[(PostgreSQL Reservations and Items)]
+    service --> outbox[Identifier-only transactional outbox]
+    outbox --> postgres
+    service -. consumed Reservation .-> fulfillment[Future Fulfillment]
+```
+
+Active Reservations subtract from reservable capacity without changing Inventory
+columns. Lazy expiration, release, and consumption terminate the hold; future
+Fulfillment remains responsible for approved Inventory adjustment.

@@ -299,6 +299,30 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Production-backed HTTP tests cover lifecycle, snapshots, ownership, idempotency,
   transactions, outbox, metrics, Order interaction, and OpenAPI.
 
+## Phase 5.4 — Inventory Reservation
+
+### Outcomes
+
+- Captured Orders can hold current Inventory capacity temporarily without changing
+  Inventory quantities.
+
+### Work
+
+- Persist customer- and Store-owned Reservations and immutable Item snapshots.
+- Validate captured Payment, confirmed Order and Checkout, and current Inventory.
+- Account for concurrent unexpired holds under Inventory row locks.
+- Support optimistic consumption, release, and lazy 30-minute expiration.
+- Keep Inventory adjustment, shipments, invoices, and Fulfillment outside the
+  Reservation boundary.
+
+### Exit gate
+
+- Only a matching captured Payment and confirmed commercial chain can reserve.
+- One active Reservation per Order and capacity safety are database-backed.
+- Stale transitions return `409`; cross-user access returns `404`.
+- Production-backed HTTP tests cover capacity, ownership, expiration, release,
+  consumption, unchanged Inventory, outbox, metrics, and OpenAPI.
+
 ## Phase 6 — Search
 
 ### Outcomes

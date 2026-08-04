@@ -22,19 +22,23 @@ async def payment_service_dependency(
     request: Request,
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> AsyncIterator[PaymentService]:
-    service = PaymentService(
-        SqlAlchemyPaymentRepository(session),
-        SqlAlchemyPaymentTransactionRepository(session),
-        build_order_service(request, session),
-        NullPaymentGateway(),
-        PaymentOutboxService(SqlAlchemyPaymentOutboxRepository(session)),
-    )
+    service = build_payment_service(request, session)
     try:
         yield service
         await session.commit()
     except Exception:
         await session.rollback()
         raise
+
+
+def build_payment_service(request: Request, session: AsyncSession) -> PaymentService:
+    return PaymentService(
+        SqlAlchemyPaymentRepository(session),
+        SqlAlchemyPaymentTransactionRepository(session),
+        build_order_service(request, session),
+        NullPaymentGateway(),
+        PaymentOutboxService(SqlAlchemyPaymentOutboxRepository(session)),
+    )
 
 
 PaymentServiceDependency = Annotated[

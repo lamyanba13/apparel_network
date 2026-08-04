@@ -126,6 +126,14 @@ class InventoryService:
             raise _not_found()
         return item
 
+    async def get_for_reservation(
+        self, inventory_id: UUID, store_id: UUID
+    ) -> InventoryItem:
+        item = await self._repository.get_for_store(inventory_id, store_id)
+        if item is None:
+            raise _not_found()
+        return item
+
     async def update_owned(
         self, inventory_id: UUID, owner_id: UUID, values: InventoryUpdate
     ) -> InventoryItem:

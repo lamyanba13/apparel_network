@@ -161,3 +161,9 @@ optimistic lifecycle transitions, private provider transaction history, outbox
 events, metrics, and capture-driven Order confirmation without a real financial
 provider. See
 [`docs/phase-5.3-payment-foundation.md`](../docs/phase-5.3-payment-foundation.md).
+
+Phase 5.4 introduces Inventory Reservations for captured Payments. It validates the
+Payment, Order, Checkout, and Inventory ownership chain, accounts for concurrent
+active holds, supports lazy expiration, release, and consumption, and never changes
+Inventory quantities. See
+[`docs/phase-5.4-inventory-reservation.md`](../docs/phase-5.4-inventory-reservation.md).

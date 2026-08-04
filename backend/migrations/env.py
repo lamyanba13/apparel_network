@@ -22,6 +22,7 @@ from app.modules.products.infrastructure import attribute_models
 from app.modules.products.infrastructure import media_models as product_media_models
 from app.modules.products.infrastructure import models as product_models
 from app.modules.products.infrastructure import variant_models as product_variant_models
+from app.modules.reservations.infrastructure import models as reservation_models
 from app.modules.stores.infrastructure.persistence import (
     analytics_models as store_analytics_models,
 )
@@ -47,6 +48,7 @@ _ = (
     checkout_models,
     order_models,
     payment_models,
+    reservation_models,
     catalog_models,
     product_models,
     attribute_models,

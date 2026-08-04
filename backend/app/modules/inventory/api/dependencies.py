@@ -15,13 +15,20 @@ from app.modules.inventory.infrastructure.repositories import (
 async def inventory_service_dependency(
     request: Request, session: Annotated[AsyncSession, Depends(get_db)]
 ) -> AsyncIterator[InventoryService]:
-    events = cast(EventPublisher, request.app.state.store_events)
+    service = build_inventory_service(request, session)
     try:
-        yield InventoryService(SqlAlchemyInventoryRepository(session), events)
+        yield service
         await session.commit()
     except Exception:
         await session.rollback()
         raise
+
+
+def build_inventory_service(
+    request: Request, session: AsyncSession
+) -> InventoryService:
+    events = cast(EventPublisher, request.app.state.store_events)
+    return InventoryService(SqlAlchemyInventoryRepository(session), events)
 
 
 InventoryServiceDependency = Annotated[

@@ -18,6 +18,9 @@ class InventoryRepository(Protocol):
     async def get_for_owner(
         self, inventory_id: UUID, owner_id: UUID
     ) -> InventoryItem | None: ...
+    async def get_for_store(
+        self, inventory_id: UUID, store_id: UUID
+    ) -> InventoryItem | None: ...
     async def update(
         self,
         inventory_id: UUID,
