@@ -350,6 +350,32 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Production-backed HTTP tests cover packages, tracking, lifecycle, cancellation,
   Inventory, ownership, outbox, metrics, and OpenAPI.
 
+## Phase 5.6 — Returns & Refund Foundation
+
+### Outcomes
+
+- Purchasing customers can submit item-level Returns for delivered Shipments and
+  progress eligible claims through inspection and provider-neutral Refunds.
+
+### Work
+
+- Persist Returns, Return Items, Refunds, and append-only Refund Transactions.
+- Validate delivered Shipment, confirmed Order, captured Payment, ownership, and
+  cumulative purchased quantity through production services.
+- Record explicit Inventory dispositions without automatic restocking.
+- Implement optimistic Return and Refund lifecycles with terminal-state safety.
+- Abstract Refund creation and status behind a deterministic Null gateway.
+- Persist identifier-only events in the transactional outbox.
+
+### Exit gate
+
+- Cross-user access is concealed and stale transitions return `409`.
+- Returned quantities and completed Refund amounts cannot exceed their immutable
+  Order and captured Payment limits.
+- No Return repository writes another bounded context's tables.
+- Production-backed HTTP tests cover lifecycle, quantity, ownership, disposition,
+  provider transactions, outbox, metrics, persistence, and OpenAPI.
+
 ## Phase 6 — Search
 
 ### Outcomes

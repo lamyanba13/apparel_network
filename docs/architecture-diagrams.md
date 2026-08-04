@@ -556,3 +556,26 @@ Shipment creation validates the captured commercial chain and consumed
 Reservation. Dispatch changes stock only through InventoryService; Shipment owns
 packages, tracking, fulfillment lifecycle, and carrier abstraction without writing
 Payment, Order, Reservation, or Inventory persistence directly.
+
+## Phase 5.6 Returns & Refund Foundation
+
+```mermaid
+flowchart LR
+    customer[Purchasing customer] --> api[Return and Refund API]
+    api --> service[Return application services]
+    service --> order[Production Order service]
+    service --> shipment[Production Shipment service]
+    service --> payment[Production Payment service]
+    service --> inventory[Production Inventory service validation]
+    service --> repositories[Return and Refund repositories]
+    repositories --> postgres[(PostgreSQL Returns Items Refunds Transactions)]
+    service --> gateway[RefundGateway protocol]
+    gateway --> null[Deterministic Null refund provider]
+    service --> outbox[Identifier-only transactional outbox]
+    outbox --> postgres
+    inventory -. disposition only; no stock mutation .-> repositories
+```
+
+Returns validate immutable delivered purchase records and cumulative quantities.
+Inspection persists disposition without restocking. Refunds derive immutable
+commercial values and use a provider-neutral gateway without writing Payment data.

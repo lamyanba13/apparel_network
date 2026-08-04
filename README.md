@@ -150,6 +150,12 @@ transitions, transactional events, and dispatch-time Inventory consumption throu
 the production Inventory service. See
 [`docs/phase-5.5-shipment-fulfillment.md`](docs/phase-5.5-shipment-fulfillment.md).
 
+Phase 5.6 adds customer-owned Returns and provider-neutral Refunds for delivered
+Shipments. It validates cumulative refundable quantities, records inspection
+dispositions without restocking, and processes deterministic Null refunds through
+transactional lifecycle and event contracts. See
+[`docs/phase-5.6-returns-refund-foundation.md`](docs/phase-5.6-returns-refund-foundation.md).
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

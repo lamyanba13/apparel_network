@@ -26,7 +26,17 @@ async def shipment_service_dependency(
     request: Request,
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> AsyncIterator[ShipmentService]:
-    service = ShipmentService(
+    service = build_shipment_service(request, session)
+    try:
+        yield service
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
+
+
+def build_shipment_service(request: Request, session: AsyncSession) -> ShipmentService:
+    return ShipmentService(
         SqlAlchemyShipmentRepository(session),
         SqlAlchemyShipmentPackageRepository(session),
         SqlAlchemyShipmentTrackingRepository(session),
@@ -37,12 +47,6 @@ async def shipment_service_dependency(
         NullShippingGateway(),
         ShipmentOutboxService(SqlAlchemyShipmentOutboxRepository(session)),
     )
-    try:
-        yield service
-        await session.commit()
-    except Exception:
-        await session.rollback()
-        raise
 
 
 ShipmentServiceDependency = Annotated[

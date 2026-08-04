@@ -157,6 +157,17 @@ class SqlAlchemyOrderItemRepository:
         ).all()
         return [_item(row) for row in rows]
 
+    async def list_for_order_locked(self, order_id: UUID) -> Sequence[OrderItem]:
+        rows = (
+            await self._session.scalars(
+                select(OrderItemModel)
+                .where(OrderItemModel.order_id == order_id)
+                .order_by(OrderItemModel.id)
+                .with_for_update()
+            )
+        ).all()
+        return [_item(row) for row in rows]
+
 
 class SqlAlchemyOrderOutboxRepository:
     def __init__(self, session: AsyncSession) -> None:

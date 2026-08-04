@@ -81,6 +81,20 @@ class SqlAlchemyPaymentRepository:
         model = await self._model(payment_id, customer_id)
         return _payment(model) if model else None
 
+    async def get_for_customer_locked(
+        self, payment_id: UUID, customer_id: UUID
+    ) -> PaymentIntent | None:
+        model = await self._session.scalar(
+            select(PaymentIntentModel)
+            .where(
+                PaymentIntentModel.id == payment_id,
+                PaymentIntentModel.customer_id == customer_id,
+                PaymentIntentModel.deleted_at.is_(None),
+            )
+            .with_for_update()
+        )
+        return _payment(model) if model else None
+
     async def transition(
         self,
         payment_id: UUID,

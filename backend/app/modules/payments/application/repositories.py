@@ -29,6 +29,10 @@ class PaymentRepository(Protocol):
         self, payment_id: UUID, customer_id: UUID
     ) -> PaymentIntent | None: ...
 
+    async def get_for_customer_locked(
+        self, payment_id: UUID, customer_id: UUID
+    ) -> PaymentIntent | None: ...
+
     async def transition(
         self,
         payment_id: UUID,

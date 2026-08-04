@@ -139,6 +139,14 @@ class PaymentService:
             raise _not_found()
         return payment
 
+    async def get_for_refund(
+        self, payment_id: UUID, customer_id: UUID
+    ) -> PaymentIntent:
+        payment = await self._payments.get_for_customer_locked(payment_id, customer_id)
+        if payment is None:
+            raise _not_found()
+        return payment
+
     async def transactions_owned(
         self, payment_id: UUID, customer_id: UUID
     ) -> Sequence[PaymentTransaction]:

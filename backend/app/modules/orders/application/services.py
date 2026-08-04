@@ -197,6 +197,19 @@ class OrderService:
             quantity=sum(item.quantity for item in items),
         )
 
+    async def summary_owned_for_return(
+        self, order_id: UUID, customer_id: UUID
+    ) -> OrderSummary:
+        order = await self.get_owned(order_id, customer_id)
+        items = await self._items.list_for_order_locked(order.id)
+        return OrderSummary(
+            order_id=order.id,
+            items=items,
+            subtotal=order.subtotal,
+            currency=order.currency,
+            quantity=sum(item.quantity for item in items),
+        )
+
     @staticmethod
     def _item_values(
         order_id: UUID, actor_id: UUID, item: CheckoutItem

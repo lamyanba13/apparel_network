@@ -32,6 +32,7 @@ Accepted ADRs are immutable historical records. A material change is documented 
 | [0015](0015-payment-boundary.md) | Payment boundary | Accepted |
 | [0016](0016-inventory-reservation-boundary.md) | Inventory Reservation boundary | Accepted |
 | [0017](0017-shipment-boundary.md) | Shipment and Fulfillment boundary | Accepted |
+| [0018](0018-return-refund-boundary.md) | Return and Refund boundary | Accepted |
 
 The implementation conformance review and frozen Identity invariants are
 recorded in the [Phase 2.6 Identity Module Freeze](../phase-2.6-identity-freeze.md).

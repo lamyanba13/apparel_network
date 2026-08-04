@@ -406,6 +406,18 @@ DELIVERY_DURATION = Histogram(
     "fashion_network_delivery_duration_seconds",
     "Time from shipment dispatch to delivery.",
 )
+RETURNS_CREATED = Counter("fashion_network_return_created_total", "Returns requested.")
+RETURNS_RECEIVED = Counter("fashion_network_return_received_total", "Returns received.")
+RETURNS_REFUNDED = Counter("fashion_network_return_refunded_total", "Returns refunded.")
+RETURNS_REJECTED = Counter("fashion_network_return_rejected_total", "Returns rejected.")
+REFUNDS_COMPLETED = Counter(
+    "fashion_network_refund_completed_total", "Refunds completed."
+)
+REFUNDS_FAILED = Counter("fashion_network_refund_failed_total", "Refunds failed.")
+REFUND_DURATION = Histogram(
+    "fashion_network_refund_duration_seconds",
+    "Time from Refund creation to a terminal provider result.",
+)
 CATEGORIES_CREATED = Counter(
     "fashion_network_category_created_total", "Categories created."
 )

@@ -173,3 +173,9 @@ requires a captured Payment, confirmed Order, and consumed Reservation; packages
 tracking, courier abstraction, optimistic lifecycle, InventoryService dispatch
 consumption, outbox events, and metrics remain production-backed. See
 [`docs/phase-5.5-shipment-fulfillment.md`](../docs/phase-5.5-shipment-fulfillment.md).
+
+Phase 5.6 introduces Returns and Refunds for delivered purchases. Production
+Order, Shipment, Payment, and Inventory services enforce ownership and eligibility;
+inspection dispositions remain non-mutating, while a deterministic Null Refund
+gateway drives auditable provider transactions. See
+[`docs/phase-5.6-returns-refund-foundation.md`](../docs/phase-5.6-returns-refund-foundation.md).

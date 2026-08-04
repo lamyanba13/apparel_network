@@ -73,6 +73,9 @@ foundation values. Future carrier integrations must implement this port, protect
 provider credentials and payloads, map callbacks idempotently, and preserve the
 same application lifecycle and transaction boundaries.
 
+Phase 5.6 consumes delivered Shipment state through `ShipmentService` when
+validating Return eligibility. It never modifies Shipment persistence.
+
 ## HTTP API
 
 - `POST /api/v1/shipments`
