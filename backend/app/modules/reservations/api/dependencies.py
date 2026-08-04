@@ -24,7 +24,19 @@ async def reservation_service_dependency(
     request: Request,
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> AsyncIterator[ReservationService]:
-    service = ReservationService(
+    service = build_reservation_service(request, session)
+    try:
+        yield service
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
+
+
+def build_reservation_service(
+    request: Request, session: AsyncSession
+) -> ReservationService:
+    return ReservationService(
         SqlAlchemyReservationRepository(session),
         SqlAlchemyReservationItemRepository(session),
         build_payment_service(request, session),
@@ -33,12 +45,6 @@ async def reservation_service_dependency(
         build_inventory_service(request, session),
         ReservationOutboxService(SqlAlchemyReservationOutboxRepository(session)),
     )
-    try:
-        yield service
-        await session.commit()
-    except Exception:
-        await session.rollback()
-        raise
 
 
 ReservationServiceDependency = Annotated[

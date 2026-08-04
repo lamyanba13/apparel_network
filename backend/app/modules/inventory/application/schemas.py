@@ -21,3 +21,9 @@ class InventoryUpdate:
     values: Mapping[str, object]
     expected_version: int
     actor_id: UUID
+
+
+@dataclass(frozen=True, slots=True)
+class InventoryReservationConsumption:
+    inventory_id: UUID
+    quantity: int

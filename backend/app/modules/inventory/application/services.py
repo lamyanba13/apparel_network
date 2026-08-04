@@ -7,7 +7,11 @@ from app.common.errors import ErrorCode, FieldError
 from app.common.events import EventPublisher
 from app.common.exceptions import AppError
 from app.modules.inventory.application.repositories import InventoryRepository
-from app.modules.inventory.application.schemas import InventoryCreate, InventoryUpdate
+from app.modules.inventory.application.schemas import (
+    InventoryCreate,
+    InventoryReservationConsumption,
+    InventoryUpdate,
+)
 from app.modules.inventory.domain import (
     InventoryAdjusted,
     InventoryCreated,
@@ -133,6 +137,35 @@ class InventoryService:
         if item is None:
             raise _not_found()
         return item
+
+    async def consume_reservation(
+        self,
+        store_id: UUID,
+        values: Sequence[InventoryReservationConsumption],
+        actor_id: UUID,
+    ) -> Sequence[InventoryItem]:
+        consumed: list[InventoryItem] = []
+        for value in sorted(values, key=lambda item: str(item.inventory_id)):
+            if value.quantity <= 0:
+                raise _validation("quantity", "Quantity must be positive.")
+            existing = await self.get_for_reservation(value.inventory_id, store_id)
+            if existing.status is not InventoryStatus.ACTIVE:
+                raise _conflict("Inventory is not active.")
+            item = await self._repository.consume(
+                value.inventory_id,
+                store_id,
+                quantity=value.quantity,
+                actor_id=actor_id,
+                expected_version=existing.version,
+            )
+            if item is None:
+                raise _conflict("Inventory could not be consumed for the Shipment.")
+            INVENTORY_UPDATED.inc()
+            INVENTORY_ADJUSTMENTS.inc()
+            await self._publish(InventoryUpdated, item)
+            await self._publish(InventoryAdjusted, item)
+            consumed.append(item)
+        return consumed
 
     async def update_owned(
         self, inventory_id: UUID, owner_id: UUID, values: InventoryUpdate

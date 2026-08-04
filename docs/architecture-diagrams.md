@@ -531,3 +531,28 @@ flowchart LR
 Active Reservations subtract from reservable capacity without changing Inventory
 columns. Lazy expiration, release, and consumption terminate the hold; future
 Fulfillment remains responsible for approved Inventory adjustment.
+
+## Phase 5.5 Shipment & Fulfillment Foundation
+
+```mermaid
+flowchart LR
+    customer[Authenticated customer] --> api[Shipment API]
+    api --> service[Shipment application service]
+    service --> payment[Production Payment service]
+    service --> order[Production Order service]
+    service --> reservation[Production Reservation service]
+    service --> gateway[ShippingGateway protocol]
+    gateway --> null[Deterministic Null carrier]
+    service --> repositories[Shipment repositories]
+    repositories --> postgres[(PostgreSQL Shipments Packages Tracking)]
+    service --> inventory[Production Inventory service]
+    inventory --> stock[Locked Inventory consumption]
+    stock --> postgres
+    service --> outbox[Identifier-only transactional outbox]
+    outbox --> postgres
+```
+
+Shipment creation validates the captured commercial chain and consumed
+Reservation. Dispatch changes stock only through InventoryService; Shipment owns
+packages, tracking, fulfillment lifecycle, and carrier abstraction without writing
+Payment, Order, Reservation, or Inventory persistence directly.

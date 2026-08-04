@@ -92,6 +92,7 @@ Read these documents in order when joining the project:
 54. [Phase 5.2 Order Foundation](phase-5.2-order-foundation.md)
 55. [Phase 5.3 Payment Foundation](phase-5.3-payment-foundation.md)
 56. [Phase 5.4 Inventory Reservation](phase-5.4-inventory-reservation.md)
+57. [Phase 5.5 Shipment & Fulfillment](phase-5.5-shipment-fulfillment.md)
 
 ## Decision authority
 

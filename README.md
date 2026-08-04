@@ -144,6 +144,12 @@ validation, lazy expiration, release, and consumption while leaving every Invent
 quantity unchanged. See
 [`docs/phase-5.4-inventory-reservation.md`](docs/phase-5.4-inventory-reservation.md).
 
+Phase 5.5 adds customer-owned Shipments for consumed Reservations. It manages
+packages, deterministic carrier labels, tracking history, optimistic fulfillment
+transitions, transactional events, and dispatch-time Inventory consumption through
+the production Inventory service. See
+[`docs/phase-5.5-shipment-fulfillment.md`](docs/phase-5.5-shipment-fulfillment.md).
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

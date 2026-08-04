@@ -156,6 +156,35 @@ class SqlAlchemyInventoryRepository:
         await self._session.refresh(model)
         return _to_domain(model)
 
+    async def consume(
+        self,
+        inventory_id: UUID,
+        store_id: UUID,
+        *,
+        quantity: int,
+        actor_id: UUID,
+        expected_version: int,
+    ) -> InventoryItem | None:
+        model = await self._session.scalar(
+            select(InventoryItemModel)
+            .where(
+                InventoryItemModel.id == inventory_id,
+                InventoryItemModel.store_id == store_id,
+                InventoryItemModel.deleted_at.is_(None),
+                InventoryItemModel.version == expected_version,
+            )
+            .with_for_update()
+        )
+        if model is None or model.quantity_available < quantity:
+            return None
+        model.quantity_on_hand -= quantity
+        model.quantity_available = model.quantity_on_hand - model.quantity_reserved
+        model.updated_by_id = actor_id
+        model.version += 1
+        await self._session.flush()
+        await self._session.refresh(model)
+        return _to_domain(model)
+
     async def archive(
         self,
         inventory_id: UUID,

@@ -21,6 +21,15 @@ class InventoryRepository(Protocol):
     async def get_for_store(
         self, inventory_id: UUID, store_id: UUID
     ) -> InventoryItem | None: ...
+    async def consume(
+        self,
+        inventory_id: UUID,
+        store_id: UUID,
+        *,
+        quantity: int,
+        actor_id: UUID,
+        expected_version: int,
+    ) -> InventoryItem | None: ...
     async def update(
         self,
         inventory_id: UUID,

@@ -323,6 +323,33 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Production-backed HTTP tests cover capacity, ownership, expiration, release,
   consumption, unchanged Inventory, outbox, metrics, and OpenAPI.
 
+## Phase 5.5 — Shipment & Fulfillment Foundation
+
+### Outcomes
+
+- Consumed Reservations can advance through auditable package, dispatch, tracking,
+  delivery, cancellation, and future return workflows.
+
+### Work
+
+- Persist customer- and Store-owned Shipments, Packages, and Tracking Events.
+- Validate captured Payment, confirmed Order, and consumed Reservation ownership.
+- Implement optimistic lifecycle transitions and terminal-state enforcement.
+- Abstract labels, tracking, estimates, cancellation, and manifests behind a
+  deterministic Null Shipping gateway.
+- Consume Inventory at dispatch only through the production Inventory service.
+- Persist identifier-only lifecycle events in the transactional outbox.
+
+### Exit gate
+
+- Duplicate fulfillment, cross-user access, invalid lifecycle transitions, and
+  stale versions are rejected deterministically.
+- Shipment repositories never write Payment, Order, Reservation, or Inventory
+  tables.
+- Dispatch-time Inventory consumption is atomic with the shipped transition.
+- Production-backed HTTP tests cover packages, tracking, lifecycle, cancellation,
+  Inventory, ownership, outbox, metrics, and OpenAPI.
+
 ## Phase 6 — Search
 
 ### Outcomes

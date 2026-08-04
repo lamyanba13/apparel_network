@@ -389,6 +389,23 @@ RESERVATION_DURATION = Histogram(
     "fashion_network_reservation_duration_seconds",
     "Lifetime of Reservations before a terminal transition.",
 )
+SHIPMENTS_CREATED = Counter(
+    "fashion_network_shipment_created_total", "Shipments created."
+)
+SHIPMENTS_PACKED = Counter("fashion_network_shipment_packed_total", "Shipments packed.")
+SHIPMENTS_SHIPPED = Counter(
+    "fashion_network_shipment_shipped_total", "Shipments shipped."
+)
+SHIPMENTS_DELIVERED = Counter(
+    "fashion_network_shipment_delivered_total", "Shipments delivered."
+)
+SHIPMENTS_CANCELLED = Counter(
+    "fashion_network_shipment_cancelled_total", "Shipments cancelled."
+)
+DELIVERY_DURATION = Histogram(
+    "fashion_network_delivery_duration_seconds",
+    "Time from shipment dispatch to delivery.",
+)
 CATEGORIES_CREATED = Counter(
     "fashion_network_category_created_total", "Categories created."
 )

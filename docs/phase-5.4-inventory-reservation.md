@@ -101,12 +101,12 @@ to the authenticated customer; cross-user access returns `404`.
 transactional outbox payloads. Lifecycle counters and an unlabeled duration
 histogram provide low-cardinality observability.
 
-## Future Fulfillment interaction
+## Fulfillment interaction
 
-Phase 5.5 may consume an active Reservation through the approved application
-service and then adjust Inventory through `InventoryService` in its own reviewed
-workflow. Phase 5.4 consumption itself intentionally changes no Inventory quantity
-and creates no shipment or invoice.
+Phase 5.5 requires a consumed Reservation before Shipment creation. Dispatch reads
+its immutable Items through the production Reservation service and adjusts stock
+through `InventoryService`. Phase 5.4 consumption itself intentionally changes no
+Inventory quantity and creates no Shipment or invoice.
 
 ## Verification
 

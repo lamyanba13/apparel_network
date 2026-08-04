@@ -55,6 +55,11 @@ class PermissionName(StrEnum):
     RESERVATION_CONSUME = "reservation:consume"
     RESERVATION_RELEASE = "reservation:release"
     RESERVATION_CANCEL = "reservation:cancel"
+    SHIPMENT_CREATE = "shipment:create"
+    SHIPMENT_VIEW = "shipment:view"
+    SHIPMENT_UPDATE = "shipment:update"
+    SHIPMENT_SHIP = "shipment:ship"
+    SHIPMENT_DELIVER = "shipment:deliver"
     ADMIN_ACCESS = "admin:access"
     SYSTEM_MANAGE = "system:manage"
 

@@ -167,3 +167,9 @@ Payment, Order, Checkout, and Inventory ownership chain, accounts for concurrent
 active holds, supports lazy expiration, release, and consumption, and never changes
 Inventory quantities. See
 [`docs/phase-5.4-inventory-reservation.md`](../docs/phase-5.4-inventory-reservation.md).
+
+Phase 5.5 introduces the Shipment and Fulfillment bounded context. A Shipment
+requires a captured Payment, confirmed Order, and consumed Reservation; packages,
+tracking, courier abstraction, optimistic lifecycle, InventoryService dispatch
+consumption, outbox events, and metrics remain production-backed. See
+[`docs/phase-5.5-shipment-fulfillment.md`](../docs/phase-5.5-shipment-fulfillment.md).
