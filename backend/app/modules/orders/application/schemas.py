@@ -6,6 +6,7 @@ from decimal import Decimal
 from uuid import UUID
 
 from app.modules.orders.domain import OrderItem, OrderStatus
+from app.modules.promotions.domain import PromotionRedemption
 
 
 @dataclass(frozen=True, slots=True)
@@ -25,8 +26,11 @@ class OrderSummary:
     order_id: UUID
     items: Sequence[OrderItem]
     subtotal: Decimal
+    discount_total: Decimal
+    final_total: Decimal
     currency: str
     quantity: int
+    applied_promotions: Sequence[PromotionRedemption]
 
 
 @dataclass(frozen=True, slots=True)

@@ -11,6 +11,8 @@ from app.modules.cart.api.schemas import (
     CartItemResponse,
     CartItemUpdateRequest,
     CartListResponse,
+    CartPromotionLineResponse,
+    CartPromotionRejectionResponse,
     CartResponse,
     CartSummaryResponse,
 )
@@ -23,6 +25,8 @@ from app.modules.cart.application.schemas import (
 from app.modules.cart.domain import CartStatus
 from app.modules.identity.api.authorization import require_permission
 from app.modules.identity.api.dependencies import CurrentIdentity
+from app.modules.promotions.api.dependencies import PromotionEvaluationServiceDependency
+from app.modules.promotions.application.schemas import PromotionEvaluate
 
 router = APIRouter(prefix="/cart", tags=["Shopping Cart"])
 _RESPONSES: dict[int | str, dict[str, Any]] = {
@@ -217,12 +221,40 @@ async def cart_summary(
     cart_id: UUID,
     identity: CurrentIdentity,
     service: CartServiceDependency,
+    promotion_service: PromotionEvaluationServiceDependency,
+    evaluate_promotions: bool = False,
+    coupon_codes: Annotated[list[str] | None, Query()] = None,
 ) -> CartSummaryResponse:
     summary = await service.summary_owned(cart_id, identity.user.id)
+    evaluation = (
+        await promotion_service.evaluate(
+            PromotionEvaluate(cart_id, tuple(coupon_codes or ()), identity.user.id)
+        )
+        if evaluate_promotions
+        else None
+    )
     return CartSummaryResponse(
         cart_id=summary.cart_id,
         items=[_item(item) for item in summary.items],
         subtotal=summary.subtotal,
         currency=summary.currency,
         quantity=summary.quantity,
+        discount_total=evaluation.discount_total if evaluation else None,
+        final_total=evaluation.final_total if evaluation else None,
+        applied_promotions=(
+            [
+                CartPromotionLineResponse.model_validate(value)
+                for value in evaluation.applied_promotions
+            ]
+            if evaluation
+            else []
+        ),
+        rejected_promotions=(
+            [
+                CartPromotionRejectionResponse.model_validate(value)
+                for value in evaluation.rejected_promotions
+            ]
+            if evaluation
+            else []
+        ),
     )

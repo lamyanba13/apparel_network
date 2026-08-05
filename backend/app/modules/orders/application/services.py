@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
+from decimal import Decimal
 from uuid import UUID
 
 from app.common.errors import ErrorCode
@@ -131,6 +132,9 @@ class OrderService:
                 for item in checkout_summary.items
             ]
         )
+        await self._checkouts.inherit_promotions_to_order(
+            checkout.id, order.id, values.actor_id
+        )
         ORDERS_CREATED.inc()
         await self._emit(OrderCreated, order)
         return order
@@ -189,12 +193,21 @@ class OrderService:
     async def summary_owned(self, order_id: UUID, customer_id: UUID) -> OrderSummary:
         order = await self.get_owned(order_id, customer_id)
         items = await self._items.list_for_order(order.id)
+        promotions = await self._checkouts.order_promotion_snapshots_owned(
+            order.id, customer_id
+        )
+        discount_total = sum(
+            (promotion.discount_amount for promotion in promotions), start=Decimal("0")
+        )
         return OrderSummary(
             order_id=order.id,
             items=items,
             subtotal=order.subtotal,
+            discount_total=discount_total,
+            final_total=order.subtotal - discount_total,
             currency=order.currency,
             quantity=sum(item.quantity for item in items),
+            applied_promotions=promotions,
         )
 
     async def summary_owned_for_return(
@@ -202,12 +215,21 @@ class OrderService:
     ) -> OrderSummary:
         order = await self.get_owned(order_id, customer_id)
         items = await self._items.list_for_order_locked(order.id)
+        promotions = await self._checkouts.order_promotion_snapshots_owned(
+            order.id, customer_id
+        )
+        discount_total = sum(
+            (promotion.discount_amount for promotion in promotions), start=Decimal("0")
+        )
         return OrderSummary(
             order_id=order.id,
             items=items,
             subtotal=order.subtotal,
+            discount_total=discount_total,
+            final_total=order.subtotal - discount_total,
             currency=order.currency,
             quantity=sum(item.quantity for item in items),
+            applied_promotions=promotions,
         )
 
     @staticmethod

@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from app.common.pagination import PageMetadata
 from app.modules.orders.domain import OrderStatus
@@ -62,9 +62,23 @@ class OrderItemResponse(BaseModel):
     updated_at: datetime
 
 
+class OrderPromotionSnapshotResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    promotion_id: UUID
+    coupon_id: UUID | None
+    discount_amount: Decimal
+    currency: str
+    coupon_code: str | None
+    snapshot: dict[str, JsonValue]
+
+
 class OrderSummaryResponse(BaseModel):
     order_id: UUID
     items: list[OrderItemResponse]
     subtotal: Decimal
+    discount_total: Decimal
+    final_total: Decimal
     currency: str
     quantity: int
+    applied_promotions: list[OrderPromotionSnapshotResponse]

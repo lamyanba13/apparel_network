@@ -156,6 +156,12 @@ dispositions without restocking, and processes deterministic Null refunds throug
 transactional lifecycle and event contracts. See
 [`docs/phase-5.6-returns-refund-foundation.md`](docs/phase-5.6-returns-refund-foundation.md).
 
+Phase 5.7 adds Store-scoped Promotions and Coupons with deterministic eligibility,
+stacking, usage limits, and optimistic lifecycle management. Cart evaluation is
+non-mutating, Checkout freezes immutable Redemption snapshots, and Orders inherit
+those snapshots without recalculation. See
+[`docs/phase-5.7-promotions-discount-engine.md`](docs/phase-5.7-promotions-discount-engine.md).
+
 ## Prerequisite
 
 Install Docker Desktop or Docker Engine with Docker Compose v2. No host installation of Python, Poetry, Node.js, pnpm, PostgreSQL, Redis, RabbitMQ, or other project services is required.

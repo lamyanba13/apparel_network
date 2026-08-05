@@ -94,6 +94,7 @@ Read these documents in order when joining the project:
 56. [Phase 5.4 Inventory Reservation](phase-5.4-inventory-reservation.md)
 57. [Phase 5.5 Shipment & Fulfillment](phase-5.5-shipment-fulfillment.md)
 58. [Phase 5.6 Returns & Refund Foundation](phase-5.6-returns-refund-foundation.md)
+59. [Phase 5.7 Promotions & Discount Engine](phase-5.7-promotions-discount-engine.md)
 
 ## Decision authority
 

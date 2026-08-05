@@ -12,6 +12,7 @@ from app.modules.orders.api.schemas import (
     OrderCreateRequest,
     OrderItemResponse,
     OrderListResponse,
+    OrderPromotionSnapshotResponse,
     OrderResponse,
     OrderSummaryResponse,
 )
@@ -166,6 +167,12 @@ async def order_summary(
         order_id=summary.order_id,
         items=[_item(item) for item in summary.items],
         subtotal=summary.subtotal,
+        discount_total=summary.discount_total,
+        final_total=summary.final_total,
         currency=summary.currency,
         quantity=summary.quantity,
+        applied_promotions=[
+            OrderPromotionSnapshotResponse.model_validate(value)
+            for value in summary.applied_promotions
+        ],
     )

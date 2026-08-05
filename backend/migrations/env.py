@@ -22,6 +22,7 @@ from app.modules.products.infrastructure import attribute_models
 from app.modules.products.infrastructure import media_models as product_media_models
 from app.modules.products.infrastructure import models as product_models
 from app.modules.products.infrastructure import variant_models as product_variant_models
+from app.modules.promotions.infrastructure import models as promotion_models
 from app.modules.reservations.infrastructure import models as reservation_models
 from app.modules.returns.infrastructure import models as return_models
 from app.modules.shipments.infrastructure import models as shipment_models
@@ -50,6 +51,7 @@ _ = (
     checkout_models,
     order_models,
     payment_models,
+    promotion_models,
     reservation_models,
     return_models,
     shipment_models,

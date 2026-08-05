@@ -24,6 +24,9 @@ from app.modules.pricing.application.price_list_services import PricingResolver
 from app.modules.pricing.infrastructure.price_list_repositories import (
     SqlAlchemyResolverRepository,
 )
+from app.modules.promotions.api.dependencies import (
+    build_promotion_evaluation_service,
+)
 
 
 async def checkout_service_dependency(
@@ -47,6 +50,7 @@ def build_checkout_service(request: Request, session: AsyncSession) -> CheckoutS
         build_cart_service(request, session),
         PricingResolver(SqlAlchemyResolverRepository(session), events),
         InventoryService(SqlAlchemyInventoryRepository(session), events),
+        build_promotion_evaluation_service(request, session),
         CheckoutOutboxService(SqlAlchemyCheckoutOutboxRepository(session)),
     )
 

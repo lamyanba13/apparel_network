@@ -376,6 +376,34 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Production-backed HTTP tests cover lifecycle, quantity, ownership, disposition,
   provider transactions, outbox, metrics, persistence, and OpenAPI.
 
+## Phase 5.7 — Promotions & Discount Engine
+
+### Outcomes
+
+- Stores can define deterministic Promotions and Coupons while customers receive
+  immutable discounts across Cart, Checkout, and Order boundaries.
+
+### Work
+
+- Persist Store-scoped Promotions, Rules, Coupons, Redemptions, and customer usage.
+- Implement draft, active, and archived lifecycle with optimistic locking.
+- Support percentage, fixed, buy-X-get-Y, bundle, tier, and free-shipping types.
+- Evaluate Catalog, Category, Brand, Product, Variant, currency, customer group,
+  first purchase, minimum, period, Coupon, and usage conditions.
+- Resolve priority, exclusivity, stackability, maximum stack, and discount caps.
+- Keep Cart evaluation read-only, freeze Checkout snapshots, and link unchanged
+  snapshots to Orders.
+- Persist identifier-only events and expose low-cardinality metrics.
+
+### Exit gate
+
+- Promotion evaluation is deterministic and never mutates Cart price snapshots.
+- Checkout and Order expose identical immutable discount snapshots.
+- Cross-Store and cross-user access remains concealed with `404`.
+- Migration upgrade, downgrade, re-upgrade, drift, and head checks pass.
+- Production-backed HTTP tests cover all strategies, eligibility, lifecycle,
+  snapshots, persistence, events, metrics, permissions, and OpenAPI.
+
 ## Phase 6 — Search
 
 ### Outcomes

@@ -579,3 +579,29 @@ flowchart LR
 Returns validate immutable delivered purchase records and cumulative quantities.
 Inspection persists disposition without restocking. Refunds derive immutable
 commercial values and use a provider-neutral gateway without writing Payment data.
+
+## Phase 5.7 Promotions & Discount Engine
+
+```mermaid
+flowchart LR
+    customer[Authenticated customer] --> cart[Production Cart service]
+    owner[Store owner] --> api[Promotion and Coupon API]
+    api --> service[Promotion application services]
+    service --> repositories[Promotion repositories]
+    repositories --> postgres[(PostgreSQL Promotions Rules Coupons Usage)]
+    cart --> resolver[Deterministic Promotion resolver]
+    resolver --> pricing[Resolved Cart price snapshots]
+    resolver --> context[Product Catalog Category Brand context]
+    resolver -. read-only result .-> cart
+    resolver --> checkout[Checkout freeze]
+    checkout --> redemption[Immutable Redemption snapshots]
+    redemption --> postgres
+    redemption -. unchanged link .-> order[Order]
+    service --> outbox[Identifier-only transactional outbox]
+    outbox --> postgres
+```
+
+Pricing and Price Lists remain authoritative for unit prices. Promotion evaluation
+does not mutate Cart persistence. Checkout freezes the selected breakdown and
+usage transactionally; Order creation links the same snapshots without
+recalculation.

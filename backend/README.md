@@ -179,3 +179,9 @@ Order, Shipment, Payment, and Inventory services enforce ownership and eligibili
 inspection dispositions remain non-mutating, while a deterministic Null Refund
 gateway drives auditable provider transactions. See
 [`docs/phase-5.6-returns-refund-foundation.md`](../docs/phase-5.6-returns-refund-foundation.md).
+
+Phase 5.7 introduces the Store-scoped Promotions bounded context. It evaluates
+typed Rules and Coupons against production Cart pricing, resolves priority and
+stacking deterministically, freezes immutable Checkout Redemption snapshots, and
+links them to Orders without recalculation. See
+[`docs/phase-5.7-promotions-discount-engine.md`](../docs/phase-5.7-promotions-discount-engine.md).

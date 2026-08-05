@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from app.common.pagination import PageMetadata
 from app.modules.checkout.domain import CheckoutStatus
@@ -13,6 +13,7 @@ from app.modules.checkout.domain import CheckoutStatus
 class CheckoutCreateRequest(BaseModel):
     cart_id: UUID
     expires_at: datetime | None = None
+    coupon_codes: list[str] = Field(default_factory=list, max_length=20)
 
 
 class CheckoutConfirmRequest(BaseModel):
@@ -61,9 +62,23 @@ class CheckoutItemResponse(BaseModel):
     updated_at: datetime
 
 
+class PromotionSnapshotResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    promotion_id: UUID
+    coupon_id: UUID | None
+    discount_amount: Decimal
+    currency: str
+    coupon_code: str | None
+    snapshot: dict[str, JsonValue]
+
+
 class CheckoutSummaryResponse(BaseModel):
     checkout_session_id: UUID
     items: list[CheckoutItemResponse]
     subtotal: Decimal
+    discount_total: Decimal
+    final_total: Decimal
     currency: str
     quantity: int
+    applied_promotions: list[PromotionSnapshotResponse]

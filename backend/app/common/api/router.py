@@ -23,6 +23,7 @@ from app.modules.products.api.attribute_router import (
 from app.modules.products.api.media_router import router as product_media_router
 from app.modules.products.api.router import router as products_router
 from app.modules.products.api.variant_router import router as product_variant_router
+from app.modules.promotions.api.router import router as promotions_router
 from app.modules.reservations.api.router import router as reservations_router
 from app.modules.returns.api.router import router as returns_router
 from app.modules.shipments.api.router import router as shipments_router
@@ -53,6 +54,7 @@ v1_router.include_router(inventory_router)
 v1_router.include_router(pricing_router)
 v1_router.include_router(price_list_router)
 v1_router.include_router(resolver_router)
+v1_router.include_router(promotions_router)
 v1_router.include_router(cart_router)
 v1_router.include_router(checkout_router)
 v1_router.include_router(orders_router)

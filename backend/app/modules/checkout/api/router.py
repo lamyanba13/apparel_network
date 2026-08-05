@@ -12,6 +12,7 @@ from app.modules.checkout.api.schemas import (
     CheckoutListResponse,
     CheckoutResponse,
     CheckoutSummaryResponse,
+    PromotionSnapshotResponse,
 )
 from app.modules.checkout.application.schemas import (
     CheckoutConfirm,
@@ -55,6 +56,7 @@ async def create_checkout(
         CheckoutCreate(
             cart_id=payload.cart_id,
             expires_at=payload.expires_at,
+            coupon_codes=tuple(payload.coupon_codes),
             actor_id=identity.user.id,
         )
     )
@@ -161,6 +163,12 @@ async def checkout_summary(
         checkout_session_id=summary.checkout_session_id,
         items=[_item(item) for item in summary.items],
         subtotal=summary.subtotal,
+        discount_total=summary.discount_total,
+        final_total=summary.final_total,
         currency=summary.currency,
         quantity=summary.quantity,
+        applied_promotions=[
+            PromotionSnapshotResponse.model_validate(value)
+            for value in summary.applied_promotions
+        ],
     )

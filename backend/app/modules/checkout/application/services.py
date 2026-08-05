@@ -36,6 +36,8 @@ from app.modules.inventory.application.services import InventoryService
 from app.modules.inventory.domain import InventoryStatus
 from app.modules.pricing.application.price_list_schemas import ResolvePriceRequest
 from app.modules.pricing.application.price_list_services import PricingResolver
+from app.modules.promotions.application.services import PromotionEvaluationService
+from app.modules.promotions.domain import PromotionRedemption
 from app.observability.metrics import (
     CHECKOUTS_CANCELLED,
     CHECKOUTS_CONFIRMED,
@@ -94,6 +96,7 @@ class CheckoutService:
         carts: CartService,
         pricing: PricingResolver,
         inventory: InventoryService,
+        promotions: PromotionEvaluationService,
         outbox: CheckoutOutboxService,
     ) -> None:
         self._checkouts = checkouts
@@ -101,6 +104,7 @@ class CheckoutService:
         self._carts = carts
         self._pricing = pricing
         self._inventory = inventory
+        self._promotions = promotions
         self._outbox = outbox
         self._validation = CheckoutValidationService()
 
@@ -135,6 +139,12 @@ class CheckoutService:
         )
         await self._items.add_many(
             [self._item_values(checkout.id, values.actor_id, item) for item in prepared]
+        )
+        await self._promotions.freeze_checkout(
+            checkout.id,
+            cart.id,
+            values.actor_id,
+            values.coupon_codes,
         )
         CHECKOUTS_CREATED.inc()
         await self._emit(CheckoutCreated, checkout)
@@ -200,13 +210,34 @@ class CheckoutService:
     async def summary_owned(self, checkout_id: UUID, user_id: UUID) -> CheckoutSummary:
         checkout = await self.get_owned(checkout_id, user_id)
         items = await self._items.list_for_checkout(checkout.id)
+        promotions = await self._promotions.checkout_snapshots(checkout.id, user_id)
+        discount_total = sum(
+            (promotion.discount_amount for promotion in promotions), Decimal("0")
+        )
         return CheckoutSummary(
             checkout_session_id=checkout.id,
             items=items,
             subtotal=checkout.subtotal,
+            discount_total=discount_total,
+            final_total=checkout.subtotal - discount_total,
             currency=checkout.currency,
             quantity=sum(item.quantity for item in items),
+            applied_promotions=promotions,
         )
+
+    async def inherit_promotions_to_order(
+        self,
+        checkout_id: UUID,
+        order_id: UUID,
+        user_id: UUID,
+    ) -> Sequence[PromotionRedemption]:
+        await self._get_owned(checkout_id, user_id)
+        return await self._promotions.link_order(checkout_id, order_id, user_id)
+
+    async def order_promotion_snapshots_owned(
+        self, order_id: UUID, user_id: UUID
+    ) -> Sequence[PromotionRedemption]:
+        return await self._promotions.order_snapshots(order_id, user_id)
 
     async def _get_owned(self, checkout_id: UUID, user_id: UUID) -> CheckoutSession:
         checkout = await self._checkouts.get_for_user(checkout_id, user_id)

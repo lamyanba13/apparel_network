@@ -67,9 +67,34 @@ class CartItemResponse(BaseModel):
     version: int
 
 
+class CartPromotionLineResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    promotion_id: UUID
+    coupon_id: UUID | None
+    coupon_code: str | None
+    promotion_type: str
+    discount_amount: Decimal
+    priority: int
+
+
+class CartPromotionRejectionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    promotion_id: UUID | None
+    coupon_code: str | None
+    reason: str
+
+
 class CartSummaryResponse(BaseModel):
     cart_id: UUID
     items: list[CartItemResponse]
     subtotal: Decimal
     currency: str
     quantity: int
+    discount_total: Decimal | None = None
+    final_total: Decimal | None = None
+    applied_promotions: list[CartPromotionLineResponse] = Field(default_factory=list)
+    rejected_promotions: list[CartPromotionRejectionResponse] = Field(
+        default_factory=list
+    )

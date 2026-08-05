@@ -41,6 +41,7 @@ PAYMENT_REVISION = "8f0a2b4c6d79"
 RESERVATION_REVISION = "9a1b3c5d7e80"
 SHIPMENT_REVISION = "aa2c4d6e8f91"
 RETURN_REVISION = "bb3d5e7f9a02"
+PROMOTION_REVISION = "cc4e6f8a0b13"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -82,6 +83,13 @@ RESERVATION_TABLES = {
 }
 SHIPMENT_TABLES = {"shipments", "shipment_packages", "shipment_tracking_events"}
 RETURN_TABLES = {"returns", "return_items", "refunds", "refund_transactions"}
+PROMOTION_TABLES = {
+    "promotions",
+    "promotion_rules",
+    "promotion_coupons",
+    "promotion_redemptions",
+    "promotion_customer_usage",
+}
 TAXONOMY_TABLES = {
     "categories",
     "product_categories",
@@ -121,9 +129,10 @@ def test_alembic_upgrades_application_schema_without_drift(
         assert RESERVATION_TABLES.issubset(metadata.tables)
         assert SHIPMENT_TABLES.issubset(metadata.tables)
         assert RETURN_TABLES.issubset(metadata.tables)
+        assert PROMOTION_TABLES.issubset(metadata.tables)
         assert TAXONOMY_TABLES.issubset(metadata.tables)
         assert PRODUCT_MEDIA_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [RETURN_REVISION]
+        assert script.get_heads() == [PROMOTION_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -158,6 +167,7 @@ def test_alembic_upgrades_application_schema_without_drift(
             f"{RESERVATION_REVISION}_create_inventory_reservations",
             f"{SHIPMENT_REVISION}_create_shipments",
             f"{RETURN_REVISION}_create_returns_and_refunds",
+            f"{PROMOTION_REVISION}_create_promotions",
         }
 
         command.check(config)

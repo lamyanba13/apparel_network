@@ -418,6 +418,25 @@ REFUND_DURATION = Histogram(
     "fashion_network_refund_duration_seconds",
     "Time from Refund creation to a terminal provider result.",
 )
+PROMOTIONS_CREATED = Counter(
+    "fashion_network_promotion_created_total", "Promotions created."
+)
+PROMOTIONS_ACTIVATED = Counter(
+    "fashion_network_promotion_activated_total", "Promotions activated."
+)
+COUPONS_REDEEMED = Counter("fashion_network_coupon_redeemed_total", "Coupons redeemed.")
+PROMOTIONS_APPLIED = Counter(
+    "fashion_network_promotion_applied_total", "Promotions applied."
+)
+DISCOUNT_AMOUNT = Counter(
+    "fashion_network_discount_amount_total",
+    "Discount amount frozen at Checkout.",
+    ("currency",),
+)
+PROMOTION_RESOLUTION_DURATION = Histogram(
+    "fashion_network_promotion_resolution_duration_seconds",
+    "Promotion resolution duration in seconds.",
+)
 CATEGORIES_CREATED = Counter(
     "fashion_network_category_created_total", "Categories created."
 )
