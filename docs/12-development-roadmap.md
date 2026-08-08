@@ -434,6 +434,37 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Production-backed tests cover dispatch, preferences, retries, persistence,
   metrics, permissions, and isolation without mocks.
 
+## Phase 5.9 — Commerce Event Reliability & Operational Hardening
+
+### Outcomes
+
+- The existing shared transactional outbox remains reliable across concurrent
+  workers, crashes, broker outages, repeated delivery, and retry exhaustion.
+
+### Work
+
+- Add PostgreSQL-safe claims, expiring leases, deterministic event retries,
+  terminal failure diagnostics, and durable consumer receipts.
+- Route Inventory and Pricing events through the existing transactional outbox
+  without changing identifier-only contracts.
+- Schedule late-acknowledged Celery dispatch with broker publication retry and
+  confirmation while retaining PostgreSQL as the source of truth.
+- Expose authenticated administrator inspection and safe recovery for failed or
+  stale events.
+- Add low-cardinality lifecycle metrics and production-backed reliability tests.
+
+### Exit gate
+
+- Business rollback leaves neither business state nor an event; committed events
+  survive unavailable workers or RabbitMQ.
+- Concurrent claims do not overlap, abandoned claims expire, and retries become
+  inspectable terminal failures after exhaustion.
+- Duplicate consumption creates one logical notification side effect and one
+  consumer receipt.
+- Administrator recovery cannot mutate healthy, completed, or active events.
+- Migration, full commerce regression, static analysis, OpenAPI, and Compose
+  validation pass.
+
 ## Phase 6 — Search
 
 ### Outcomes

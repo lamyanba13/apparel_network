@@ -23,6 +23,8 @@ class AttributeStatus(StrEnum):
 
 class OutboxStatus(StrEnum):
     PENDING = "pending"
+    PROCESSING = "processing"
+    DISPATCHED = "dispatched"
     PUBLISHED = "published"
     FAILED = "failed"
 
@@ -97,3 +99,11 @@ class OutboxEvent:
     status: OutboxStatus
     retry_count: int
     version: int
+    available_at: datetime
+    attempts: int
+    locked_at: datetime | None
+    locked_by: str | None
+    dispatched_at: datetime | None
+    last_error: str | None
+    created_at: datetime
+    updated_at: datetime

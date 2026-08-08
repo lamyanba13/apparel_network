@@ -150,10 +150,13 @@ class EventOutboxModel(UuidPrimaryKeyMixin, VersionNumberMixin, Base):
     __tablename__ = "event_outbox"
     __table_args__ = (
         CheckConstraint("retry_count >= 0", name="retry_count_nonnegative"),
+        CheckConstraint("attempts >= 0", name="attempts_nonnegative"),
         CheckConstraint("version >= 1", name="version_positive"),
         Index("ix_event_outbox_status", "status"),
         Index("ix_event_outbox_occurred_at", "occurred_at"),
         Index("ix_event_outbox_aggregate_type", "aggregate_type"),
+        Index("ix_event_outbox_available", "status", "available_at"),
+        Index("ix_event_outbox_stale_lock", "status", "locked_at"),
     )
 
     aggregate_type: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -178,4 +181,27 @@ class EventOutboxModel(UuidPrimaryKeyMixin, VersionNumberMixin, Base):
     )
     retry_count: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default=text("0")
+    )
+    available_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    attempts: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default=text("0")
+    )
+    locked_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    locked_by: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    dispatched_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    last_error: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )

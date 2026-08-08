@@ -540,4 +540,12 @@ def _outbox(model: EventOutboxModel) -> OutboxEvent:
         status=model.status,
         retry_count=model.retry_count,
         version=model.version,
+        available_at=model.available_at,
+        attempts=model.attempts,
+        locked_at=model.locked_at,
+        locked_by=model.locked_by,
+        dispatched_at=model.dispatched_at,
+        last_error=model.last_error,
+        created_at=model.created_at,
+        updated_at=model.updated_at,
     )

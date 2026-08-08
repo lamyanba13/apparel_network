@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.core.config import get_settings
 from app.database.metadata import metadata
+from app.events.infrastructure import models as event_models
 from app.modules.cart.infrastructure import models as cart_models
 from app.modules.catalogs.infrastructure import models as catalog_models
 from app.modules.catalogs.infrastructure import taxonomy_models
@@ -45,6 +46,7 @@ from app.modules.stores.infrastructure.persistence import (
 )
 
 _ = (
+    event_models,
     identity_models,
     inventory_models,
     notification_models,

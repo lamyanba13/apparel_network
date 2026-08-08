@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.events import EventPublisher
 from app.database.session import get_db
+from app.events import TransactionalOutboxPublisher
 from app.modules.pricing.application.price_list_services import (
     PriceListService,
     PricingResolver,
@@ -27,7 +28,10 @@ async def pricing_service_dependency(
 ) -> AsyncIterator[PricingService]:
     events = cast(EventPublisher, request.app.state.store_events)
     try:
-        yield PricingService(SqlAlchemyProductPriceRepository(session), events)
+        yield PricingService(
+            SqlAlchemyProductPriceRepository(session),
+            TransactionalOutboxPublisher(session, delegate=events),
+        )
         await session.commit()
     except Exception:
         await session.rollback()
@@ -48,7 +52,7 @@ async def price_list_service_dependency(
         yield PriceListService(
             SqlAlchemyPriceListRepository(session),
             SqlAlchemyAssignmentRepository(session),
-            events,
+            TransactionalOutboxPublisher(session, delegate=events),
         )
         await session.commit()
     except Exception:
@@ -62,7 +66,10 @@ async def pricing_resolver_dependency(
 ) -> AsyncIterator[PricingResolver]:
     events = cast(EventPublisher, request.app.state.store_events)
     try:
-        yield PricingResolver(SqlAlchemyResolverRepository(session), events)
+        yield PricingResolver(
+            SqlAlchemyResolverRepository(session),
+            TransactionalOutboxPublisher(session, delegate=events),
+        )
         await session.commit()
     except Exception:
         await session.rollback()

@@ -628,3 +628,24 @@ flowchart LR
 The dispatcher owns notification lifecycle and bounded retries while commerce
 contexts own their source events. Idempotency is enforced by source event,
 customer, and channel; destinations and rendered content never enter events.
+
+## Phase 5.9 Commerce Event Reliability
+
+```mermaid
+flowchart LR
+    domains[Commerce application services] -->|same transaction| outbox[(PostgreSQL outbox)]
+    beat[Celery beat] --> rabbit[RabbitMQ]
+    rabbit --> worker[Late-ack worker]
+    worker -->|FOR UPDATE SKIP LOCKED| outbox
+    outbox --> claims[Claims leases attempts errors]
+    worker --> receipts[(Consumer receipts)]
+    worker --> notifications[(Notification side effects)]
+    admin[Administrator] --> operations[Inspection and recovery API]
+    operations --> outbox
+    metrics[Low-cardinality metrics] --- worker
+```
+
+PostgreSQL is authoritative. RabbitMQ schedules work but never owns the only copy
+of a commerce event. A rolled-back claim remains pending; an abandoned committed
+claim becomes eligible after its lease; exhausted failures remain inspectable and
+can be returned to pending only through the administrator operation.

@@ -329,3 +329,8 @@ Phase 5.8 adds customer-owned transactional Notifications driven by the shared
 commerce outbox, with channel preferences, deterministic Null delivery, bounded
 retries, audit history, and production-backed HTTP coverage. See
 [`docs/phase-5.8-customer-notifications.md`](docs/phase-5.8-customer-notifications.md).
+
+Phase 5.9 hardens the existing commerce outbox for concurrent claims, worker
+crashes, deterministic retry exhaustion, RabbitMQ outages, durable idempotency,
+and administrator recovery. See
+[`docs/phase-5.9-commerce-event-reliability.md`](docs/phase-5.9-commerce-event-reliability.md).

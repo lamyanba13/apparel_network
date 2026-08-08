@@ -35,6 +35,7 @@ Accepted ADRs are immutable historical records. A material change is documented 
 | [0018](0018-return-refund-boundary.md) | Return and Refund boundary | Accepted |
 | [0019](0019-promotion-resolution-boundary.md) | Promotion resolution boundary | Accepted |
 | [0020](0020-notification-outbox-dispatch.md) | Notification outbox dispatch boundary | Accepted |
+| [0021](0021-commerce-event-reliability.md) | Commerce event reliability | Accepted |
 
 The implementation conformance review and frozen Identity invariants are
 recorded in the [Phase 2.6 Identity Module Freeze](../phase-2.6-identity-freeze.md).

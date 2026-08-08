@@ -7,6 +7,7 @@ from pytest import MonkeyPatch
 
 from app.core.config import get_settings
 from app.database.metadata import metadata
+from app.events.infrastructure import models as event_models
 from app.modules.identity.infrastructure.persistence import models as identity_models
 from app.modules.notifications.infrastructure import models as notification_models
 from app.modules.stores.infrastructure.persistence import models as store_models
@@ -44,6 +45,7 @@ SHIPMENT_REVISION = "aa2c4d6e8f91"
 RETURN_REVISION = "bb3d5e7f9a02"
 PROMOTION_REVISION = "cc4e6f8a0b13"
 NOTIFICATION_REVISION = "dd5f7a9c1e24"
+EVENT_RELIABILITY_REVISION = "ee6a8b0d2f35"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -99,6 +101,7 @@ NOTIFICATION_TABLES = {
     "notification_deliveries",
     "notification_failures",
 }
+EVENT_RELIABILITY_TABLES = {"event_consumer_receipts"}
 TAXONOMY_TABLES = {
     "categories",
     "product_categories",
@@ -123,6 +126,7 @@ def test_alembic_upgrades_application_schema_without_drift(
         command.upgrade(config, "head")
 
         assert identity_models is not None
+        assert event_models is not None
         assert notification_models is not None
         assert store_models is not None
         assert IDENTITY_TABLES.issubset(metadata.tables)
@@ -141,9 +145,10 @@ def test_alembic_upgrades_application_schema_without_drift(
         assert RETURN_TABLES.issubset(metadata.tables)
         assert PROMOTION_TABLES.issubset(metadata.tables)
         assert NOTIFICATION_TABLES.issubset(metadata.tables)
+        assert EVENT_RELIABILITY_TABLES.issubset(metadata.tables)
         assert TAXONOMY_TABLES.issubset(metadata.tables)
         assert PRODUCT_MEDIA_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [NOTIFICATION_REVISION]
+        assert script.get_heads() == [EVENT_RELIABILITY_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -180,6 +185,7 @@ def test_alembic_upgrades_application_schema_without_drift(
             f"{RETURN_REVISION}_create_returns_and_refunds",
             f"{PROMOTION_REVISION}_create_promotions",
             f"{NOTIFICATION_REVISION}_create_notifications",
+            f"{EVENT_RELIABILITY_REVISION}_harden_event_outbox",
         }
 
         command.check(config)

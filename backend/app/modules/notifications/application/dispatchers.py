@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime, timedelta
 from time import perf_counter
 from uuid import UUID
@@ -27,7 +28,10 @@ from app.observability.metrics import (
     NOTIFICATIONS_FAILED,
     NOTIFICATIONS_RETRIED,
     NOTIFICATIONS_SENT,
+    OUTBOX_EVENT_PROCESSING_DURATION,
 )
+
+logger = logging.getLogger(__name__)
 
 SUPPORTED_COMMERCE_EVENTS = (
     "order.created",
@@ -73,83 +77,112 @@ class NotificationDispatcher:
         at = now or datetime.now(UTC)
         count = 0
         for event_id, event_name, payload in await self._outbox.pending(
-            SUPPORTED_COMMERCE_EVENTS, limit
+            SUPPORTED_COMMERCE_EVENTS, limit, now=at
         ):
-            customer_id = _uuid(payload.get("customer_id"))
-            if customer_id is None:
-                await self._outbox.mark_published(event_id, at)
-                continue
-            store_id = _uuid(payload.get("store_id"))
-            preference = await self._preferences.get(
-                customer_id
-            ) or await self._preferences.add_default(customer_id)
-            waiting = False
-            for channel in NotificationChannel:
-                notification = await self._notifications.get_by_source(
-                    event_id, customer_id, channel, for_update=True
+            started = perf_counter()
+            try:
+                attempted, waiting = await self._dispatch_event(
+                    event_id, event_name, payload, at
                 )
-                if notification is None:
-                    template = await self._templates.get_for_event(
-                        event_name, channel, preference.language
-                    )
-                    if template is None:
-                        continue
-                    variables = {
-                        key: value
-                        for key, value in payload.items()
-                        if isinstance(value, (str, int, float, bool)) or value is None
-                    }
-                    notification = await self._notifications.add(
-                        {
-                            "customer_id": customer_id,
-                            "store_id": store_id,
-                            "template_id": template.id,
-                            "source_event_id": event_id,
-                            "event_name": event_name,
-                            "channel": channel,
-                            "status": NotificationStatus.PENDING,
-                            "subject": render_template(template.subject, variables),
-                            "body": render_template(template.body, variables),
-                            "variables": variables,
-                            "attempt_count": 0,
-                            "max_retries": self._max_retries,
-                        }
-                    )
-                    NOTIFICATIONS_CREATED.labels(channel.value).inc()
-                    await self._outbox.add(
-                        NotificationCreated(
-                            notification_id=notification.id,
-                            customer_id=customer_id,
-                            store_id=store_id,
-                            version=notification.version,
-                        )
-                    )
-                if not preference.channel_enabled(channel, transactional=True):
-                    if notification.status not in _TERMINAL:
-                        await self._notifications.transition(
-                            notification.id,
-                            notification.version,
-                            {
-                                "status": NotificationStatus.CANCELLED,
-                                "cancelled_at": at,
-                                "deleted_at": at,
-                            },
-                        )
-                    continue
-                if notification.status in _TERMINAL:
-                    continue
-                if (
-                    notification.next_retry_at is not None
-                    and notification.next_retry_at > at
-                ):
-                    waiting = True
-                    continue
-                result = await self._send(notification, customer_id, at)
-                waiting = waiting or not result
-                count += 1
-            if not waiting:
-                await self._outbox.mark_published(event_id, at)
+                count += attempted
+                if waiting:
+                    await self._outbox.release(event_id, at)
+                else:
+                    await self._outbox.mark_published(event_id, at)
+            except Exception as error:
+                logger.exception(
+                    "commerce_event_processing_failed",
+                    extra={
+                        "event": "commerce_event_processing_failed",
+                        "event_id": str(event_id),
+                        "source_event_name": event_name,
+                    },
+                )
+                await self._outbox.mark_failed(event_id, at, str(error))
+            finally:
+                OUTBOX_EVENT_PROCESSING_DURATION.observe(perf_counter() - started)
         return count
+
+    async def _dispatch_event(
+        self,
+        event_id: UUID,
+        event_name: str,
+        payload: dict[str, object],
+        at: datetime,
+    ) -> tuple[int, bool]:
+        customer_id = _uuid(payload.get("customer_id"))
+        if customer_id is None:
+            return 0, False
+        store_id = _uuid(payload.get("store_id"))
+        preference = await self._preferences.get(
+            customer_id
+        ) or await self._preferences.add_default(customer_id)
+        waiting = False
+        count = 0
+        for channel in NotificationChannel:
+            notification = await self._notifications.get_by_source(
+                event_id, customer_id, channel, for_update=True
+            )
+            if notification is None:
+                template = await self._templates.get_for_event(
+                    event_name, channel, preference.language
+                )
+                if template is None:
+                    continue
+                variables = {
+                    key: value
+                    for key, value in payload.items()
+                    if isinstance(value, (str, int, float, bool)) or value is None
+                }
+                notification = await self._notifications.add(
+                    {
+                        "customer_id": customer_id,
+                        "store_id": store_id,
+                        "template_id": template.id,
+                        "source_event_id": event_id,
+                        "event_name": event_name,
+                        "channel": channel,
+                        "status": NotificationStatus.PENDING,
+                        "subject": render_template(template.subject, variables),
+                        "body": render_template(template.body, variables),
+                        "variables": variables,
+                        "attempt_count": 0,
+                        "max_retries": self._max_retries,
+                    }
+                )
+                NOTIFICATIONS_CREATED.labels(channel.value).inc()
+                await self._outbox.add(
+                    NotificationCreated(
+                        notification_id=notification.id,
+                        customer_id=customer_id,
+                        store_id=store_id,
+                        version=notification.version,
+                    )
+                )
+            if not preference.channel_enabled(channel, transactional=True):
+                if notification.status not in _TERMINAL:
+                    await self._notifications.transition(
+                        notification.id,
+                        notification.version,
+                        {
+                            "status": NotificationStatus.CANCELLED,
+                            "cancelled_at": at,
+                            "deleted_at": at,
+                        },
+                    )
+                continue
+            if notification.status in _TERMINAL:
+                continue
+            if (
+                notification.next_retry_at is not None
+                and notification.next_retry_at > at
+            ):
+                waiting = True
+                continue
+            delivered = await self._send(notification, customer_id, at)
+            waiting = waiting or not delivered
+            count += 1
+        return count, waiting
 
     async def _send(self, value: Notification, customer_id: UUID, at: datetime) -> bool:
         current = value

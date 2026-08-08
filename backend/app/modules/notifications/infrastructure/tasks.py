@@ -36,13 +36,20 @@ async def _dispatch() -> int:
                 SqlAlchemyPreferenceRepository(session),
                 SqlAlchemyTemplateRepository(session),
                 SqlAlchemyDeliveryRepository(session),
-                SqlAlchemyNotificationOutboxRepository(session),
+                SqlAlchemyNotificationOutboxRepository(
+                    session,
+                    lease_seconds=settings.outbox_lease_seconds,
+                    max_attempts=settings.outbox_max_attempts,
+                    retry_base_seconds=settings.outbox_retry_base_seconds,
+                ),
                 NullNotificationGateway(),
                 max_retries=settings.notification_max_retries,
                 retry_base_seconds=settings.notification_retry_base_seconds,
             )
             try:
-                count = await dispatcher.dispatch_pending()
+                count = await dispatcher.dispatch_pending(
+                    limit=settings.outbox_claim_limit
+                )
                 await session.commit()
                 return count
             except Exception:

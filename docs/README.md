@@ -96,6 +96,7 @@ Read these documents in order when joining the project:
 58. [Phase 5.6 Returns & Refund Foundation](phase-5.6-returns-refund-foundation.md)
 59. [Phase 5.7 Promotions & Discount Engine](phase-5.7-promotions-discount-engine.md)
 60. [Phase 5.8 Customer Notifications & Commerce Events](phase-5.8-customer-notifications.md)
+61. [Phase 5.9 Commerce Event Reliability](phase-5.9-commerce-event-reliability.md)
 
 ## Decision authority
 

@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import cast
 from uuid import UUID
 
 from pydantic import JsonValue
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from uuid6 import uuid7
 
+from app.events.infrastructure.repositories import SqlAlchemyReliableOutboxRepository
 from app.modules.notifications.application.schemas import NotificationFilter
 from app.modules.notifications.domain import (
     Notification,
@@ -26,6 +28,7 @@ from app.modules.notifications.infrastructure.models import (
 )
 from app.modules.products.domain import OutboxStatus
 from app.modules.products.infrastructure.attribute_models import EventOutboxModel
+from app.observability.metrics import OUTBOX_EVENTS_CREATED
 
 
 class SqlAlchemyNotificationRepository:
@@ -216,37 +219,55 @@ class SqlAlchemyDeliveryRepository:
 
 
 class SqlAlchemyNotificationOutboxRepository:
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(
+        self,
+        session: AsyncSession,
+        *,
+        worker_id: str | None = None,
+        lease_seconds: int = 300,
+        max_attempts: int = 5,
+        retry_base_seconds: int = 30,
+    ) -> None:
         self._session = session
+        self._worker_id = worker_id or f"notifications:{uuid7()}"
+        self._lease_seconds = lease_seconds
+        self._max_attempts = max_attempts
+        self._retry_base_seconds = retry_base_seconds
+        self._reliable = SqlAlchemyReliableOutboxRepository(
+            session, consumer_name="notifications"
+        )
 
     async def pending(
-        self, event_names: Sequence[str], limit: int
+        self,
+        event_names: Sequence[str],
+        limit: int,
+        *,
+        now: datetime | None = None,
     ) -> Sequence[tuple[UUID, str, dict[str, object]]]:
-        rows = (
-            await self._session.scalars(
-                select(EventOutboxModel)
-                .where(
-                    EventOutboxModel.status == OutboxStatus.PENDING,
-                    EventOutboxModel.event_name.in_(event_names),
-                )
-                .order_by(EventOutboxModel.occurred_at, EventOutboxModel.id)
-                .with_for_update(skip_locked=True)
-                .limit(limit)
-            )
-        ).all()
-        return [(row.id, row.event_name, row.payload) for row in rows]
+        claims = await self._reliable.claim(
+            event_names,
+            worker_id=self._worker_id,
+            now=now or datetime.now(UTC),
+            lease_timeout=timedelta(seconds=self._lease_seconds),
+            limit=limit,
+        )
+        return [(claim.id, claim.event_name, claim.payload) for claim in claims]
 
     async def mark_published(self, event_id: UUID, at: datetime) -> None:
-        await self._session.execute(
-            update(EventOutboxModel)
-            .where(EventOutboxModel.id == event_id)
-            .values(
-                status=OutboxStatus.PUBLISHED,
-                published_at=at,
-                version=EventOutboxModel.version + 1,
-            )
+        await self._reliable.mark_processed(event_id, worker_id=self._worker_id, now=at)
+
+    async def release(self, event_id: UUID, at: datetime) -> None:
+        await self._reliable.release(event_id, worker_id=self._worker_id, now=at)
+
+    async def mark_failed(self, event_id: UUID, at: datetime, error: str) -> None:
+        await self._reliable.mark_failed(
+            event_id,
+            worker_id=self._worker_id,
+            now=at,
+            error=error,
+            max_attempts=self._max_attempts,
+            retry_base_seconds=self._retry_base_seconds,
         )
-        await self._session.flush()
 
     async def add(self, event: NotificationEvent) -> None:
         self._session.add(
@@ -257,11 +278,13 @@ class SqlAlchemyNotificationOutboxRepository:
                 event_name=event.event_name,
                 payload=event.payload,
                 occurred_at=event.occurred_at,
+                available_at=event.occurred_at,
                 status=OutboxStatus.PENDING,
                 retry_count=0,
             )
         )
         await self._session.flush()
+        OUTBOX_EVENTS_CREATED.inc()
 
 
 def _notification(model: NotificationModel) -> Notification:

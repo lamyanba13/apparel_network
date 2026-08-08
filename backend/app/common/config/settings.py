@@ -133,6 +133,10 @@ class Settings(BaseSettings):
     rabbitmq_url: str = "amqp://fashion_network:fashion_network@localhost:5672//"
     notification_max_retries: int = Field(default=3, ge=0, le=10)
     notification_retry_base_seconds: int = Field(default=60, ge=1, le=86400)
+    outbox_lease_seconds: int = Field(default=300, ge=1, le=86400)
+    outbox_max_attempts: int = Field(default=5, ge=1, le=100)
+    outbox_retry_base_seconds: int = Field(default=30, ge=1, le=86400)
+    outbox_claim_limit: int = Field(default=100, ge=1, le=1000)
     meilisearch_url: str = "http://localhost:7700"
     meilisearch_master_key: SecretStr | None = Field(
         default=None,

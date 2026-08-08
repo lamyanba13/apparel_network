@@ -75,3 +75,11 @@ authorization, and the deterministic Null gateway. It covers rendering, every
 gateway method, dispatch idempotency, delivery and cancellation, preferences,
 read state, stale versions, retries, persistence, metrics, permissions, and
 cross-customer isolation without mocks or direct ORM inserts.
+
+## Phase 5.9 reliability extension
+
+Phase 5.9 preserves this notification contract while adding persisted outbox
+claims, expiring leases, consumer receipts, event-level retry exhaustion, and
+administrator recovery. Notification/channel idempotency, preferences, templates,
+delivery lifecycle, customer isolation, and gateway behavior are unchanged. See
+[`phase-5.9-commerce-event-reliability.md`](phase-5.9-commerce-event-reliability.md).

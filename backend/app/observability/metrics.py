@@ -328,6 +328,38 @@ VARIANT_ATTRIBUTES_ASSIGNED = Counter(
 OUTBOX_WRITTEN = Counter(
     "fashion_network_outbox_written_total", "Transactional outbox records written."
 )
+OUTBOX_EVENTS_CREATED = Counter(
+    "fashion_network_outbox_events_created_total",
+    "Commerce events durably created in the transactional outbox.",
+)
+OUTBOX_EVENTS_CLAIMED = Counter(
+    "fashion_network_outbox_events_claimed_total",
+    "Commerce events safely claimed for processing.",
+)
+OUTBOX_EVENTS_PROCESSED = Counter(
+    "fashion_network_outbox_events_processed_total",
+    "Commerce events durably completed by a consumer.",
+)
+OUTBOX_EVENTS_FAILED = Counter(
+    "fashion_network_outbox_events_failed_total",
+    "Commerce event processing attempts that failed.",
+)
+OUTBOX_EVENTS_RETRIED = Counter(
+    "fashion_network_outbox_events_retried_total",
+    "Commerce events released or scheduled for retry.",
+)
+OUTBOX_EVENTS_RECOVERED = Counter(
+    "fashion_network_outbox_events_recovered_total",
+    "Failed or stale commerce events safely recovered.",
+)
+OUTBOX_EVENTS_PERMANENTLY_FAILED = Counter(
+    "fashion_network_outbox_events_permanently_failed_total",
+    "Commerce events that exhausted automatic retries.",
+)
+OUTBOX_EVENT_PROCESSING_DURATION = Histogram(
+    "fashion_network_outbox_event_processing_duration_seconds",
+    "Commerce event processing duration.",
+)
 CARTS_CREATED = Counter("fashion_network_cart_created_total", "Shopping Carts created.")
 CART_ITEMS_ADDED = Counter(
     "fashion_network_cart_item_added_total", "Shopping Cart Items added."

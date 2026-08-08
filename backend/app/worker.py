@@ -10,12 +10,28 @@ configure_celery_telemetry(settings)
 install_worker_observability()
 celery_app = Celery("fashion_network", broker=settings.rabbitmq_url)
 celery_app.conf.update(
+    beat_schedule={
+        "dispatch-commerce-events": {
+            "task": "notifications.dispatch",
+            "schedule": 10.0,
+        }
+    },
+    broker_transport_options={"confirm_publish": True},
     broker_connection_retry_on_startup=True,
     control_queue_exclusive=True,
     enable_utc=True,
     event_queue_exclusive=True,
     result_backend=None,
     task_ignore_result=True,
+    task_acks_late=True,
+    task_publish_retry=True,
+    task_publish_retry_policy={
+        "interval_start": 0,
+        "interval_step": 1,
+        "interval_max": 5,
+        "max_retries": 10,
+    },
+    task_reject_on_worker_lost=True,
     task_serializer="json",
     timezone="UTC",
     include=[
@@ -63,6 +79,7 @@ celery_app.conf.update(
             "routing_key": "notification-events",
         },
     },
+    worker_prefetch_multiplier=1,
 )
 
 from app.modules.stores.infrastructure import (  # noqa: E402,F401

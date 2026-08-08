@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.events import EventPublisher
 from app.database.session import get_db
+from app.events import TransactionalOutboxPublisher
 from app.modules.inventory.application.services import InventoryService
 from app.modules.inventory.infrastructure.repositories import (
     SqlAlchemyInventoryRepository,
@@ -28,7 +29,10 @@ def build_inventory_service(
     request: Request, session: AsyncSession
 ) -> InventoryService:
     events = cast(EventPublisher, request.app.state.store_events)
-    return InventoryService(SqlAlchemyInventoryRepository(session), events)
+    return InventoryService(
+        SqlAlchemyInventoryRepository(session),
+        TransactionalOutboxPublisher(session, delegate=events),
+    )
 
 
 InventoryServiceDependency = Annotated[

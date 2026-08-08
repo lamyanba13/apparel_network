@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.events.api.router import router as event_operations_router
 from app.modules.cart.api.router import router as cart_router
 from app.modules.catalogs.api.router import router as catalogs_router
 from app.modules.catalogs.api.taxonomy_router import router as taxonomy_router
@@ -41,6 +42,7 @@ from app.modules.stores.api.verification_router import (
 )
 
 v1_router = APIRouter(prefix="/api/v1")
+v1_router.include_router(event_operations_router)
 v1_router.include_router(identity_auth_router)
 v1_router.include_router(identity_session_router)
 v1_router.include_router(identity_account_router)

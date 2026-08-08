@@ -191,3 +191,9 @@ dispatcher consumes existing commerce events from the shared outbox, renders
 plain-text templates, respects channel preferences, and records idempotent Null
 gateway deliveries with bounded retries. See
 [`docs/phase-5.8-customer-notifications.md`](../docs/phase-5.8-customer-notifications.md).
+
+Phase 5.9 hardens that same outbox with PostgreSQL-safe claims, expiring leases,
+bounded event retries, terminal failure diagnostics, consumer receipts,
+administrator recovery, and broker-outage-safe scheduling. Inventory and Pricing
+now use the shared transactional publisher without changing event contracts. See
+[`docs/phase-5.9-commerce-event-reliability.md`](../docs/phase-5.9-commerce-event-reliability.md).
