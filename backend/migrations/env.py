@@ -15,6 +15,7 @@ from app.modules.catalogs.infrastructure import taxonomy_models
 from app.modules.checkout.infrastructure import models as checkout_models
 from app.modules.identity.infrastructure.persistence import models as identity_models
 from app.modules.inventory.infrastructure import models as inventory_models
+from app.modules.notifications.infrastructure import models as notification_models
 from app.modules.orders.infrastructure import models as order_models
 from app.modules.payments.infrastructure import models as payment_models
 from app.modules.pricing.infrastructure import models as pricing_models
@@ -46,6 +47,7 @@ from app.modules.stores.infrastructure.persistence import (
 _ = (
     identity_models,
     inventory_models,
+    notification_models,
     pricing_models,
     cart_models,
     checkout_models,

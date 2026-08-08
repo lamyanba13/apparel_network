@@ -324,3 +324,8 @@ Read [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`docs/git-workflow.md`](docs/git-
 Operations start with [`docs/observability.md`](docs/observability.md),
 [`docs/runbook.md`](docs/runbook.md), and the
 [`production deployment checklist`](docs/production-deployment-checklist.md).
+
+Phase 5.8 adds customer-owned transactional Notifications driven by the shared
+commerce outbox, with channel preferences, deterministic Null delivery, bounded
+retries, audit history, and production-backed HTTP coverage. See
+[`docs/phase-5.8-customer-notifications.md`](docs/phase-5.8-customer-notifications.md).

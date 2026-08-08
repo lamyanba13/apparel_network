@@ -185,3 +185,9 @@ typed Rules and Coupons against production Cart pricing, resolves priority and
 stacking deterministically, freezes immutable Checkout Redemption snapshots, and
 links them to Orders without recalculation. See
 [`docs/phase-5.7-promotions-discount-engine.md`](../docs/phase-5.7-promotions-discount-engine.md).
+
+Phase 5.8 introduces customer-owned transactional Notifications. A production
+dispatcher consumes existing commerce events from the shared outbox, renders
+plain-text templates, respects channel preferences, and records idempotent Null
+gateway deliveries with bounded retries. See
+[`docs/phase-5.8-customer-notifications.md`](../docs/phase-5.8-customer-notifications.md).

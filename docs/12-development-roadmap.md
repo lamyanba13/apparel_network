@@ -404,6 +404,36 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Production-backed HTTP tests cover all strategies, eligibility, lifecycle,
   snapshots, persistence, events, metrics, permissions, and OpenAPI.
 
+## Phase 5.8 — Customer Notifications & Commerce Events
+
+### Outcomes
+
+- Customers receive idempotent transactional notifications from existing commerce
+  events without coupling provider availability to commerce transactions.
+
+### Work
+
+- Persist templates, customer preferences, notifications, deliveries, and failure
+  history with audit fields, soft deletion, and optimistic versions.
+- Consume supported identifier-only events from the shared transactional outbox.
+- Implement email, SMS, push, and in-app delivery through a deterministic Null
+  gateway and a dedicated worker queue.
+- Enforce channel preferences while allowing transactional messages regardless of
+  marketing opt-in.
+- Expose customer-owned list, detail, read, preference, and administrator test
+  endpoints.
+- Add bounded exponential retry, delivery idempotency, identifier-only events,
+  and low-cardinality metrics.
+
+### Exit gate
+
+- Source events publish only after all applicable channels reach terminal states.
+- Duplicate dispatch does not duplicate Notifications or Deliveries.
+- Cross-customer access is concealed and stale mutations return `409`.
+- Migration upgrade, downgrade, re-upgrade, drift, and head checks pass.
+- Production-backed tests cover dispatch, preferences, retries, persistence,
+  metrics, permissions, and isolation without mocks.
+
 ## Phase 6 — Search
 
 ### Outcomes

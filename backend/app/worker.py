@@ -18,7 +18,10 @@ celery_app.conf.update(
     task_ignore_result=True,
     task_serializer="json",
     timezone="UTC",
-    include=["app.modules.stores.infrastructure.search_tasks"],
+    include=[
+        "app.modules.stores.infrastructure.search_tasks",
+        "app.modules.notifications.infrastructure.tasks",
+    ],
     task_default_queue="store-search",
     task_queues=(
         Queue(
@@ -31,6 +34,20 @@ celery_app.conf.update(
             },
         ),
         Queue(
+            "notification-events",
+            exchange=Exchange("notification-events"),
+            routing_key="notification-events",
+            queue_arguments={
+                "x-dead-letter-exchange": "notification-events-dlx",
+                "x-dead-letter-routing-key": "notification-events-dead-letter",
+            },
+        ),
+        Queue(
+            "notification-events-dead-letter",
+            exchange=Exchange("notification-events-dlx"),
+            routing_key="notification-events-dead-letter",
+        ),
+        Queue(
             "store-search-dead-letter",
             exchange=Exchange("store-search-dlx"),
             routing_key="store-search-dead-letter",
@@ -40,7 +57,11 @@ celery_app.conf.update(
         "stores.search.*": {
             "queue": "store-search",
             "routing_key": "store-search",
-        }
+        },
+        "notifications.*": {
+            "queue": "notification-events",
+            "routing_key": "notification-events",
+        },
     },
 )
 

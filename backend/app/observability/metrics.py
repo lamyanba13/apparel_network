@@ -437,6 +437,31 @@ PROMOTION_RESOLUTION_DURATION = Histogram(
     "fashion_network_promotion_resolution_duration_seconds",
     "Promotion resolution duration in seconds.",
 )
+NOTIFICATIONS_CREATED = Counter(
+    "fashion_network_notifications_created_total",
+    "Notifications created from commerce events.",
+    ("channel",),
+)
+NOTIFICATIONS_SENT = Counter(
+    "fashion_network_notifications_sent_total",
+    "Notifications delivered successfully.",
+    ("channel",),
+)
+NOTIFICATIONS_FAILED = Counter(
+    "fashion_network_notifications_failed_total",
+    "Notifications that exhausted delivery retries.",
+    ("channel",),
+)
+NOTIFICATIONS_RETRIED = Counter(
+    "fashion_network_notifications_retried_total",
+    "Notification delivery retries scheduled.",
+    ("channel",),
+)
+NOTIFICATION_DELIVERY_DURATION = Histogram(
+    "fashion_network_notification_delivery_duration_seconds",
+    "Time spent invoking a notification gateway.",
+    ("channel",),
+)
 CATEGORIES_CREATED = Counter(
     "fashion_network_category_created_total", "Categories created."
 )

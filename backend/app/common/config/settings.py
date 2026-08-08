@@ -131,6 +131,8 @@ class Settings(BaseSettings):
     database_command_timeout_seconds: float = Field(default=30.0, gt=0, le=300)
     redis_url: str = "redis://localhost:6379/0"
     rabbitmq_url: str = "amqp://fashion_network:fashion_network@localhost:5672//"
+    notification_max_retries: int = Field(default=3, ge=0, le=10)
+    notification_retry_base_seconds: int = Field(default=60, ge=1, le=86400)
     meilisearch_url: str = "http://localhost:7700"
     meilisearch_master_key: SecretStr | None = Field(
         default=None,

@@ -605,3 +605,26 @@ Pricing and Price Lists remain authoritative for unit prices. Promotion evaluati
 does not mutate Cart persistence. Checkout freezes the selected breakdown and
 usage transactionally; Order creation links the same snapshots without
 recalculation.
+
+## Phase 5.8 Customer Notifications & Commerce Events
+
+```mermaid
+flowchart LR
+    commerce[Commerce application services] --> outbox[(Transactional outbox)]
+    worker[Notification dispatcher] --> outbox
+    worker --> templates[(Plain-text templates)]
+    worker --> preferences[(Customer preferences)]
+    worker --> notifications[(Notifications Deliveries Failures)]
+    worker --> gateway[NotificationGateway]
+    gateway --> null[Deterministic Null gateway]
+    customer[Authenticated customer] --> api[Notification API]
+    admin[Administrator] --> api
+    api --> notifications
+    api --> preferences
+    worker --> events[Identifier-only notification events]
+    events --> outbox
+```
+
+The dispatcher owns notification lifecycle and bounded retries while commerce
+contexts own their source events. Idempotency is enforced by source event,
+customer, and channel; destinations and rendered content never enter events.

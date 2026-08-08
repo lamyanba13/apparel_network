@@ -8,6 +8,7 @@ from app.modules.identity.api.account_router import router as identity_account_r
 from app.modules.identity.api.router import router as identity_auth_router
 from app.modules.identity.api.session_router import router as identity_session_router
 from app.modules.inventory.api.router import router as inventory_router
+from app.modules.notifications.api.router import router as notifications_router
 from app.modules.orders.api.router import router as orders_router
 from app.modules.payments.api.router import router as payments_router
 from app.modules.pricing.api.price_list_router import (
@@ -51,6 +52,7 @@ v1_router.include_router(attribute_router)
 v1_router.include_router(attribute_value_router)
 v1_router.include_router(variant_attribute_router)
 v1_router.include_router(inventory_router)
+v1_router.include_router(notifications_router)
 v1_router.include_router(pricing_router)
 v1_router.include_router(price_list_router)
 v1_router.include_router(resolver_router)
