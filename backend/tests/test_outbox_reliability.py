@@ -14,6 +14,7 @@ from app.modules.inventory.application.services import InventoryService
 from app.modules.inventory.domain import InventoryStatus, TrackingPolicy
 from app.modules.inventory.infrastructure.models import InventoryItemModel
 from app.modules.inventory.infrastructure.repositories import (
+    SqlAlchemyInventoryMovementRepository,
     SqlAlchemyInventoryRepository,
 )
 from app.modules.notifications.application.dispatchers import NotificationDispatcher
@@ -55,6 +56,7 @@ async def test_inventory_and_outbox_rollback_atomically(
     service = InventoryService(
         SqlAlchemyInventoryRepository(db_session),
         TransactionalOutboxPublisher(db_session),
+        SqlAlchemyInventoryMovementRepository(db_session),
     )
     inventory = await service.create(
         InventoryCreate(

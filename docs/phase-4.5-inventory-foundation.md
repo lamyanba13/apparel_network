@@ -43,3 +43,12 @@ requests use the current version and advance the persisted optimistic version.
 Stale PATCH and DELETE requests return `409 Conflict`; rejected stale deletes leave
 the Inventory record active and unchanged. Owner-scoped missing records continue to
 return `404 Not Found` without exposing cross-Store data.
+
+## Phase 5.10 operational extension
+
+Phase 5.10 preserves this authoritative snapshot and compatibility API while
+adding explicit adjustment and physical-count reconciliation commands,
+append-only movement history, active-Reservation protection, accepted Store-staff
+access, and retailer stock-attention queries. See
+[`phase-5.10-retailer-operations.md`](phase-5.10-retailer-operations.md) and
+[`ADR 0022`](adr/0022-retailer-inventory-operations.md).

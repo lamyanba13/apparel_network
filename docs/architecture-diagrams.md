@@ -649,3 +649,24 @@ PostgreSQL is authoritative. RabbitMQ schedules work but never owns the only cop
 of a commerce event. A rolled-back claim remains pending; an abandoned committed
 claim becomes eligible after its lease; exhausted failures remain inspectable and
 can be returned to pending only through the administrator operation.
+
+## Phase 5.10 Retailer Operations & Inventory Management
+
+```mermaid
+flowchart LR
+    retailer[Store owner or accepted staff] --> commands[Explicit adjustment or reconciliation]
+    commands --> service[InventoryService]
+    service -->|lock and version check| inventory[(Inventory snapshot)]
+    service -->|active holds| reservations[(Reservations)]
+    service --> movements[(Append-only movements)]
+    service -->|same transaction| outbox[(Shared commerce outbox)]
+    dashboard[Retailer operations API] --> inventory
+    dashboard --> movements
+    dashboard --> orders[(Orders)]
+    dashboard --> shipments[(Shipments)]
+```
+
+Inventory is locked before active Reservation capacity is read. Snapshot,
+movement, and identifier-only outbox writes share request transaction ownership.
+Operational Order and Shipment projections are read-only and never bypass their
+owning lifecycle services.

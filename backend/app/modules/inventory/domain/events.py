@@ -51,3 +51,18 @@ class InventoryDeleted(InventoryEvent):
 @dataclass(frozen=True, slots=True, kw_only=True)
 class InventoryAdjusted(InventoryEvent):
     event_name: ClassVar[str] = "inventory.adjusted"
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class InventoryReconciled(InventoryEvent):
+    event_name: ClassVar[str] = "inventory.reconciled"
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class InventoryLowStock(InventoryEvent):
+    event_name: ClassVar[str] = "inventory.low_stock"
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class InventoryOutOfStock(InventoryEvent):
+    event_name: ClassVar[str] = "inventory.out_of_stock"

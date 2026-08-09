@@ -46,6 +46,7 @@ RETURN_REVISION = "bb3d5e7f9a02"
 PROMOTION_REVISION = "cc4e6f8a0b13"
 NOTIFICATION_REVISION = "dd5f7a9c1e24"
 EVENT_RELIABILITY_REVISION = "ee6a8b0d2f35"
+RETAILER_OPERATIONS_REVISION = "f08c2d4e6a71"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -69,7 +70,7 @@ STORE_TABLES = {
 }
 CATALOG_TABLES = {"catalogs"}
 PRODUCT_TABLES = {"products", "product_variants"}
-INVENTORY_TABLES = {"inventory_items"}
+INVENTORY_TABLES = {"inventory_items", "inventory_movements"}
 PRICING_TABLES = {"product_prices", "price_lists", "price_list_assignments"}
 ATTRIBUTE_TABLES = {
     "product_attributes",
@@ -148,7 +149,7 @@ def test_alembic_upgrades_application_schema_without_drift(
         assert EVENT_RELIABILITY_TABLES.issubset(metadata.tables)
         assert TAXONOMY_TABLES.issubset(metadata.tables)
         assert PRODUCT_MEDIA_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [EVENT_RELIABILITY_REVISION]
+        assert script.get_heads() == [RETAILER_OPERATIONS_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -186,6 +187,7 @@ def test_alembic_upgrades_application_schema_without_drift(
             f"{PROMOTION_REVISION}_create_promotions",
             f"{NOTIFICATION_REVISION}_create_notifications",
             f"{EVENT_RELIABILITY_REVISION}_harden_event_outbox",
+            f"{RETAILER_OPERATIONS_REVISION}_create_inventory_movements",
         }
 
         command.check(config)

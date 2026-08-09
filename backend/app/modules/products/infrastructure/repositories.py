@@ -10,6 +10,7 @@ from app.modules.catalogs.domain import CatalogStatus
 from app.modules.catalogs.infrastructure.models import CatalogModel
 from app.modules.products.domain import Product, ProductStatus, ProductVisibility
 from app.modules.products.infrastructure.models import ProductModel
+from app.modules.stores.infrastructure.persistence.access import store_accessible_by
 from app.modules.stores.infrastructure.persistence.models import StoreModel
 
 
@@ -23,7 +24,7 @@ class SqlAlchemyProductRepository:
             .join(StoreModel)
             .where(
                 CatalogModel.id == catalog_id,
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
                 CatalogModel.deleted_at.is_(None),
                 CatalogModel.status != CatalogStatus.ARCHIVED,
             )
@@ -56,7 +57,7 @@ class SqlAlchemyProductRepository:
         query = (
             select(ProductModel)
             .join(StoreModel, StoreModel.id == ProductModel.store_id)
-            .where(StoreModel.owner_id == owner_id, ProductModel.deleted_at.is_(None))
+            .where(store_accessible_by(owner_id), ProductModel.deleted_at.is_(None))
         )
         if catalog_id is not None:
             query = query.where(ProductModel.catalog_id == catalog_id)
@@ -85,7 +86,7 @@ class SqlAlchemyProductRepository:
             .join(StoreModel, StoreModel.id == ProductModel.store_id)
             .where(
                 ProductModel.id == product_id,
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
                 ProductModel.deleted_at.is_(None),
             )
         )
@@ -129,7 +130,7 @@ class SqlAlchemyProductRepository:
             .join(StoreModel)
             .where(
                 ProductModel.id == product_id,
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
                 ProductModel.deleted_at.is_(None),
                 ProductModel.version == expected_version,
             )
@@ -157,7 +158,7 @@ class SqlAlchemyProductRepository:
             .join(StoreModel)
             .where(
                 ProductModel.id == product_id,
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
                 ProductModel.deleted_at.is_(None),
                 ProductModel.version == expected_version,
             )
@@ -185,7 +186,7 @@ class SqlAlchemyProductRepository:
             .join(StoreModel)
             .where(
                 ProductModel.id == product_id,
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
                 ProductModel.deleted_at.is_(None),
                 ProductModel.version == expected_version,
             )

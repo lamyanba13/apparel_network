@@ -334,3 +334,9 @@ Phase 5.9 hardens the existing commerce outbox for concurrent claims, worker
 crashes, deterministic retry exhaustion, RabbitMQ outages, durable idempotency,
 and administrator recovery. See
 [`docs/phase-5.9-commerce-event-reliability.md`](docs/phase-5.9-commerce-event-reliability.md).
+
+Phase 5.10 adds explicit retailer Inventory adjustments and physical-count
+reconciliation, append-only movement history, Reservation-safe locking,
+low/out-of-stock attention queries, accepted Store-staff access, and bounded
+order/fulfillment operational views. See
+[`docs/phase-5.10-retailer-operations.md`](docs/phase-5.10-retailer-operations.md).

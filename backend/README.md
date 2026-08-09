@@ -197,3 +197,10 @@ bounded event retries, terminal failure diagnostics, consumer receipts,
 administrator recovery, and broker-outage-safe scheduling. Inventory and Pricing
 now use the shared transactional publisher without changing event contracts. See
 [`docs/phase-5.9-commerce-event-reliability.md`](../docs/phase-5.9-commerce-event-reliability.md).
+
+Phase 5.10 extends Inventory with explicit adjustment and physical-count
+reconciliation commands, append-only movement history, active-Reservation
+protection, stock-attention queries, and bounded retailer order/fulfillment
+projections. Product and Variant operations now recognize accepted active Store
+staff while preserving Store isolation. See
+[`docs/phase-5.10-retailer-operations.md`](../docs/phase-5.10-retailer-operations.md).

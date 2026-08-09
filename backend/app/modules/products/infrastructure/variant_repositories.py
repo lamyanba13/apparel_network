@@ -15,6 +15,7 @@ from app.modules.products.infrastructure.attribute_models import (
 )
 from app.modules.products.infrastructure.models import ProductModel
 from app.modules.products.infrastructure.variant_models import ProductVariantModel
+from app.modules.stores.infrastructure.persistence.access import store_accessible_by
 from app.modules.stores.infrastructure.persistence.models import StoreModel
 
 
@@ -29,7 +30,7 @@ class SqlAlchemyProductVariantRepository:
             .where(
                 ProductModel.id == product_id,
                 ProductModel.deleted_at.is_(None),
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
             )
         )
         return cast(UUID | None, await self._session.scalar(query))
@@ -63,7 +64,7 @@ class SqlAlchemyProductVariantRepository:
                 .where(
                     ProductVariantModel.product_id == product_id,
                     ProductVariantModel.deleted_at.is_(None),
-                    StoreModel.owner_id == owner_id,
+                    store_accessible_by(owner_id),
                 )
                 .order_by(ProductVariantModel.sort_order, ProductVariantModel.reference)
             )
@@ -80,7 +81,7 @@ class SqlAlchemyProductVariantRepository:
                 ProductVariantModel.id == variant_id,
                 ProductVariantModel.product_id == product_id,
                 ProductVariantModel.deleted_at.is_(None),
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
             )
         )
         return await self._to_domain(model) if model else None
@@ -166,7 +167,7 @@ class SqlAlchemyProductVariantRepository:
                 ProductVariantModel.product_id == product_id,
                 ProductVariantModel.deleted_at.is_(None),
                 ProductVariantModel.version == expected_version,
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
             )
         )
         if model is None:
@@ -213,7 +214,7 @@ class SqlAlchemyProductVariantRepository:
                 ProductVariantModel.product_id == product_id,
                 ProductVariantModel.deleted_at.is_(None),
                 ProductVariantModel.version == expected_version,
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
             )
         )
         if model is None:

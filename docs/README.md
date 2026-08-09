@@ -97,6 +97,7 @@ Read these documents in order when joining the project:
 59. [Phase 5.7 Promotions & Discount Engine](phase-5.7-promotions-discount-engine.md)
 60. [Phase 5.8 Customer Notifications & Commerce Events](phase-5.8-customer-notifications.md)
 61. [Phase 5.9 Commerce Event Reliability](phase-5.9-commerce-event-reliability.md)
+62. [Phase 5.10 Retailer Operations & Inventory Management](phase-5.10-retailer-operations.md)
 
 ## Decision authority
 

@@ -465,6 +465,36 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Migration, full commerce regression, static analysis, OpenAPI, and Compose
   validation pass.
 
+## Phase 5.10 — Retailer Operations & Inventory Management
+
+### Outcomes
+
+- Store owners and accepted staff can operate Product, Variant, and Inventory
+  records through existing bounded-context services.
+- Manual stock changes and physical counts are explicit, auditable,
+  concurrency-safe, and Reservation-safe.
+- Bounded stock-attention, movement, order, and fulfillment views support a
+  future retailer dashboard without duplicating lifecycle models.
+
+### Work
+
+- Add append-only Inventory movements and explicit adjustment/reconciliation
+  commands using the Phase 5.9 transactional outbox.
+- Enforce optimistic versions, stable row-lock ordering, active Reservation
+  protection, audit attribution, and threshold-crossing events.
+- Add deterministic Store-scoped history, low/out-of-stock, summary, Order, and
+  Shipment operational queries.
+- Extend existing Product/Variant Store access to accepted active staff and add
+  production-backed authorization, isolation, and commerce regression coverage.
+
+### Exit gate
+
+- Every quantity mutation preserves Inventory and Reservation invariants and
+  appends an auditable movement atomically with identifier-only events.
+- Stale operations return `409`; inaccessible Store resources return `404`.
+- Migration round trips, drift/head checks, full regression, static checks,
+  OpenAPI, and Compose validation pass.
+
 ## Phase 6 — Search
 
 ### Outcomes

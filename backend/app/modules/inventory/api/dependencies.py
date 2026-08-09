@@ -7,9 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.common.events import EventPublisher
 from app.database.session import get_db
 from app.events import TransactionalOutboxPublisher
-from app.modules.inventory.application.services import InventoryService
+from app.modules.inventory.application.services import (
+    InventoryService,
+    RetailerOperationsService,
+)
 from app.modules.inventory.infrastructure.repositories import (
+    SqlAlchemyInventoryMovementRepository,
     SqlAlchemyInventoryRepository,
+    SqlAlchemyRetailerOperationsRepository,
 )
 
 
@@ -32,9 +37,26 @@ def build_inventory_service(
     return InventoryService(
         SqlAlchemyInventoryRepository(session),
         TransactionalOutboxPublisher(session, delegate=events),
+        SqlAlchemyInventoryMovementRepository(session),
     )
 
 
 InventoryServiceDependency = Annotated[
     InventoryService, Depends(inventory_service_dependency)
+]
+
+
+async def retailer_operations_dependency(
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> AsyncIterator[RetailerOperationsService]:
+    try:
+        yield RetailerOperationsService(SqlAlchemyRetailerOperationsRepository(session))
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
+
+
+RetailerOperationsDependency = Annotated[
+    RetailerOperationsService, Depends(retailer_operations_dependency)
 ]

@@ -277,6 +277,22 @@ INVENTORY_DELETED = Counter(
 INVENTORY_ADJUSTMENTS = Counter(
     "fashion_network_inventory_adjustments_total", "Inventory adjustments completed."
 )
+INVENTORY_RECONCILED = Counter(
+    "fashion_network_inventory_reconciled_total",
+    "Physical Inventory reconciliations completed.",
+)
+INVENTORY_LOW_STOCK = Counter(
+    "fashion_network_inventory_low_stock_total",
+    "Inventory transitions into low-stock state.",
+)
+INVENTORY_OUT_OF_STOCK = Counter(
+    "fashion_network_inventory_out_of_stock_total",
+    "Inventory transitions into out-of-stock state.",
+)
+INVENTORY_ADJUSTMENT_DURATION = Histogram(
+    "fashion_network_inventory_adjustment_duration_seconds",
+    "Inventory adjustment and reconciliation duration.",
+)
 PRICES_CREATED = Counter(
     "fashion_network_price_created_total", "Product prices created."
 )
