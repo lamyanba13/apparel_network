@@ -53,6 +53,7 @@ class ProductMediaService:
         filename: str,
         content_type: str,
         data: bytes,
+        variant_id: UUID | None = None,
     ) -> ProductMedia:
         product = await self.repository.get_product(product_id, owner_id)
         if product is None:
@@ -60,6 +61,15 @@ class ProductMediaService:
                 code=ErrorCode.NOT_FOUND,
                 title="Product not found",
                 detail="Product not found.",
+                status_code=404,
+            )
+        if variant_id is not None and not await self.repository.variant_in_product(
+            product_id, variant_id, owner_id
+        ):
+            raise AppError(
+                code=ErrorCode.NOT_FOUND,
+                title="Product Variant not found",
+                detail="Product Variant not found.",
                 status_code=404,
             )
         allowed = {
@@ -96,6 +106,7 @@ class ProductMediaService:
         media = await self.repository.add(
             dict(
                 product_id=product.id,
+                variant_id=variant_id,
                 store_id=product.store_id,
                 catalog_id=product.catalog_id,
                 media_type=media_type,

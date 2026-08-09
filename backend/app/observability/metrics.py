@@ -542,6 +542,34 @@ PRODUCT_MEDIA_BYTES = Counter(
 PRODUCT_MEDIA_FAILURES = Counter(
     "fashion_network_product_media_failures_total", "Product media failures."
 )
+CATALOG_IMPORTS_CREATED = Counter(
+    "fashion_network_catalog_imports_created_total", "Catalog Imports created."
+)
+CATALOG_IMPORTS_VALIDATED = Counter(
+    "fashion_network_catalog_imports_validated_total", "Catalog Imports validated."
+)
+CATALOG_IMPORTS_COMPLETED = Counter(
+    "fashion_network_catalog_imports_completed_total", "Catalog Imports completed."
+)
+CATALOG_IMPORTS_FAILED = Counter(
+    "fashion_network_catalog_imports_failed_total", "Catalog Imports failed."
+)
+CATALOG_IMPORT_ROWS_PROCESSED = Counter(
+    "fashion_network_catalog_import_rows_processed_total",
+    "Catalog Import rows committed to canonical services.",
+)
+CATALOG_IMPORT_ROWS_REJECTED = Counter(
+    "fashion_network_catalog_import_rows_rejected_total",
+    "Catalog Import rows rejected during validation or commit.",
+)
+CATALOG_IMPORT_IMAGE_FAILURES = Counter(
+    "fashion_network_catalog_import_image_failures_total",
+    "Catalog Import images rejected during staging.",
+)
+CATALOG_IMPORT_DURATION = Histogram(
+    "fashion_network_catalog_import_duration_seconds",
+    "Catalog Import processing duration in seconds.",
+)
 
 WORKER_UP.set(0)
 WORKER_ACTIVE_TASKS.set(0)

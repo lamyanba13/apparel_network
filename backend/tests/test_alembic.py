@@ -9,6 +9,7 @@ from app.core.config import get_settings
 from app.database.metadata import metadata
 from app.events.infrastructure import models as event_models
 from app.modules.identity.infrastructure.persistence import models as identity_models
+from app.modules.ingestion.infrastructure import models as ingestion_models
 from app.modules.notifications.infrastructure import models as notification_models
 from app.modules.stores.infrastructure.persistence import models as store_models
 
@@ -47,6 +48,7 @@ PROMOTION_REVISION = "cc4e6f8a0b13"
 NOTIFICATION_REVISION = "dd5f7a9c1e24"
 EVENT_RELIABILITY_REVISION = "ee6a8b0d2f35"
 RETAILER_OPERATIONS_REVISION = "f08c2d4e6a71"
+CATALOG_IMPORT_REVISION = "2b3c4d5e6f70"
 IDENTITY_TABLES = {
     "identity_email_verification_tokens",
     "identity_login_attempts",
@@ -110,6 +112,12 @@ TAXONOMY_TABLES = {
     "collection_products",
 }
 PRODUCT_MEDIA_TABLES = {"product_media"}
+CATALOG_IMPORT_TABLES = {
+    "catalog_imports",
+    "catalog_import_rows",
+    "catalog_import_errors",
+    "catalog_import_media",
+}
 
 
 def test_alembic_upgrades_application_schema_without_drift(
@@ -127,6 +135,7 @@ def test_alembic_upgrades_application_schema_without_drift(
         command.upgrade(config, "head")
 
         assert identity_models is not None
+        assert ingestion_models is not None
         assert event_models is not None
         assert notification_models is not None
         assert store_models is not None
@@ -149,7 +158,8 @@ def test_alembic_upgrades_application_schema_without_drift(
         assert EVENT_RELIABILITY_TABLES.issubset(metadata.tables)
         assert TAXONOMY_TABLES.issubset(metadata.tables)
         assert PRODUCT_MEDIA_TABLES.issubset(metadata.tables)
-        assert script.get_heads() == [RETAILER_OPERATIONS_REVISION]
+        assert CATALOG_IMPORT_TABLES.issubset(metadata.tables)
+        assert script.get_heads() == [CATALOG_IMPORT_REVISION]
         assert {
             path.stem
             for path in (BACKEND_ROOT / "migrations" / "versions").glob("*.py")
@@ -188,6 +198,7 @@ def test_alembic_upgrades_application_schema_without_drift(
             f"{NOTIFICATION_REVISION}_create_notifications",
             f"{EVENT_RELIABILITY_REVISION}_harden_event_outbox",
             f"{RETAILER_OPERATIONS_REVISION}_create_inventory_movements",
+            f"{CATALOG_IMPORT_REVISION}_create_catalog_imports",
         }
 
         command.check(config)

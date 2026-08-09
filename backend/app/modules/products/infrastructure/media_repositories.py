@@ -9,6 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.products.domain.media import ProductMedia
 from app.modules.products.infrastructure.media_models import ProductMediaModel
 from app.modules.products.infrastructure.models import ProductModel
+from app.modules.products.infrastructure.variant_models import ProductVariantModel
+from app.modules.stores.infrastructure.persistence.access import store_accessible_by
+from app.modules.stores.infrastructure.persistence.models import StoreModel
 
 
 class ProductMediaRepository:
@@ -36,8 +39,6 @@ class ProductMediaRepository:
     async def get_product(
         self, product_id: UUID, owner_id: UUID
     ) -> ProductModel | None:
-        from app.modules.stores.infrastructure.persistence.models import StoreModel
-
         return cast(
             ProductModel | None,
             await self.session.scalar(
@@ -45,10 +46,27 @@ class ProductMediaRepository:
                 .join(StoreModel, StoreModel.id == ProductModel.store_id)
                 .where(
                     ProductModel.id == product_id,
-                    StoreModel.owner_id == owner_id,
+                    store_accessible_by(owner_id),
                     ProductModel.deleted_at.is_(None),
                 )
             ),
+        )
+
+    async def variant_in_product(
+        self, product_id: UUID, variant_id: UUID, owner_id: UUID
+    ) -> bool:
+        return (
+            await self.session.scalar(
+                select(ProductVariantModel.id)
+                .join(StoreModel, StoreModel.id == ProductVariantModel.store_id)
+                .where(
+                    ProductVariantModel.id == variant_id,
+                    ProductVariantModel.product_id == product_id,
+                    ProductVariantModel.deleted_at.is_(None),
+                    store_accessible_by(owner_id),
+                )
+            )
+            is not None
         )
 
     async def add(self, values: dict[str, object]) -> ProductMedia:

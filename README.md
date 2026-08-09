@@ -1,6 +1,16 @@
 # Fashion Network
 
-Fashion Network is digital inventory infrastructure connecting participating clothing stores in Manipur. Customers discover store-owned inventory across the network; stores retain inventory ownership and fulfill their own reservations. It is not an e-commerce platform.
+Fashion Network is a digital commerce and inventory network connecting local
+retailers with customers. Retailers retain ownership of their Store, Catalog,
+Pricing, Inventory, and fulfillment operations while the platform provides
+shared discovery, reservation, checkout, order, payment-foundation, promotion,
+notification, and operational workflows.
+
+The current validated engineering baseline is **Phase 5.11 — Retailer Catalog &
+Inventory Ingestion Foundation**. Retailer exports and platform-staff collection
+packages can be previewed and committed into the same canonical Product, Variant,
+Product Media, Pricing, and Inventory services. There is no separate online,
+offline, or imported-product domain.
 
 Phase 1.6 freezes the reviewed, business-neutral engineering foundation.
 The foundation includes separate liveness, readiness, and startup probes;
@@ -12,20 +22,15 @@ are recorded in the [ADRs](docs/adr/README.md) and
 [architecture freeze review](docs/phase-1.6-architecture-freeze.md).
 
 The frozen foundation remains unchanged. Identity is complete and frozen;
-Phases 3.1 through 3.4 introduce the first isolated business bounded context
-for owner-scoped Store profiles, verification, staff lifecycle, and Store-only
-media.
+Phases 3.1 through 3.7 introduce the first isolated business bounded context for
+Store profiles, verification, staff lifecycle, media, operating hours, analytics,
+and discovery.
 
 The Phase 1.4 transport foundations remain unchanged and include disabled-by-default
 rate-limiting and conditional-ETag middleware, validated `Idempotency-Key`
 contracts, opt-in API deprecation/sunset headers, and adaptive Brotli/GZip
 response compression. No rate policy, Redis limiter, idempotency table, or
 catalog cache behavior is enabled or implemented prematurely.
-
-Phase 4.3 adds Product Media metadata and storage orchestration using the
-existing MinIO-compatible StorageProvider. Product media objects are owned by
-the Product/Catalog boundary and presigned download URLs are generated only at
-request time.
 
 ## Local architecture
 
@@ -48,7 +53,10 @@ flowchart LR
     Mailpit[Mailpit SMTP] -. future notifications .-> Backend
 ```
 
-PostgreSQL is the authoritative future system of record. RabbitMQ is the only Celery broker. Redis is reserved for caching, sessions, rate limiting, temporary reservation locks, and other ephemeral coordination. Meilisearch is a rebuildable search projection. MinIO substitutes for Cloudflare R2 only in local development.
+PostgreSQL is the authoritative system of record. RabbitMQ is the only Celery
+broker. Redis is reserved for caching, sessions, rate limiting, temporary
+reservation locks, and other ephemeral coordination. Meilisearch is a rebuildable
+search projection. MinIO substitutes for Cloudflare R2 only in local development.
 
 The approved product and architecture documentation remains authoritative in [`docs/`](docs/README.md).
 
@@ -78,6 +86,18 @@ MinIO/R2 abstraction. PostgreSQL remains authoritative for lifecycle metadata;
 object mutations use rollback compensation; and no product media, workers,
 CDN, frontend, or generic upload API is added.
 
+The [Phase 3.5 Store Operating Hours](docs/phase-3.5-store-operating-hours.md)
+adds Store-local schedules, exceptional closures, timezone-aware availability,
+and optimistic lifecycle operations.
+
+The [Phase 3.6 Store Analytics Foundation](docs/phase-3.6-store-analytics-foundation.md)
+adds governed Store-scoped operational measurements without replacing audit or
+business source data.
+
+The [Phase 3.7 Store Search](docs/phase-3.7-store-search.md) adds the Store
+discovery boundary and rebuildable search projections while PostgreSQL remains
+authoritative.
+
 Phase 4.0 introduces the Store-owned Catalog foundation. Catalog metadata,
 ownership scoping, lifecycle validation, optimistic locking, soft deletion,
 safe events, and permissions are documented in
@@ -87,6 +107,19 @@ Products, variants, pricing, inventory, and reservations remain out of scope.
 Phase 4.1 adds Store-scoped Products inside Catalogs with lifecycle,
 optimistic locking, SKU/slug uniqueness, and permission-protected CRUD. See
 [`docs/phase-4.1-product-foundation.md`](docs/phase-4.1-product-foundation.md).
+
+Phase 4.2 adds Store-owned hierarchical Categories, Collections, deterministic
+ordering, Product assignments, lifecycle validation, and isolation. See
+[`docs/phase-4.2-product-categories-collections.md`](docs/phase-4.2-product-categories-collections.md).
+
+Phase 4.3 adds Product Media metadata and storage orchestration through the
+existing S3-compatible storage boundary. Product media remains owned by the
+Product/Catalog boundary and download URLs are generated only at request time.
+See [`docs/phase-4.3-product-media.md`](docs/phase-4.3-product-media.md).
+
+Phase 4.4 adds the initial Product Variant lifecycle, Store-scoped references,
+optimistic locking, and canonical sellable-unit boundary. See
+[`docs/phase-4.4-product-variants.md`](docs/phase-4.4-product-variants.md).
 
 Phase 4.5 adds the Inventory Foundation: one PostgreSQL-authoritative inventory
 record per Product Variant, derived available quantity, tenant-scoped CRUD,
@@ -161,6 +194,39 @@ stacking, usage limits, and optimistic lifecycle management. Cart evaluation is
 non-mutating, Checkout freezes immutable Redemption snapshots, and Orders inherit
 those snapshots without recalculation. See
 [`docs/phase-5.7-promotions-discount-engine.md`](docs/phase-5.7-promotions-discount-engine.md).
+
+Phase 5.8 adds customer-owned transactional Notifications driven by the shared
+commerce outbox, with channel preferences, deterministic Null delivery, bounded
+retries, audit history, and production-backed HTTP coverage. See
+[`docs/phase-5.8-customer-notifications.md`](docs/phase-5.8-customer-notifications.md).
+
+Phase 5.9 hardens the existing commerce outbox for concurrent claims, worker
+crashes, deterministic retry exhaustion, RabbitMQ outages, durable idempotency,
+and administrator recovery. See
+[`docs/phase-5.9-commerce-event-reliability.md`](docs/phase-5.9-commerce-event-reliability.md).
+
+Phase 5.10 adds explicit retailer Inventory adjustments and physical-count
+reconciliation, append-only movement history, Reservation-safe locking,
+low/out-of-stock attention queries, accepted Store-staff access, and bounded
+order/fulfillment operational views. See
+[`docs/phase-5.10-retailer-operations.md`](docs/phase-5.10-retailer-operations.md).
+
+Phase 5.11 adds Store-scoped CSV/XLSX and image-package ingestion with explicit
+preview and atomic commit. It normalizes retailer exports and staff-collected
+data into the existing Product, Variant, Product Media, Pricing, and Inventory
+services, preserving optimistic locking, Reservation-safe reconciliation, audit,
+and transactional outbox behavior. See
+[`docs/phase-5.11-retailer-catalog-inventory-ingestion.md`](docs/phase-5.11-retailer-catalog-inventory-ingestion.md).
+
+The ingestion path is:
+
+```text
+Retailer export or staff-collected package
+    → validation and normalization
+    → preview with structured row errors
+    → atomic commit through canonical services
+    → marketplace-ready catalog and inventory
+```
 
 ## Prerequisite
 
@@ -279,7 +345,8 @@ The backend bind-mounts `backend/` and runs Uvicorn reload. FastAPI lifespan cre
 
 ## Cloudflare R2 in production
 
-MinIO is never deployed as the production object store. The production adapter will use the R2-supported S3 subset:
+MinIO is never deployed as the production object store. Production configuration
+uses the existing S3-compatible storage boundary with Cloudflare R2:
 
 1. Set `FASHION_NETWORK_S3_ENDPOINT_URL` to the account-specific R2 S3 endpoint.
 2. Set region to `auto`.
@@ -288,7 +355,9 @@ MinIO is never deployed as the production object store. The production adapter w
 5. Remove MinIO and its initialization container from the production topology.
 6. Run staging contract tests against real R2 because MinIO compatibility is not proof of complete R2 compatibility.
 
-No R2 adapter or upload business workflow is implemented in Phase 1.5.
+Store Media, Product Media, and Catalog Import image workflows all use this
+storage boundary. Staging must still run the storage contract tests against real
+R2 because MinIO compatibility does not prove complete provider compatibility.
 
 ## Verification
 
@@ -324,19 +393,3 @@ Read [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`docs/git-workflow.md`](docs/git-
 Operations start with [`docs/observability.md`](docs/observability.md),
 [`docs/runbook.md`](docs/runbook.md), and the
 [`production deployment checklist`](docs/production-deployment-checklist.md).
-
-Phase 5.8 adds customer-owned transactional Notifications driven by the shared
-commerce outbox, with channel preferences, deterministic Null delivery, bounded
-retries, audit history, and production-backed HTTP coverage. See
-[`docs/phase-5.8-customer-notifications.md`](docs/phase-5.8-customer-notifications.md).
-
-Phase 5.9 hardens the existing commerce outbox for concurrent claims, worker
-crashes, deterministic retry exhaustion, RabbitMQ outages, durable idempotency,
-and administrator recovery. See
-[`docs/phase-5.9-commerce-event-reliability.md`](docs/phase-5.9-commerce-event-reliability.md).
-
-Phase 5.10 adds explicit retailer Inventory adjustments and physical-count
-reconciliation, append-only movement history, Reservation-safe locking,
-low/out-of-stock attention queries, accepted Store-staff access, and bounded
-order/fulfillment operational views. See
-[`docs/phase-5.10-retailer-operations.md`](docs/phase-5.10-retailer-operations.md).

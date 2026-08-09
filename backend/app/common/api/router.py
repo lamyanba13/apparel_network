@@ -8,6 +8,7 @@ from app.modules.checkout.api.router import router as checkout_router
 from app.modules.identity.api.account_router import router as identity_account_router
 from app.modules.identity.api.router import router as identity_auth_router
 from app.modules.identity.api.session_router import router as identity_session_router
+from app.modules.ingestion.api.router import router as catalog_import_router
 from app.modules.inventory.api.operations_router import router as operations_router
 from app.modules.inventory.api.router import router as inventory_router
 from app.modules.notifications.api.router import router as notifications_router
@@ -47,6 +48,7 @@ v1_router.include_router(event_operations_router)
 v1_router.include_router(identity_auth_router)
 v1_router.include_router(identity_session_router)
 v1_router.include_router(identity_account_router)
+v1_router.include_router(catalog_import_router)
 v1_router.include_router(catalogs_router)
 v1_router.include_router(taxonomy_router)
 v1_router.include_router(products_router)

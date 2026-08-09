@@ -15,6 +15,7 @@ from app.modules.catalogs.infrastructure import models as catalog_models
 from app.modules.catalogs.infrastructure import taxonomy_models
 from app.modules.checkout.infrastructure import models as checkout_models
 from app.modules.identity.infrastructure.persistence import models as identity_models
+from app.modules.ingestion.infrastructure import models as ingestion_models
 from app.modules.inventory.infrastructure import models as inventory_models
 from app.modules.notifications.infrastructure import models as notification_models
 from app.modules.orders.infrastructure import models as order_models
@@ -48,6 +49,7 @@ from app.modules.stores.infrastructure.persistence import (
 _ = (
     event_models,
     identity_models,
+    ingestion_models,
     inventory_models,
     notification_models,
     pricing_models,

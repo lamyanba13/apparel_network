@@ -42,4 +42,7 @@ def test_settings(database_url: str, test_private_key_pem: str) -> Settings:
         database_max_overflow=0,
         opentelemetry_exporter_otlp_endpoint=None,
         jwt_private_key_pem=test_private_key_pem,
+        s3_endpoint_url="http://localhost:9000",
+        s3_access_key_id="fashion_network",
+        s3_secret_access_key="fashion_network_dev_minio_secret",
     )

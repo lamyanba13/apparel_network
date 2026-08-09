@@ -14,6 +14,7 @@ from app.modules.catalogs.infrastructure.taxonomy_models import (
     ProductCategoryModel,
 )
 from app.modules.products.infrastructure.models import ProductModel
+from app.modules.stores.infrastructure.persistence.access import store_accessible_by
 from app.modules.stores.infrastructure.persistence.models import StoreModel
 
 
@@ -26,7 +27,7 @@ class SqlAlchemyTaxonomyRepository:
             await self.session.scalar(
                 select(StoreModel.id).where(
                     StoreModel.id == store_id,
-                    StoreModel.owner_id == owner_id,
+                    store_accessible_by(owner_id),
                     StoreModel.deleted_at.is_(None),
                 )
             )
@@ -104,7 +105,7 @@ class SqlAlchemyTaxonomyRepository:
                 select(CategoryModel)
                 .join(StoreModel)
                 .where(
-                    StoreModel.owner_id == owner_id, CategoryModel.deleted_at.is_(None)
+                    store_accessible_by(owner_id), CategoryModel.deleted_at.is_(None)
                 )
                 .order_by(CategoryModel.sort_order, CategoryModel.name)
             )
@@ -117,7 +118,7 @@ class SqlAlchemyTaxonomyRepository:
                 select(CollectionModel)
                 .join(StoreModel)
                 .where(
-                    StoreModel.owner_id == owner_id,
+                    store_accessible_by(owner_id),
                     CollectionModel.deleted_at.is_(None),
                 )
                 .order_by(CollectionModel.sort_order, CollectionModel.name)
@@ -131,7 +132,7 @@ class SqlAlchemyTaxonomyRepository:
             .join(StoreModel)
             .where(
                 CategoryModel.id == entity_id,
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
                 CategoryModel.deleted_at.is_(None),
             )
         )
@@ -145,7 +146,7 @@ class SqlAlchemyTaxonomyRepository:
             .join(StoreModel)
             .where(
                 CollectionModel.id == entity_id,
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
                 CollectionModel.deleted_at.is_(None),
             )
         )
@@ -159,7 +160,7 @@ class SqlAlchemyTaxonomyRepository:
             .join(StoreModel)
             .where(
                 CategoryModel.id == entity_id,
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
                 CategoryModel.version == version,
                 CategoryModel.deleted_at.is_(None),
             )
@@ -174,7 +175,7 @@ class SqlAlchemyTaxonomyRepository:
             .join(StoreModel)
             .where(
                 CollectionModel.id == entity_id,
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
                 CollectionModel.version == version,
                 CollectionModel.deleted_at.is_(None),
             )
@@ -221,7 +222,7 @@ class SqlAlchemyTaxonomyRepository:
             .join(StoreModel)
             .where(
                 model_type.id == entity_id,
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
                 model_type.version == version,
                 model_type.deleted_at.is_(None),
             )

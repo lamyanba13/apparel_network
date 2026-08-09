@@ -495,6 +495,35 @@ Each phase has an exit gate. Work does not advance by declaring code complete wh
 - Migration round trips, drift/head checks, full regression, static checks,
   OpenAPI, and Compose validation pass.
 
+## Phase 5.11 — Retailer Catalog & Inventory Ingestion Foundation
+
+### Outcomes
+
+- Retailer exports and staff-collected packages become the same canonical
+  Product, Variant, Media, Pricing, and Inventory records.
+- Store-scoped import jobs provide an explicit validation preview before any
+  canonical mutation.
+- Repeat uploads, stale versions, unsafe files, and ambiguous SKUs fail without
+  partial catalog corruption.
+
+### Work
+
+- Add CSV/XLSX parsing, normalized staging rows, structured errors, staged image
+  metadata, source types, and import lifecycle persistence.
+- Commit through existing canonical application services with optimistic
+  versions and request-owned transaction rollback.
+- Reconcile stock through Inventory movements and Reservation-aware locking.
+- Add Store owner/accepted-staff APIs, identifier-only outbox events,
+  low-cardinality metrics, and production-backed integration coverage.
+
+### Exit gate
+
+- Preview performs no canonical writes and commit is atomic and idempotent.
+- File, Store isolation, SKU, taxonomy, media, pricing, Inventory, audit, outbox,
+  and optimistic-concurrency tests pass.
+- Migration round trips, drift/head checks, full regression, static checks,
+  OpenAPI, Compose, and production-image validation pass.
+
 ## Phase 6 — Search
 
 ### Outcomes

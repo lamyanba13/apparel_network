@@ -670,3 +670,27 @@ Inventory is locked before active Reservation capacity is read. Snapshot,
 movement, and identifier-only outbox writes share request transaction ownership.
 Operational Order and Shipment projections are read-only and never bypass their
 owning lifecycle services.
+
+## Phase 5.11 Retailer Catalog & Inventory Ingestion
+
+```mermaid
+flowchart LR
+    sources[POS export Manual or Staff spreadsheet] --> parser[CSV/XLSX source adapter]
+    package[Uploaded product images] --> staging[(Import staging)]
+    parser --> staging
+    staging --> preview[Validation and preview]
+    preview -->|validated commit| orchestrator[CatalogImportService]
+    orchestrator --> products[Product and Variant services]
+    orchestrator --> media[Product Media service]
+    orchestrator --> pricing[Pricing service]
+    orchestrator --> inventory[Inventory reconciliation]
+    products --> canonical[(Canonical marketplace tables)]
+    media --> canonical
+    pricing --> canonical
+    inventory --> canonical
+    orchestrator -->|same transaction| outbox[(Transactional outbox)]
+```
+
+Staging is temporary and never becomes a second catalog. Preview captures
+canonical identifiers and optimistic versions without mutation. Commit delegates
+to each owning service; any conflict rolls back the complete canonical change.

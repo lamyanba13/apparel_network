@@ -20,6 +20,7 @@ class ProductMediaRole(StrEnum):
 class ProductMedia:
     id: UUID
     product_id: UUID
+    variant_id: UUID | None
     store_id: UUID
     catalog_id: UUID
     media_type: ProductMediaType

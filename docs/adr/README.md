@@ -37,6 +37,7 @@ Accepted ADRs are immutable historical records. A material change is documented 
 | [0020](0020-notification-outbox-dispatch.md) | Notification outbox dispatch boundary | Accepted |
 | [0021](0021-commerce-event-reliability.md) | Commerce event reliability | Accepted |
 | [0022](0022-retailer-inventory-operations.md) | Retailer Inventory operations and movement ledger | Accepted |
+| [0023](0023-retailer-catalog-ingestion-boundary.md) | Retailer Catalog ingestion orchestration boundary | Accepted |
 
 The implementation conformance review and frozen Identity invariants are
 recorded in the [Phase 2.6 Identity Module Freeze](../phase-2.6-identity-freeze.md).

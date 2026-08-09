@@ -54,6 +54,7 @@ class ProductMediaModel(
             name="product_media_soft_delete_consistent",
         ),
         Index("ix_product_media_product", "product_id"),
+        Index("ix_product_media_variant", "variant_id"),
         Index("ix_product_media_store", "store_id"),
         Index("ix_product_media_catalog", "catalog_id"),
         Index("ix_product_media_product_role", "product_id", "role"),
@@ -77,6 +78,9 @@ class ProductMediaModel(
     )
     product_id: Mapped[UUID] = mapped_column(
         ForeignKey("products.id", ondelete="RESTRICT"), nullable=False
+    )
+    variant_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("product_variants.id", ondelete="RESTRICT"), nullable=True
     )
     store_id: Mapped[UUID] = mapped_column(
         ForeignKey("stores.id", ondelete="RESTRICT"), nullable=False

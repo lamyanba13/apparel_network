@@ -78,6 +78,7 @@ Dependencies point inward. Infrastructure implements ports declared inward. Fram
 | Stores | Store profile, physical address, status, memberships and store permissions. | Product/inventory records. |
 | Products | Product, variant, taxonomy references, publication state, product-media associations. | Stock quantities and storage transport. |
 | Inventory | Store/variant stock, holds, movement ledger, availability policy. | Reservation customer workflow or product description. |
+| Ingestion | Temporary Store-scoped import jobs, normalized staging rows, row errors, and source adapters. | Canonical Product, Variant, Media, Pricing, or Inventory ownership. |
 | Reservations | Reservation aggregate, expiry, customer/store workflow, references. | Exact stock mutation rules, which it invokes through Inventory's public service. |
 | Search | Search document schema, indexing, query translation, ranking configuration, rebuilds. | Authoritative product/inventory truth. |
 | Notifications | Notification records, templates, preferences, delivery attempts/adapters. | Deciding business state changes. |

@@ -280,3 +280,12 @@ Exact paths are finalized during API design, but the v1 contract must cover:
 | Admin | Store review/status, moderation, support reads, audit queries, approved policies, platform aggregates and operational health. |
 
 CRUD endpoints are not required merely because a table exists. APIs expose user/business capabilities.
+
+## Catalog Import workflow
+
+Catalog Imports are long-running business resources but execute synchronously in
+the initial foundation. Their API separates create, spreadsheet/media upload,
+validation preview, row/error inspection, and commit. Creation requires the
+standard `Idempotency-Key`; lifecycle or optimistic conflicts use `409`; and
+cross-Store resources use concealed `404`. The complete contract is documented
+in [Phase 5.11](phase-5.11-retailer-catalog-inventory-ingestion.md).

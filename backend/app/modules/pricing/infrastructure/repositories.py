@@ -13,6 +13,7 @@ from app.modules.pricing.domain import PriceStatus, ProductPrice
 from app.modules.pricing.infrastructure.models import ProductPriceModel
 from app.modules.products.infrastructure.models import ProductModel
 from app.modules.products.infrastructure.variant_models import ProductVariantModel
+from app.modules.stores.infrastructure.persistence.access import store_accessible_by
 from app.modules.stores.infrastructure.persistence.models import StoreModel
 
 
@@ -25,7 +26,7 @@ class SqlAlchemyProductPriceRepository:
             await self._session.scalar(
                 select(StoreModel.id).where(
                     StoreModel.id == store_id,
-                    StoreModel.owner_id == owner_id,
+                    store_accessible_by(owner_id),
                     StoreModel.deleted_at.is_(None),
                 )
             )
@@ -42,7 +43,7 @@ class SqlAlchemyProductPriceRepository:
                 .where(
                     ProductModel.id == product_id,
                     ProductModel.deleted_at.is_(None),
-                    StoreModel.owner_id == owner_id,
+                    store_accessible_by(owner_id),
                     StoreModel.deleted_at.is_(None),
                 )
             )
@@ -62,7 +63,7 @@ class SqlAlchemyProductPriceRepository:
                     CatalogModel.id == catalog_id,
                     CatalogModel.store_id == store_id,
                     CatalogModel.deleted_at.is_(None),
-                    StoreModel.owner_id == owner_id,
+                    store_accessible_by(owner_id),
                     StoreModel.deleted_at.is_(None),
                 )
             )
@@ -82,7 +83,7 @@ class SqlAlchemyProductPriceRepository:
                     ProductVariantModel.store_id == store_id,
                     ProductVariantModel.deleted_at.is_(None),
                     ProductVariantModel.is_active.is_(True),
-                    StoreModel.owner_id == owner_id,
+                    store_accessible_by(owner_id),
                     StoreModel.deleted_at.is_(None),
                 )
             )
@@ -146,7 +147,7 @@ class SqlAlchemyProductPriceRepository:
             select(ProductPriceModel)
             .join(StoreModel, StoreModel.id == ProductPriceModel.store_id)
             .where(
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
                 StoreModel.deleted_at.is_(None),
                 ProductPriceModel.deleted_at.is_(None),
             )
@@ -193,7 +194,7 @@ class SqlAlchemyProductPriceRepository:
             .where(
                 ProductPriceModel.id == price_id,
                 ProductPriceModel.deleted_at.is_(None),
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
                 StoreModel.deleted_at.is_(None),
             )
         )
@@ -264,7 +265,7 @@ class SqlAlchemyProductPriceRepository:
                 ProductPriceModel.id == price_id,
                 ProductPriceModel.deleted_at.is_(None),
                 ProductPriceModel.version == expected_version,
-                StoreModel.owner_id == owner_id,
+                store_accessible_by(owner_id),
                 StoreModel.deleted_at.is_(None),
             )
         )
